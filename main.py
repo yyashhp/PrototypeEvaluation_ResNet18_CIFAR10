@@ -36,7 +36,6 @@ parser.add_argument('--test-batch-size', type=int, default=128, metavar='N', hel
 parser.add_argument('--dataset', default='CIFAR10', help="Dataset being used")
 parser.add_argument('--assessments', nargs='+', default=[],help='list of strings showing which assessments to make')
 parser.add_argument('--image-step', default=0.0, type=float, help='for image training, number of decimals to round to')
-parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed (default: 1)')
 parser.add_argument('--restart-epoch', default=100, type=int, help='epoch to restart from')
 parser.add_argument('--schedule', nargs='+', type=float, default=[0.1, 0.25, 0.4, 0.6, 0.7, 0.8, 1.0], help='training points to consider')
 parser.add_argument('--no-cuda', action='store_true', default=False,help='disables CUDA training')
