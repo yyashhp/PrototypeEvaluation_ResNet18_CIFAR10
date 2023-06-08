@@ -5,8 +5,6 @@ import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 
 from torchvision import datasets, transforms, models
-from loss_utils import *
-from utils import *
 
 import torchvision.transforms as transforms
 import json
