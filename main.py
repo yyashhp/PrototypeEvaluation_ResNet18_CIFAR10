@@ -18,7 +18,6 @@ import ResNet18Model
 from ResNet18Model import Block
 from ResNet18Model import ResNet
 from ResNet18Model import ResNet18
-from utils import progress_bar
 from sklearn.model_selection import KFold, StratifiedKFold, train_test_split
 
 from foolbox import PyTorchModel, accuracy, samples
