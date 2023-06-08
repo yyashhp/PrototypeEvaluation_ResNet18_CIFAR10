@@ -34,7 +34,7 @@ parser.add_argument('--norm-type', default='batch', help='batch,layer, or instan
 parser.add_argument('--par-grad-mult', default=10.0, type=float, help='boost image gradients if desired')
 parser.add_argument('--par-grad-clip', default=0.01, type=float, help='max magnitude per update for proto image updates')
 parser.add_argument('--channel-norm', default=1, type=int, help='normalize each channel by training set mean and std')
-parser.add_argument('--model-dir', default='../ProtoRunTest/Cifar10Model')
+parser.add_argument('--model-dir', default='../ProtoRuns/model-cifar10-')
 parser.add_argument('--test-batch-size', type=int, default=128, metavar='N', help='input batch size for testing (default: 128)')
 parser.add_argument('--dataset', default='CIFAR10', help="Dataset being used")
 parser.add_argument('--assessments', nargs='+', default=[],help='list of strings showing which assessments to make')
@@ -65,8 +65,8 @@ def get_datetime():
     dt_string = now.strftime("%m%d_%H_%M_%S")
     return dt_string
 
-targ = "/Users/yashpatel/Desktop/NNResearch/ProtoRunTest"
-plottarg = "/Users/yashpatel/Desktop/NNResearch/metric_plots"
+targ = "/home/lab/csc-reu/yxp441/YashProto/PrototypeEvaluation_ResNet18_CIFAR10"
+plottarg = "/home/lab/csc-reu/yxp441/YashProto/PrototypeEvaluation_ResNet18_CIFAR10/metric_plots"
 dir_suffix = args.model_dir
 
 model_dir = os.path.join(targ, dir_suffix)
@@ -77,6 +77,10 @@ if not os.path.exists(model_dir):
 
 if not os.path.exists(full_dir_plot):
     os.makedirs(full_dir_plot)
+
+with open('{}/commandline_args.txt'.format(model_dir), 'a') as f:
+    json.dump(args.__dict__, f, indent=2)
+f.close()
 
 use_cuda = not args.no_cuda and torch.cuda.is_available()
 device = 'cuda' if use_cuda else 'cpu'
