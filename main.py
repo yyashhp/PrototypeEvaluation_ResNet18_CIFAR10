@@ -233,7 +233,7 @@ def main():
 
     trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform)
     
-    testset = torchvision.datasets.CIFAR10(root='./data', train=False, downloaded=True, transform=gen_transform_test)
+    testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=gen_transform_test)
 
 
     
