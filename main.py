@@ -1,9 +1,10 @@
+from __future__ import print_function
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
-
+import torchvision
 from torchvision import datasets, transforms, models
 
 import torchvision.transforms as transforms
@@ -47,6 +48,7 @@ parser.add_argument('--log-interval', type=int, default=20, metavar='N', help='h
 parser.add_argument('--model-scale', default=1.0, type=float, help='width scale of network off of baseline resnet18')
 parser.add_argument('--batch-size', type=int, default=128, metavar='N', help='input batch size for training (default: 128)')
 parser.add_argument('--total-runs', type=int, default=5, help='How many instantiations of prototype images')
+
 #runs default 5
 
 
