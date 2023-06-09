@@ -36,9 +36,10 @@ class ResNet(nn.Module):
     def __init__(self, num_blocks, nclass = 10, scale = 1, channels = 3, block_type = Block, **kwargs):
         super(ResNet, self).__init__()
 
-        self.in_channels, self.orig_channels = int(64 * scale)
-        self.orig_HW = 32
 
+        self.in_channels = int(64 * scale)
+        self.orig_channels = int(64 * scale)
+        self.orig_HW = 32
         self.channels = channels
         print(self.in_channels)
 
