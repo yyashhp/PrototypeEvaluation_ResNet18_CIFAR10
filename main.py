@@ -96,9 +96,9 @@ def eval_train(model, device, train_loader, transformDict):
     train_loss = 0
     correct = 0
     transformDictionary = transformDict
-    with torch.no_grad():
+    with torch.inference_mode():
         for data, target in train_loader:
-            data, target = data.to(device), target.to(device)
+            data, target = data.to(device), target.to(device) 
             data = transformDictionary['norm'](data)
             output = model(data)
             train_loss += F.cross_entropy(output, target, size_average=False).item()
@@ -159,7 +159,7 @@ def train(model, device, optimizer, criterion, cur_loader, epoch, max_steps, sch
     for batch_idx, (inputs, targets) in enumerate(cur_loader):
         inputs, targets = inputs.to(device), targets.to(device)
         optimizer.zero_grad()
-        outputs = model(inputs)
+        p, outputs = model(inputs)
         loss = criterion(outputs, targets)
         loss.backward()
         optimizer.step()
@@ -180,11 +180,12 @@ def eval_test(model, device, test_loader, transformDict):
     test_loss = 0
     correct = 0
     transformDictionary = transformDict
-    with torch.no_grad():
+    with torch.inference_mode():
         for data, target in test_loader:
             # for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             data = transformDictionary['norm'](data)
+#            data = transforms.PILToTensor()(data)
             output = model(data)
             test_loss += F.cross_entropy(output, target, size_average=False).item()
             pred = output.max(1, keepdim=True)[1]
@@ -219,15 +220,15 @@ def main():
 
     train_transform = transforms.Compose([transforms.ToTensor(),
                                           transforms.RandomHorizontalFlip(),
-                                          transforms.RandomCrop(32, padding=4), transforms.Normalize(MEAN, STD)])
+                                          transforms.RandomCrop(32, padding=4)])
     train_transform_tensor = transforms.Compose([transforms.RandomHorizontalFlip(),
                                                  transforms.RandomCrop(32, padding=4)])
-    gen_transform_test = transforms.Compose([transforms.Normalize(MEAN, STD)])
+    gen_transform_test = transforms.Compose([transforms.ToTensor()])
     transformDict = {}
     
     transformDict['basic'] = train_transform
     transformDict['flipcrop'] = train_transform_tensor
-    transformDict['norm'] = gen_transform_test
+    transformDict['norm'] = transforms.Compose([transforms.Normalize(MEAN, STD)])
     transformDict['mean'] = MEAN
     transformDict['std'] = STD
 

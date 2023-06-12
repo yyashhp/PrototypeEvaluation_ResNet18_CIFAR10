@@ -50,7 +50,7 @@ class ResNet(nn.Module):
         self.layer2 = self._make_layer(self.orig_channels * 2, num_blocks, HW=(0.5 * self.orig_HW), stride=2)
         self.layer3 = self._make_layer(self.orig_channels * 4, num_blocks, HW=(0.25 * self.orig_HW), stride=2)
         self.layer4 = self._make_layer(self.orig_channels * 8, num_blocks, HW=(0.125 * self.orig_HW), stride=2)
-        self.linear = nn.Linear(self.orig_channels * block_type.expansion, nclass)
+        self.linear = nn.Linear(self.in_channels * block_type.expansion, nclass)
 
         self.multi_out = 0
         #self.proto_layer = kwargs['proto_layer']
@@ -76,7 +76,7 @@ class ResNet(nn.Module):
         out = self.layer1(out)
         out = self.layer2(out)
         out = self.layer3(out)
-
+        out = self.layer4(out)
         #if self.proto_layer == 3:
         p = self.define_proto(out)
         out = F.avg_pool2d(out,4)
