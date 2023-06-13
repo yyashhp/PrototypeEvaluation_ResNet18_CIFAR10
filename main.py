@@ -463,7 +463,60 @@ def main():
         for i in range(len(data_schedule)):
             f.write("{0:4.4f} \t {1:4.4f}\t {}\t {3:4.4f}\t {4:4.4f}\t {5:4.4f}\t {6:4.4f}\t {7:4.4f} \n".format(data_schedule[i], test_accs[i],saved_protos[i], CS_means[i],L2_cum_latent_means[i], L2_cum_image_means[i],CS_adv_image[i], CS_adv_latent[i]))
     f.close()
-        
+
+
+    print("-----------------------------------------------")
+    print("Now calculating boundary tensors")
+
+    boundaries = torch.zeros(nclass, nclass, dtype=torch.float).to(device)
+    alphas_needed = torch.zeros(nclass, nclass, dtype = torch.int).to(device)
+    model.eval()
+    model.multi_out = 0
+    anomalies = []
+    for i in len(par_image_tensors[0]):
+        for j in len(par_image_tensors[0]):
+            if i != j:
+                tester_weights = []
+                #preds = []
+
+                starter = par_image_tensors[0][i]
+                end = par_image_tensors[0][j]
+                starter_copy = starter.clone().detach().requires_grad_(False).to(device)
+                end_copy = end.clone().detach().requires_grad_(False).to(device)
+                with torch.inference_mode():
+                    starter_logits = model(starter_copy)
+                    end_logits = model(end_copy)
+                    start_pred = torch.argmax(starter_logits, dim = 1, keepdim=True)
+                    end_pred = torch.argmax(end_logits, dim = 1, keepdim=True)
+                #preds.append(start_pred.clone())
+                for alpha in range (20):
+                    adj_alpha = 1/(alpha)
+                    weighted_starter = torch.mul(starter_copy, (1-adj_alpha))
+                    weighted_end = torch.mul(end_copy, adj_alpha)
+                    tester = torch.add(weighted_starter, weighted_end, alpha = 1)
+                    tester_norm = transformDict['norm'](tester)
+                    tester_logits = model(tester_norm)
+                #    curr_probs = F.softmax(tester_logits)
+                    curr_pred = torch.argmax(tester_logits, dim = 1, keepdim=True)
+                    if curr_pred == end_pred:
+                        boundaries[i][j] = (torch.add(torch.mul(tester_weights[alpha-2], 0.5), torch.mul(tester_norm, 0.5)))
+                        alphas_needed[i][j] = alpha
+                        #preds.append(curr_pred)
+                        tester_weights.append(tester_norm.clone())
+                    elif curr_pred == start_pred:
+                        tester_weights.append(tester_norm.clone())
+                        #preds.append(curr_pred)
+                    elif curr_pred != end_pred and curr_pred != start_pred:
+                        anomalies.append([start_pred, end_pred, curr_pred, alpha])
+
+
+
+
+
+
+
+
+
     
     
 
