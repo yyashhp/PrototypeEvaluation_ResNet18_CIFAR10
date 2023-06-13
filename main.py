@@ -62,7 +62,7 @@ def get_datetime():
     now = datetime.now()
     dt_string = now.strftime("%m%d_%H_%M_%S")
     return dt_string
-
+date_time = get_datetime()
 targ = "/home/lab/csc-reu/yxp441/YashProto/PrototypeEvaluation_ResNet18_CIFAR10"
 plottarg = "/home/lab/csc-reu/yxp441/YashProto/PrototypeEvaluation_ResNet18_CIFAR10/metric_plots"
 dir_suffix = args.model_dir
@@ -95,6 +95,8 @@ def eval_train(model, device, train_loader, transformDict):
     model.eval()
     train_loss = 0
     correct = 0
+    curr = model.multi_out
+    model.multi_out = 0
     transformDictionary = transformDict
     with torch.inference_mode():
         for data, target in train_loader:
@@ -109,6 +111,7 @@ def eval_train(model, device, train_loader, transformDict):
             train_loss, correct, len(train_loader.dataset),
             100. * correct / len(train_loader.dataset)))
         training_accuracy = correct / len(train_loader.dataset)
+        model.multi_out = curr
         return train_loss, training_accuracy
 
 
@@ -179,6 +182,8 @@ def eval_test(model, device, test_loader, transformDict):
     model.eval()
     test_loss = 0
     correct = 0
+    curr = model.multi_out
+    model.multi_out = 0
     transformDictionary = transformDict
     with torch.inference_mode():
         for data, target in test_loader:
@@ -195,6 +200,7 @@ def eval_test(model, device, test_loader, transformDict):
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
     test_accuracy = correct / len(test_loader.dataset)
+    model.multi_out = curr
     return test_loss, test_accuracy
 
 
@@ -292,7 +298,7 @@ def main():
 
     test_accs = []
     par_image_tensors = []
-    par_targets = torch.arange(nclass)
+    par_targets = torch.arange(nclass).to(device)
     for run in range(args.total_runs):
         with torch.no_grad():
             par_images_metric = torch.rand([kwargsUser['num_classes'], nchannels, H, W], dtype=torch.float, device=device)
@@ -310,7 +316,7 @@ def main():
         initial_loss_train, initial_acc_train = eval_train(model, device, train_loader, transformDict)
         initial_loss_test, initial_acc_test = eval_test(model, device, test_loader, transformDict)
 
-        with open('{}/train_hist.txt'.format(model_dir), 'a') as f:
+        with open('{}/train_hist_{}.txt'.format(model_dir, date_time), 'a') as f:
             f.write("=====INITIAL======\n")
             f.write("{0:4.3f}\t{1:4.3f}\t{2:4.0f}\t{3:4.3f}\t{4:6.5f}\n".format(initial_acc_train,initial_acc_test,len(train_loader.dataset),initial_loss_train,initial_loss_test))
             f.write("==================\n")
@@ -345,7 +351,7 @@ def main():
             loss_train, acc_train = eval_train(model, device, train_loader, transformDict)
             loss_test, acc_test = eval_test(model, device, test_loader, transformDict)
 
-            with open('{}/train_hist.txt'.format(model_dir), 'a') as f:
+            with open('{}/train_hist_{}.txt'.format(model_dir, date_time), 'a') as f:
                 f.write("{0:4.3f}\t{1:4.3f}\t{2:4.0f}\t{3:4.3f}\t{4:6.5f}\n".format(acc_train,acc_test,len(train_loader.dataset),loss_train,loss_test))
             f.close()
             if epoch == args.epochs:
@@ -359,7 +365,7 @@ def main():
 #Freezing model for protos
         for run in range(args.total_runs):
             for epoch in range(1, (args.epochs // 2) + 1):
-                last_loss = train_image_no_data(args, model = model, device = device, epoch = epoch, par_images=par_image_tensors[run], targets = par_targets, transformDict=transformDict)
+                last_loss = train_image_no_data(args, model = model, device = 'cuda', epoch = epoch, par_images=par_image_tensors[run], targets = par_targets, transformDict=transformDict)
         # Protos are trained here^
 
         saved_protos.append(par_image_tensors)
@@ -378,11 +384,12 @@ def main():
                 for q in range(len(latent_p)):
                     if i != q:
                         cos_mat_latent_temp[i,q] = cos_sim(latent_p[i].view(-1),latent_p[q].view(-1))
+                        print(cos_mat_latent_temp[i,q])
             cos_matrices.append(cos_mat_latent_temp.clone())
 
         cos_mat_std, cos_mat_mean = torch.std_mean(torch.stack(cos_matrices, dim=0), dim=0)
         CS_means.append(torch.mean(cos_mat_mean.clone()))
-        with open('{}CS_stats_{}.txt'.format(model_dir, get_datetime()), 'a') as f:
+        with open('{}/CS_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
             f.write("\n")
             f.write(
                 "Training split: {}, \t CS_diff_mean {}  ".format(
@@ -408,7 +415,7 @@ def main():
             model.eval()
             model.multi_out = 0
             attack = L2DeepFoolAttack(overshoot=0.02)
-            preprocessing = dict(mean=MEAN, std=STD, axis=3)
+            preprocessing = dict(mean=MEAN, std=STD, axis=-3)
             fmodel = PyTorchModel(model, bounds=(0,1), preprocessing=preprocessing)
 
             print('Computing DF L2_stats')
@@ -423,7 +430,7 @@ def main():
             L2_df_image = torch.linalg.norm((new_proto-proto_copy).view(nclass, -1), dim=1)
             L2_df_latent = torch.linalg.norm((latent_adv - latent_onehot).view(nclass, -1), dim=1)
             CS_df_image = F.cosine_similarity(new_proto.view(nclass, -1), proto_copy.view(nclass, -1))
-            CS_df_latent = F.cosine_similarity(latent_adv.view(nclass, -1), latent_onehot)
+            CS_df_latent = F.cosine_similarity(latent_adv.view(nclass, -1), latent_onehot.view(nclass, -1))
 
             im_df_std, im_df_mean = torch.std_mean(L2_df_image)
             latent_df_std, latent_df_mean = torch.std_mean(L2_df_latent)
@@ -431,14 +438,14 @@ def main():
             L2_latent_means.append(latent_df_mean.clone())
             CS_image_means.append(torch.mean(CS_df_image).clone())
             CS_latent_means.append(torch.mean(CS_df_latent).clone())
-            with open('{}Adv_stats_{}.txt'.format(model_dir, get_datetime()), 'a') as f:
+            with open('{}/Adv_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
                 f.write("\n")
                 f.write("Training split: {}, \t L2 image and latent means: {} \t {} \t CS image and latent means: {} \t {}  ".format(j,im_df_mean.clone(), latent_df_mean.clone(), torch.mean(CS_df_image).clone(), torch.mean(CS_df_latent).clone() ))
                 f.write("\n")
             f.close()
 
         L2_cum_image_std, L2_cum_image_mean = torch.std_mean(torch.stack(L2_image_means, dim=0), dim=0)
-        L2_cum_latent_means.append(L2_cum_image_mean.clone())
+        L2_cum_image_means.append(L2_cum_image_mean.clone())
 
         L2_cum_latent_std, L2_cum_latent_mean = torch.std_mean(torch.stack(L2_latent_means, dim=0), dim=0)
         L2_cum_latent_means.append(L2_cum_latent_mean.clone())
@@ -451,14 +458,10 @@ def main():
 
     data_schedule = [0.25, 0.4, 0.6, 0.7, 0.8, 0.9, 1.0]
 
-    with open('{}/final_data_summary_{}.txt'.format(model_dir, get_datetime()), 'a') as f:
+    with open('{}/final_data_summary_{}.txt'.format(model_dir, date_time), 'a') as f:
         f.write("Data \t Test Acc \t Prototype Tensors \t CS_norm metric \t L2 adversarial latent means \t L2 adversarial image means \t CS adversarial image means \t CS adversarial latent means  \n")
         for i in range(len(data_schedule)):
-            f.write("{0:4.4f} \t {1:4.4f}\t {2:4.4f}\t {3:4.4f}\t {4:4.4f}\t {5:4.4f}\t {6:4.4f}\t {7:4.4f} \n".format(
-                data_schedule[i], test_accs[i],
-                saved_protos[i], CS_means[i],
-                L2_cum_latent_means[i], L2_cum_image_means[i],
-                CS_adv_image[i], CS_adv_latent[i]))
+            f.write("{0:4.4f} \t {1:4.4f}\t {}\t {3:4.4f}\t {4:4.4f}\t {5:4.4f}\t {6:4.4f}\t {7:4.4f} \n".format(data_schedule[i], test_accs[i],saved_protos[i], CS_means[i],L2_cum_latent_means[i], L2_cum_image_means[i],CS_adv_image[i], CS_adv_latent[i]))
     f.close()
         
     
