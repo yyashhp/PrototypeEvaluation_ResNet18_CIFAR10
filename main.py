@@ -125,6 +125,7 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
         L2_img, logits_img = model(_par_images_opt_norm)
 
         loss = F.cross_entropy(logits_img, targets, reduction='none')
+        print(f"gradient used: {torch.ones_like(loss)}")
         loss.backward(gradient=torch.ones_like(loss))
 
         with torch.no_grad():
@@ -132,7 +133,7 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
             grad_mag = gradients_unscaled.view(gradients_unscaled.shape[0], -1).norm(2, dim=-1)
             image_gradients = 0.01 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
             #print(f"Printing image gradients here: {image_gradients}")
-            if torch.mean(loss) > 1e-7:
+            if torch.mean(loss) > 1e-6:
                 par_images.add_(-image_gradients)
 
             par_images.clamp_(0.0, 1.0)
@@ -547,7 +548,11 @@ def main():
     count = 0
     for i in range(nclass):
         primary = par_image_tensors[0][i]
-        print(primary.view(-1))
+        print(f"Proto tensor of class {i}, {primary.view(-1)}")
+        vals, indices = primary.clone().sort(dim=0)
+        inds = list(range(len(vals)))
+
+
         for j in range(nclass):
             if i == j:
                 continue
