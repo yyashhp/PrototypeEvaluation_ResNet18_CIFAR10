@@ -123,9 +123,8 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
         _par_images_opt_norm = transformDict['norm'](_par_images_opt)
 
         L2_img, logits_img = model(_par_images_opt_norm)
-        print(f"---------------------------------------------------These are the Logits{logits_img}")
+
         loss = F.cross_entropy(logits_img, targets, reduction='none')
-        print(f"This is the gradients:{torch.ones_like(loss)}")
         loss.backward(gradient=torch.ones_like(loss))
 
         with torch.no_grad():
@@ -152,7 +151,7 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
     return loss, pred, probs
 
 
-def train(model, device, optimizer, criterion, cur_loader, epoch, max_steps, scheduler):
+def train(model, device, optimizer, criterion, cur_loader, epoch, max_steps, scheduler, transformDict):
 
     model.train()
     print('Training model')
@@ -162,7 +161,8 @@ def train(model, device, optimizer, criterion, cur_loader, epoch, max_steps, sch
     for batch_idx, (inputs, targets) in enumerate(cur_loader):
         inputs, targets = inputs.to(device), targets.to(device)
         optimizer.zero_grad()
-        p, outputs = model(inputs)
+        inputs_norm = transformDict['norm'](inputs)
+        p, outputs = model(inputs_norm)
         loss = criterion(outputs, targets)
         loss.backward()
         optimizer.step()
@@ -298,15 +298,7 @@ def main():
 
     test_accs = []
     par_image_tensors = []
-    par_targ = []
-    for i in range(nclass):
-        set = ([0] * (i-1)) + [1] + ([0] * (nclass-i))
-        par_targ.append(set)
-        print(f"This is the set: {set}")
-    parray = np.array(par_targ)
-    par_tens = torch.from_numpy(parray)
-    par_targets = par_tens.to(device)
-    print(f"This is par_targs:{par_targets}")
+    par_targets = torch.arange(nclass).to(device)
 
 
 
@@ -354,7 +346,7 @@ def main():
         for epoch in range(1, args.epochs+1):
             model.train()
             model.multi_out = 1
-            train(model=model, device=device, epoch=epoch, max_steps=steps_per_epoch, scheduler=scheduler, criterion=criterion, cur_loader=train_loader, optimizer=optimizer)
+            train(model=model, device=device, epoch=epoch, max_steps=steps_per_epoch, scheduler=scheduler, criterion=criterion, cur_loader=train_loader, optimizer=optimizer, transformDict=transformDict)
 
             model.multi_out = 0
     #Training model
