@@ -131,8 +131,8 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
         with torch.no_grad():
             gradients_unscaled = _par_images_opt.grad.clone()
             grad_mag = gradients_unscaled.view(gradients_unscaled.shape[0], -1).norm(2, dim=-1)
-            image_gradients = 0.01 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
-
+            image_gradients = 0.0003 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
+            print(f"Printing image gradients here: {image_gradients}")
             if(torch.mean(loss) > 1e-7):
                 par_images.add_(-image_gradients)
 
@@ -409,6 +409,12 @@ def main():
 
         for proto in par_image_tensors:
             proto_copy = proto.clone()
+            print("Printing max of proto and its copy:")
+            print(torch.max(proto))
+            print(torch.max(proto_copy))
+            print("Printing min of proto and then its copy")
+            print(torch.min(proto))
+            print(torch.min(proto_copy))
             with torch.no_grad():
                 proto_copy_norm = transformDict['norm'](proto_copy)
                 latent_onehot, logit_onehot = model(proto_copy_norm)
@@ -456,26 +462,28 @@ def main():
         CS_adv_latent.append(CS_latent_mean.clone())
 
 
-    data_schedule = [0.25, 0.4, 0.6, 0.7, 0.8, 0.9, 1.0]
+   # data_schedule = [0.25, 0.4, 0.6, 0.7, 0.8, 0.9, 1.0]
 
-    with open('{}/final_data_summary_{}.txt'.format(model_dir, date_time), 'a') as f:
-        f.write("Data \t Test Acc \t Prototype Tensors \t CS_norm metric \t L2 adversarial latent means \t L2 adversarial image means \t CS adversarial image means \t CS adversarial latent means  \n")
-        for i in range(len(data_schedule)):
-            f.write("{0:4.4f} \t {1:4.4f}\t {}\t {3:4.4f}\t {4:4.4f}\t {5:4.4f}\t {6:4.4f}\t {7:4.4f} \n".format(data_schedule[i], test_accs[i],saved_protos[i], CS_means[i],L2_cum_latent_means[i], L2_cum_image_means[i],CS_adv_image[i], CS_adv_latent[i]))
-    f.close()
+#    with open('{}/final_data_summary_{}.txt'.format(model_dir, date_time), 'a') as f:
+ #       f.write("Data \t Test Acc \t Prototype Tensors \t CS_norm metric \t L2 adversarial latent means \t L2 adversarial image means \t CS adversarial image means \t CS adversarial latent means  \n")
+  #      for i in range(len(data_schedule)):
+   #         f.write("{0:4.4f} \t {1:4.4f}\t {}\t {3:4.4f}\t {4:4.4f}\t {5:4.4f}\t {6:4.4f}\t {7:4.4f} \n".format(data_schedule[i], test_accs[i],saved_protos[i], CS_means[i],L2_cum_latent_means[i], L2_cum_image_means[i],CS_adv_image[i], CS_adv_latent[i]))
+    #f.close()
 
 
     print("-----------------------------------------------")
     print("Now calculating boundary tensors")
 
-    boundaries = torch.zeros(nclass, nclass, dtype=torch.float).to(device)
+    boundaries = []
     alphas_needed = torch.zeros(nclass, nclass, dtype = torch.int).to(device)
     model.eval()
     model.multi_out = 0
     anomalies = []
-    for i in len(par_image_tensors[0]):
-        for j in len(par_image_tensors[0]):
-            if i != j:
+    for i in range(nclass):
+        for j in range(nclass):
+            if i == j:
+                boundaries.append(0)
+            elif i != j:
                 tester_weights = []
                 #preds = []
 
@@ -483,33 +491,67 @@ def main():
                 end = par_image_tensors[0][j]
                 starter_copy = starter.clone().detach().requires_grad_(False).to(device)
                 end_copy = end.clone().detach().requires_grad_(False).to(device)
+                starter_norm = transformDict['norm'](starter_copy)
+                end_norm = transformDict['norm'](end_copy)
+                starter_resize = torch.unsqueeze(starter_copy, dim=0)
+                end_resize = torch.unsqueeze(end_copy, dim=0)
+                starter_norm_resize = torch.unsqueeze(starter_norm, dim=0)
+                end_norm_resize = torch.unsqueeze(end_norm, dim=0)
+#                print(starter_norm_resize.shape)
+ #               print(end_norm_resize.shape)
                 with torch.inference_mode():
-                    starter_logits = model(starter_copy)
-                    end_logits = model(end_copy)
-                    start_pred = torch.argmax(starter_logits, dim = 1, keepdim=True)
-                    end_pred = torch.argmax(end_logits, dim = 1, keepdim=True)
+                    starter_logits = model(starter_norm_resize)
+                    end_logits = model(end_norm_resize)
+                    start_pred = starter_logits.max(1, keepdim=True)[1]
+                    end_pred = end_logits.max(1, keepdim=True)[1]
+                    print(start_pred)
+                    print(end_pred)
+                    start_probs = F.softmax(starter_logits, dim=1)
+                    end_probs = F.softmax(end_logits, dim=1)
+                    print("Printing start and end probs")
+                    print(start_probs)
+                    print(end_probs)
                 #preds.append(start_pred.clone())
-                for alpha in range (20):
+                for alpha in range (1,20):
                     adj_alpha = 1/(alpha)
-                    weighted_starter = torch.mul(starter_copy, (1-adj_alpha))
-                    weighted_end = torch.mul(end_copy, adj_alpha)
+                    weighted_starter = torch.mul(starter_resize, (adj_alpha))
+                    weighted_end = torch.mul(end_resize, (1-adj_alpha))
                     tester = torch.add(weighted_starter, weighted_end, alpha = 1)
+                    print(tester.shape)
                     tester_norm = transformDict['norm'](tester)
                     tester_logits = model(tester_norm)
                 #    curr_probs = F.softmax(tester_logits)
                     curr_pred = torch.argmax(tester_logits, dim = 1, keepdim=True)
+                    tester_weights.append(tester_norm.clone())
                     if curr_pred == end_pred:
-                        boundaries[i][j] = (torch.add(torch.mul(tester_weights[alpha-2], 0.5), torch.mul(tester_norm, 0.5)))
+                        print(f"Alpha here is {alpha}, boundaries are {i}, {j}")
+                        half_curr = torch.mul(tester, 0.5)
+                        if alpha == 1:
+                            prev_ind = 0
+                        else:
+                            prev_ind = alpha-2
+                        half_prev = torch.mul(tester_weights[prev_ind], 0.5)
+                        print("Printing summed half curr and half prev sizes")
+                        median = torch.add(half_curr, half_prev, alpha = 1)
+                        print(median.shape)
+                        boundaries.append([i, j, median])
                         alphas_needed[i][j] = alpha
                         #preds.append(curr_pred)
-                        tester_weights.append(tester_norm.clone())
-                    elif curr_pred == start_pred:
-                        tester_weights.append(tester_norm.clone())
+                 #   elif curr_pred == start_pred:
+                       # tester_weights.append(tester_norm.clone())
                         #preds.append(curr_pred)
-                    elif curr_pred != end_pred and curr_pred != start_pred:
+                    elif (curr_pred != end_pred and curr_pred != start_pred):
                         anomalies.append([start_pred, end_pred, curr_pred, alpha])
-
-
+    count = 0
+    for i in range(nclass):
+        for j in range(nclass):
+            if i == j:
+                continue
+            else:
+   
+                print(f"Alphas needed for boundary between {i} and {j} : {alphas_needed[i,j]}")
+                print(f"tensor there: {boundaries[0]}")
+            count += 1
 
 
 
