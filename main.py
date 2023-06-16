@@ -131,11 +131,11 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
         with torch.no_grad():
             gradients_unscaled = _par_images_opt.grad.clone()
             grad_mag = gradients_unscaled.view(gradients_unscaled.shape[0], -1).norm(2, dim=-1)
-            image_gradients = 0.01 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
+            image_grads = 0.01 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
+            image_gradients = torch.nan_to_num(image_grads)
             #print(f"Printing image gradients here: {image_gradients}")
-            if torch.mean(loss) > 1e-6:
+            if torch.mean(loss) > 1e-7:
                 par_images.add_(-image_gradients)
-
             par_images.clamp_(0.0, 1.0)
             print(f"Printing par_image_vals: {par_images}")
 
