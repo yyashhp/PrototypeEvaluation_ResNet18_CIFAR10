@@ -125,6 +125,7 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
         L2_img, logits_img = model(_par_images_opt_norm)
         print(f"---------------------------------------------------These are the Logits{logits_img}")
         loss = F.cross_entropy(logits_img, targets, reduction='none')
+        print(f"This is the gradients:{torch.ones_like(loss)}")
         loss.backward(gradient=torch.ones_like(loss))
 
         with torch.no_grad():
