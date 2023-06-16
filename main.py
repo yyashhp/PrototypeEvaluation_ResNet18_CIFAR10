@@ -131,11 +131,12 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
             gradients_unscaled = _par_images_opt.grad.clone()
             grad_mag = gradients_unscaled.view(gradients_unscaled.shape[0], -1).norm(2, dim=-1)
             image_gradients = 0.01 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
-            print(f"Printing image gradients here: {image_gradients}")
-            if(torch.mean(loss) > 1e-7):
+            #print(f"Printing image gradients here: {image_gradients}")
+            if torch.mean(loss) > 1e-7:
                 par_images.add_(-image_gradients)
 
-            par_images.clamp_(0.0,1.0)
+            par_images.clamp_(0.0, 1.0)
+            print(f"Printing par_image_vals: {par_images}")
 
             _par_images_opt.grad.zero_()
     if batch_idx % args.log_interval == 0:
@@ -187,10 +188,8 @@ def eval_test(model, device, test_loader, transformDict):
     transformDictionary = transformDict
     with torch.inference_mode():
         for data, target in test_loader:
-            # for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             data = transformDictionary['norm'](data)
-#            data = transforms.PILToTensor()(data)
             output = model(data)
             test_loss += F.cross_entropy(output, target, size_average=False).item()
             pred = output.max(1, keepdim=True)[1]
