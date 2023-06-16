@@ -125,13 +125,13 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
         L2_img, logits_img = model(_par_images_opt_norm)
 
         loss = F.cross_entropy(logits_img, targets, reduction='none')
-        loss.backward(gradient=torch.ones_like(loss))
-
+        #loss.backward(gradient=torch.ones_like(loss))
+        loss.backward()
 
         with torch.no_grad():
             gradients_unscaled = _par_images_opt.grad.clone()
             grad_mag = gradients_unscaled.view(gradients_unscaled.shape[0], -1).norm(2, dim=-1)
-            image_gradients = 0.0003 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
+            image_gradients = 0.01 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
             print(f"Printing image gradients here: {image_gradients}")
             if(torch.mean(loss) > 1e-7):
                 par_images.add_(-image_gradients)
@@ -298,7 +298,7 @@ def main():
 
     test_accs = []
     par_image_tensors = []
-    par_targets = torch.arange(nclass).to(device)
+    par_targets = torch.arange(nclass, dtype=torch.long, device=device)
     for run in range(args.total_runs):
         with torch.no_grad():
             par_images_metric = torch.rand([kwargsUser['num_classes'], nchannels, H, W], dtype=torch.float, device=device)
