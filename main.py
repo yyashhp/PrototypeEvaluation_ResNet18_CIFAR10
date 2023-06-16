@@ -123,7 +123,7 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
         _par_images_opt_norm = transformDict['norm'](_par_images_opt)
 
         L2_img, logits_img = model(_par_images_opt_norm)
-
+        print(f"---------------------------------------------------These are the Logits{logits_img}")
         loss = F.cross_entropy(logits_img, targets, reduction='none')
         loss.backward(gradient=torch.ones_like(loss))
 
@@ -299,12 +299,13 @@ def main():
     par_image_tensors = []
     par_targ = []
     for i in range(nclass):
-        set = [0] * nclass
-        set[i] = 1.000
+        set = ([0] * (i-1)) + [1] + ([0] * (nclass-i))
         par_targ.append(set)
+        print(f"This is the set: {set}")
     parray = np.array(par_targ)
     par_tens = torch.from_numpy(parray)
     par_targets = par_tens.to(device)
+    print(f"This is par_targs:{par_targets}")
 
 
 
