@@ -129,7 +129,7 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
         loss.backward(gradient=torch.ones_like(loss))
 
         with torch.no_grad():
-            gradients_unscaled = _par_images_opt.grad.clone()
+            gradients_unscaled = _par_images_opt_norm.grad.clone()
             grad_mag = gradients_unscaled.view(gradients_unscaled.shape[0], -1).norm(2, dim=-1)
             print(f"Grad_Mag:{grad_mag}")
             image_grads = 0.01 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
@@ -299,7 +299,7 @@ def main():
 
     test_accs = []
     par_image_tensors = []
-    par_targets = torch.arange(nclass).to(device)
+    par_targets = torch.arange(nclass, dtype=torch.long, device=device)
 
 
 
@@ -368,8 +368,8 @@ def main():
             p.requires_grad = False
 #Freezing model for protos
         for run in range(args.total_runs):
-            for epoch in range(1, (args.epochs // 2) + 1):
-                last_loss = train_image_no_data(args, model = model, device = 'cuda', epoch = epoch, par_images=par_image_tensors[run], targets = par_targets, transformDict=transformDict)
+            for epoch in range(1, (args.epochs + 1)):
+                last_loss, preds, probs = train_image_no_data(args, model = model, device = 'cuda', epoch = epoch, par_images=par_image_tensors[run], targets = par_targets, transformDict=transformDict)
         # Protos are trained here^
 
         saved_protos.append(par_image_tensors)
