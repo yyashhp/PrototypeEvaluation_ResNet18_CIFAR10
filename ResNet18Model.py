@@ -54,9 +54,6 @@ class ResNet(nn.Module):
         self.linear = nn.Linear(self.in_channels * block_type.expansion, nclass)
 
         self.multi_out = 0
-        #self.proto_layer = kwargs['proto_layer']
-        #self.proto_norm = kwargs['proto_norm']
-        #self.proto_pool = "ave"
         #self.proto_pool_f = nn.AdaptiveAvgPool2d((1, 1))
 
     def _make_layer(self, out_channels, num_blocks, HW, stride, block_type = Block):
@@ -78,13 +75,10 @@ class ResNet(nn.Module):
         out = self.layer2(out)
         out = self.layer3(out)
         out = self.layer4(out)
-        #if self.proto_layer == 3:
-        #p = self.define_proto(out)
         out = F.avg_pool2d(out,4)
 
         p = out.view(out.size(0), -1)
 
-       # if self.proto_norm:
 
         out = self.linear(p)
 

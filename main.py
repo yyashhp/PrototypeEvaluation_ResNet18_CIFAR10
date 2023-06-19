@@ -211,18 +211,6 @@ def eval_test(model, device, test_loader, transformDict):
     return test_loss, test_accuracy
 
 
-def adjust_learning_rate(optimizer, epoch):
-    #decrease learning rate
-    lr = args.lr
-    if epoch >= (0.5 * args.epochs):
-        lr = args.lr * 0.1
-    if epoch >= (0.75 * args.epochs):
-        lr = args.lr * 0.01
-    for param_group in optimizer.param_groups:
-        param_group['lr'] = lr
-
-
-
 def main():
     #Setting up dataloader
     torch.manual_seed(args.seed)
