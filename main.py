@@ -153,7 +153,7 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
     return loss, pred, probs
 
 
-def train(model, device, optimizer, criterion, cur_loader, epoch, max_steps, scheduler, transformDict):
+def train(model, device, optimizer, cur_loader, epoch, max_steps, scheduler, transformDict):
 
     model.train()
     print('Training model')
@@ -166,7 +166,7 @@ def train(model, device, optimizer, criterion, cur_loader, epoch, max_steps, sch
         optimizer.zero_grad()
         inputs_norm = transformDict['norm'](inputs)
         p, outputs = model(inputs_norm)
-        loss = criterion(outputs, targets)
+        loss = F.cross_entropy(outputs, targets, reduction='none')
         loss.backward()
         optimizer.step()
 
@@ -343,11 +343,10 @@ def main():
         print("len(cur_loader)", len(train_loader))
 
         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs*len(train_loader), eta_min=0.0000001, last_epoch=-1, verbose=False)
-        criterion = nn.CrossEntropyLoss()
         for epoch in range(1, args.epochs+1):
             model.train()
             model.multi_out = 1
-            train(model=model, device=device, epoch=epoch, max_steps=steps_per_epoch, scheduler=scheduler, criterion=criterion, cur_loader=train_loader, optimizer=optimizer, transformDict=transformDict)
+            train(model=model, device=device, epoch=epoch, max_steps=steps_per_epoch, scheduler=scheduler, cur_loader=train_loader, optimizer=optimizer, transformDict=transformDict)
 
             model.multi_out = 0
     #Training model
