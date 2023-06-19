@@ -123,6 +123,7 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
         _par_images_opt_norm = transformDict['norm'](_par_images_opt)
 
         L2_img, logits_img = model(_par_images_opt_norm)
+        print(f"Logits tensor of images: {logits_img}")
 
         loss = F.cross_entropy(logits_img, targets, reduction='none')
         loss.backward(gradient=torch.ones_like(loss))
