@@ -123,7 +123,6 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
         _par_images_opt_norm = transformDict['norm'](_par_images_opt)
 
         L2_img, logits_img = model(_par_images_opt_norm)
-        print(f"Logits tensor of images: {logits_img}")
 
         loss = F.cross_entropy(logits_img, targets, reduction='none')
         loss.backward(gradient=torch.ones_like(loss))
@@ -131,6 +130,9 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
         with torch.no_grad():
             gradients_unscaled = _par_images_opt.grad.clone()
             grad_mag = gradients_unscaled.view(gradients_unscaled.shape[0], -1).norm(2, dim=-1)
+            for grad in grad_mag:
+                if grad < 1e-15:
+                    grad = torch.mean(grad_mag)
             print(f"Grad_Mag:{grad_mag}")
             image_grads = 0.01 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
            # image_gradients = torch.nan_to_num(image_grads)
@@ -168,7 +170,6 @@ def train(model, device, optimizer, criterion, cur_loader, epoch, max_steps, sch
         p, outputs = model(inputs_norm)
         loss = criterion(outputs, targets)
         loss.backward()
-        nn.utils.clip_grad_value_(model.parameters(), clip_value=0.5)
         optimizer.step()
 
         train_loss += loss.item()
