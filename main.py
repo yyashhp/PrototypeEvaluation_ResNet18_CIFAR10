@@ -125,11 +125,10 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
         L2_img, logits_img = model(_par_images_opt_norm)
 
         loss = F.cross_entropy(logits_img, targets, reduction='none')
-        print(f"gradient used: {torch.ones_like(loss)}")
         loss.backward(gradient=torch.ones_like(loss))
 
         with torch.no_grad():
-            gradients_unscaled = _par_images_opt_norm.grad.clone()
+            gradients_unscaled = _par_images_opt.grad.clone()
             grad_mag = gradients_unscaled.view(gradients_unscaled.shape[0], -1).norm(2, dim=-1)
             print(f"Grad_Mag:{grad_mag}")
             image_grads = 0.01 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
@@ -138,7 +137,6 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
             if torch.mean(loss) > 1e-7:
                 par_images.add_(-image_grads)
             par_images.clamp_(0.0, 1.0)
-            print(f"Printing par_image_vals: {par_images}")
 
             _par_images_opt.grad.zero_()
     if batch_idx % args.log_interval == 0:

@@ -39,6 +39,7 @@ class ResNet(nn.Module):
 
         self.in_channels = int(64 * scale)
         self.orig_channels = int(64 * scale)
+        print(f"Printing orig channels: {self.orig_channels}")
         self.orig_HW = 32
         self.channels = channels
         print(self.in_channels)
