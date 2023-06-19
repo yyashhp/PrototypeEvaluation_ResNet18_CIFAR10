@@ -156,6 +156,7 @@ def train(model, device, optimizer, criterion, cur_loader, epoch, max_steps, sch
 
     model.train()
     print('Training model')
+    print(f"Model's orig-channels: {model.orig_channels}")
     train_loss = 0
     correct = 0
     total = 0
