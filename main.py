@@ -55,7 +55,7 @@ parser.add_argument('--total-runs', type=int, default=5, help='How many instanti
 args = parser.parse_args()
 
 kwargsUser = {}
-kwargsUser['norm_type'] = args.norm_type
+#kwargsUser['norm_type'] = args.norm_type
 network_string = "ResNet18"
 
 def get_datetime():
@@ -117,6 +117,8 @@ def eval_train(model, device, train_loader, transformDict):
 
 def train_image_no_data(args, model, device, epoch, par_images, targets, transformDict):
     print ("training images against one hot encodings")
+    model.eval()
+
     for batch_idx in range(20):
         _par_images_opt = par_images.clone().detach().requires_grad_(True).to(device)
 
@@ -130,12 +132,12 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
         with torch.no_grad():
             gradients_unscaled = _par_images_opt.grad.clone()
             grad_mag = gradients_unscaled.view(gradients_unscaled.shape[0], -1).norm(2, dim=-1)
-            for grad in range(len(grad_mag)):
-                gradd = grad_mag[grad]
-                if gradd == 0:
-                    grad_mag[grad] = torch.mean(grad_mag)
+            #for grad in range(len(grad_mag)):
+            #    gradd = grad_mag[grad]
+            #    if gradd == 0:
+            #        grad_mag[grad] = torch.mean(grad_mag)
             print(f"Grad_Mag:{grad_mag}")
-            image_grads = 0.01 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
+            image_grads = 0.1 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
            # image_gradients = torch.nan_to_num(image_grads)
             #print(f"Printing image gradients here: {image_gradients}")
             if torch.mean(loss) > 1e-7:
@@ -371,8 +373,14 @@ def main():
             p.requires_grad = False
 #Freezing model for protos
         for run in range(args.total_runs):
-            for epoch in range(1, (args.epochs + 1)):
-                last_loss, preds, probs = train_image_no_data(args, model = model, device = 'cuda', epoch = epoch, par_images=par_image_tensors[run], targets = par_targets, transformDict=transformDict)
+            for epoch in range(1, int((args.epochs + 1)/4)):
+                last_loss, preds, probs = train_image_no_data(args,
+                                                              model = model,
+                                                              device = device,
+                                                              epoch = epoch,
+                                                              par_images=par_image_tensors[run],
+                                                              targets = par_targets,
+                                                              transformDict=transformDict)
         # Protos are trained here^
 
         saved_protos.append(par_image_tensors)

@@ -56,8 +56,8 @@ class ResNet(nn.Module):
         self.multi_out = 0
         #self.proto_layer = kwargs['proto_layer']
         #self.proto_norm = kwargs['proto_norm']
-        self.proto_pool = "ave"
-        self.proto_pool_f = nn.AdaptiveAvgPool2d((1, 1))
+        #self.proto_pool = "ave"
+        #self.proto_pool_f = nn.AdaptiveAvgPool2d((1, 1))
 
     def _make_layer(self, out_channels, num_blocks, HW, stride, block_type = Block):
         strides = [stride] + [1] * (num_blocks-1)
@@ -67,10 +67,10 @@ class ResNet(nn.Module):
             self.in_channels = out_channels * block_type.expansion
         return nn.Sequential(*layers)
 
-    def define_proto(self, features):
-        if self.proto_pool:
-            features = self.proto_pool_f(features)
-        return features.view(features.shape[0],-1)
+    #def define_proto(self, features):
+    #    if self.proto_pool:
+    #        features = self.proto_pool_f(features)
+    #    return features.view(features.shape[0],-1)
 
     def forward(self, x):
         out = F.relu(self.bn1(self.conv1(x)))
@@ -79,15 +79,14 @@ class ResNet(nn.Module):
         out = self.layer3(out)
         out = self.layer4(out)
         #if self.proto_layer == 3:
-        p = self.define_proto(out)
+        #p = self.define_proto(out)
         out = F.avg_pool2d(out,4)
 
-        out = out.view(out.size(0), -1)
+        p = out.view(out.size(0), -1)
 
        # if self.proto_norm:
-        out = F.normalize(out)
 
-        out = self.linear(out)
+        out = self.linear(p)
 
         if (self.multi_out):
             return p, out #returning feature weights as well as logits
