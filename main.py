@@ -23,6 +23,7 @@ from sklearn.model_selection import KFold, StratifiedKFold, train_test_split
 
 from foolbox import PyTorchModel, accuracy, samples
 from foolbox.attacks import L2DeepFoolAttack
+from statistics import mean
 
 parser = argparse.ArgumentParser(description="CIFAR10 Training")
 parser.add_argument('--lr', type=float, default = 0.1, metavar='LR', help='learning rate')
@@ -314,6 +315,7 @@ def main():
             par_image_tensors.append(par_images_metric.clone())
     model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
     for j in range(len(splits)):
+        split_test_accs = []
         subtrain = torch.utils.data.Subset(trainset, splits[j])
         print(f"Length of subtrain: {len(subtrain)}")
 
@@ -359,13 +361,15 @@ def main():
             print('================================================================')
             loss_train, acc_train = eval_train(model, device, train_loader, transformDict)
             loss_test, acc_test = eval_test(model, device, test_loader, transformDict)
+            split_test_accs.append(acc_test)
 
             with open('{}/train_hist_{}.txt'.format(model_dir, date_time), 'a') as f:
                 f.write("{0:4.3f}\t{1:4.3f}\t{2:4.0f}\t{3:4.3f}\t{4:6.5f}\n".format(acc_train,acc_test,len(train_loader.dataset),loss_train,loss_test))
             f.close()
-            if epoch == args.epochs:
-                torch.save(model.state_dict(),os.path.join(model_dir, 'model-{}-epoch{}-training{}.pt'.format(network_string,epoch,j)))
-        test_accs.append(acc_test)
+            #if epoch == args.epochs:
+            #    torch.save(model.state_dict(),os.path.join(model_dir, '../model-{}-epoch{}-training{}.pt'.format(network_string,epoch,j)))
+        test_accs.append(mean(acc_test))
+
 #Saving trained model
         model.multi_out = 1
         model.eval()
@@ -381,6 +385,14 @@ def main():
                                                               par_images=par_image_tensors[run],
                                                               targets = par_targets,
                                                               transformDict=transformDict)
+                if run == args.total_runs-1 and epoch == int((args.epochs+1)/4) - 2:
+                    with open('{}/Final_Proto_Preds_And_Probs_{}.txt'.format(model_dir, date_time), 'a') as f:
+                        f.write("\n")
+                        f.write(
+                            "Final Preds : {}, \n Final Probs {}  ".format(
+                                preds, probs))
+                        f.write("\n")
+                    f.close()
         # Protos are trained here^
 
         saved_protos.append(par_image_tensors)
@@ -398,7 +410,7 @@ def main():
             for i in range(len(latent_p)):
                 for q in range(len(latent_p)):
                     if i != q:
-                        cos_mat_latent_temp[i,q] = cos_sim(latent_p[i].view(-1),latent_p[q].view(-1))
+                        cos_mat_latent_temp[i,q] = 1-cos_sim(latent_p[i].view(-1),latent_p[q].view(-1))
                         print(cos_mat_latent_temp[i,q])
             cos_matrices.append(cos_mat_latent_temp.clone())
 
@@ -407,8 +419,7 @@ def main():
         with open('{}/CS_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
             f.write("\n")
             f.write(
-                "Training split: {}, \t CS_diff_mean {}  ".format(
-                    j,torch.mean(cos_mat_mean.clone())))
+                f"Training split: {j}, \t Each Protos CS_Diff_Mean, {cos_mat_mean.clone()} \t Overall CS_Diff_Mean CS_diff_mean {torch.mean(cos_mat_mean.clone())}")
             f.write("\n")
         f.close()
 
@@ -463,7 +474,7 @@ def main():
                 f.write("\n")
                 f.write("Training split: {}, \t L2 image and latent means: {} \t {} \t CS image and latent means: {} \t {}  ".format(j,im_df_mean.clone(), latent_df_mean.clone(), torch.mean(CS_df_image).clone(), torch.mean(CS_df_latent).clone() ))
                 f.write("\n")
-            f.close()
+
 
         L2_cum_image_std, L2_cum_image_mean = torch.std_mean(torch.stack(L2_image_means, dim=0), dim=0)
         L2_cum_image_means.append(L2_cum_image_mean.clone())
@@ -475,15 +486,26 @@ def main():
         CS_adv_image.append(CS_df_mean.clone())
         CS_latent_std, CS_latent_mean = torch.std_mean(torch.stack(CS_latent_means, dim=0), dim=0)
         CS_adv_latent.append(CS_latent_mean.clone())
+        f.write(f"Split {j} L2_diff latent overall mean: {L2_cum_latent_mean}")
+        f.close()
+    data_schedule = [0.25, 0.4, 0.6, 0.7, 0.8, 0.9, 1.0]
 
 
-   # data_schedule = [0.25, 0.4, 0.6, 0.7, 0.8, 0.9, 1.0]
+    with open('{}/final_data_summary_{}.txt'.format(model_dir, date_time), 'a') as f:
+        f.write("Data \t Test Acc  \t CS_norm metric \t L2 adversarial latent means \t L2 adversarial image means \t CS adversarial image means \t CS adversarial latent means  \n")
+        for i in range(len(data_schedule)):
+            f.write("{0:4.4f} \t {1:4.4f}\t {}\t {2:4.4f}\t {3:4.4f}\t 4:4.4f}\t {5:4.4f}\t {6:4.4f} \n".format(data_schedule[i], test_accs[i], CS_means[i],L2_cum_latent_means[i], L2_cum_image_means[i],CS_adv_image[i], CS_adv_latent[i]))
+    f.close()
+    saved_model_path = os.path.join(model_dir,'../Trained_Model.pt')
+    saved_protos_path = os.path.join(model_dir,'../Saved_Protos.pt')
+    if not os.path.exists(saved_model_path):
+        os.makedirs(saved_model_path)
+    if not os.path.exists(saved_protos_path):
+        os.makedirs(saved_protos_path)
 
-#    with open('{}/final_data_summary_{}.txt'.format(model_dir, date_time), 'a') as f:
- #       f.write("Data \t Test Acc \t Prototype Tensors \t CS_norm metric \t L2 adversarial latent means \t L2 adversarial image means \t CS adversarial image means \t CS adversarial latent means  \n")
-  #      for i in range(len(data_schedule)):
-   #         f.write("{0:4.4f} \t {1:4.4f}\t {}\t {3:4.4f}\t {4:4.4f}\t {5:4.4f}\t {6:4.4f}\t {7:4.4f} \n".format(data_schedule[i], test_accs[i],saved_protos[i], CS_means[i],L2_cum_latent_means[i], L2_cum_image_means[i],CS_adv_image[i], CS_adv_latent[i]))
-    #f.close()
+    torch.save(model.state_dict(), f"{saved_model_path}/Saved_Model")
+    torch.save(par_image_tensors, f"{saved_protos_path}/Saved_Protos")
+
 
 
     print("-----------------------------------------------")
