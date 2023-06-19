@@ -166,7 +166,7 @@ def train(model, device, optimizer, cur_loader, epoch, max_steps, scheduler, tra
         optimizer.zero_grad()
         inputs_norm = transformDict['norm'](inputs)
         p, outputs = model(inputs_norm)
-        loss = F.cross_entropy(outputs, targets, reduction='none')
+        loss = nn.CrossEntropyLoss(outputs, targets)
         loss.backward()
         optimizer.step()
 
