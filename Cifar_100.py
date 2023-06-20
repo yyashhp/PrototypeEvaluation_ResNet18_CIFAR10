@@ -34,7 +34,7 @@ parser.add_argument('--par-grad-mult', default=10.0, type=float, help='boost ima
 parser.add_argument('--par-grad-clip', default=0.01, type=float,
                     help='max magnitude per update for proto image updates')
 parser.add_argument('--channel-norm', default=1, type=int, help='normalize each channel by training set mean and std')
-parser.add_argument('--model-dir', default='../ProtoRuns')
+parser.add_argument('--model-dir', default='../ProtoRuns_CIFAR100')
 parser.add_argument('--test-batch-size', type=int, default=128, metavar='N',
                     help='input batch size for testing (default: 128)')
 parser.add_argument('--dataset', default='CIFAR10', help="Dataset being used")
