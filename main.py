@@ -365,7 +365,7 @@ def main():
             p.requires_grad = False
 #Freezing model for protos
         for run in range(args.total_runs):
-            for epoch in range(1, int(args.epochs + 1)):
+            for epoch in range(1, int((args.epochs + 1)/4)):
                 last_loss, preds, probs = train_image_no_data(args,
                                                               model = model,
                                                               device = device,
@@ -373,7 +373,7 @@ def main():
                                                               par_images=par_image_tensors[run],
                                                               targets = par_targets,
                                                               transformDict=transformDict)
-                if run == args.total_runs-1 and epoch == int(args.epochs+1):
+                if run == args.total_runs-1 and epoch == int((args.epochs+1)/4) - 2:
                     with open('{}/Final_Proto_Preds_And_Probs_{}.txt'.format(model_dir, date_time), 'a') as f:
                         f.write("\n")
                         f.write(

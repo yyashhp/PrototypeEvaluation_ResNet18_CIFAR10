@@ -17,34 +17,15 @@ from foolbox.attacks import L2DeepFoolAttack
 from statistics import mean
 
 parser = argparse.ArgumentParser(description="CIFAR10 Training")
-parser.add_argument('--lr', type=float, default = 0.1, metavar='LR', help='learning rate')
 parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed(default: 1')
-parser.add_argument('--beta', default=0.1, type=float, help='loss weight for proximity')
-parser.add_argument('--norm-type', default='batch', help='batch,layer, or instance')
-parser.add_argument('--par-grad-mult', default=10.0, type=float, help='boost image gradients if desired')
-parser.add_argument('--par-grad-clip', default=0.01, type=float, help='max magnitude per update for proto image updates')
-parser.add_argument('--channel-norm', default=1, type=int, help='normalize each channel by training set mean and std')
 parser.add_argument('--model-dir', default='../ProtoRuns')
-parser.add_argument('--test-batch-size', type=int, default=128, metavar='N', help='input batch size for testing (default: 128)')
-parser.add_argument('--dataset', default='CIFAR10', help="Dataset being used")
-parser.add_argument('--assessments', nargs='+', default=[],help='list of strings showing which assessments to make')
-parser.add_argument('--image-step', default=0.0, type=float, help='for image training, number of decimals to round to')
-parser.add_argument('--restart-epoch', default=100, type=int, help='epoch to restart from')
-parser.add_argument('--schedule', nargs='+', type=float, default=[0.1, 0.25, 0.4, 0.6, 0.7, 0.8, 1.0], help='training points to consider')
 parser.add_argument('--no-cuda', action='store_true', default=False,help='disables CUDA training')
-parser.add_argument('--epochs', type=int, default=100, metavar='N', help='number of epochs to train')
-parser.add_argument('--momentum', type=float, default=0.9, metavar='M', help='SGD momentum')
-parser.add_argument('--weight-decay', '--wd', default=5e-4, type=float, metavar='W')
-parser.add_argument('--anneal', default="cosine", help='type of LR schedule (cosine)')
-parser.add_argument('--log-interval', type=int, default=20, metavar='N', help='how many epochs to wait before logging training status')
 parser.add_argument('--model-scale', default=1.0, type=float, help='width scale of network off of baseline resnet18')
-parser.add_argument('--batch-size', type=int, default=128, metavar='N', help='input batch size for training (default: 128)')
-parser.add_argument('--total-runs', type=int, default=5, help='How many instantiations of prototype images')
-
+parser.add_argument('--total-runs', default=5, type=int, help='proto instantiations')
 
 args = parser.parse_args()
 
-
+kwargsUser = {}
 
 def get_datetime():
     now = datetime.now()
@@ -89,15 +70,109 @@ def main():
 
     nclass = 10
     nchannels = 3
-    H, W = 32, 32
 
     model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
     model_saved = torch.load(f"{saved_model_path}/Saved_Model")
     model.load_state_dict(model_saved)
+    model.multi_out = 1
     model.eval()
     for p in model.parameters():
         p.requires_grad = False
+    par_image_tensors = torch.load(f"{saved_protos_path}/Saved_Protos")
 
+    for run in range(args.total_runs):
+        _par_image_copy = par_image_tensors[run].clone().detach().requires_grad_(False).to(device)
+        _par_image_norm = transformDict['norm'](_par_image_copy)
+        L2_img, logits_img = model(_par_image_norm)
+        preds = logits_img.max(1, keepdim=True)[1]
+        probs = F.softmax(logits_img)
+        print(f"Preds for run {run}:\t {preds}\n")
+        print(f"Probs for run {run}:\t {probs}\n")
+
+    cos_matrices = []
+    CS_means = []
+    for proto in par_image_tensors:
+        par_tensors_norm = transformDict['norm'](proto.clone())
+        latent_p, logits_p = model(par_tensors_norm)
+
+        # compute cos similarity matrix
+
+        cos_mat_latent_temp = torch.zeros(nclass, nclass, dtype=torch.float)
+        cos_sim = nn.CosineSimilarity(dim=0, eps=1e-6)
+
+        for i in range(len(latent_p)):
+            for q in range(len(latent_p)):
+                if i != q:
+                    cos_mat_latent_temp[i, q] = 1 - cos_sim(latent_p[i].view(-1), latent_p[q].view(-1))
+                    print(cos_mat_latent_temp[i, q])
+        cos_matrices.append(cos_mat_latent_temp.clone())
+
+    cos_mat_std, cos_mat_mean = torch.std_mean(torch.stack(cos_matrices, dim=0), dim=0)
+    CS_means.append(torch.mean(cos_mat_mean.clone()))
+    with open('{}/CS_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
+        f.write("\n")
+        f.write(
+            f"Training split: {j}, \t Each Protos CS_Diff_Mean, {cos_mat_mean.clone()} \t Overall CS_Diff_Mean CS_diff_mean {torch.mean(cos_mat_mean.clone())}")
+        f.write("\n")
+    f.close()
+
+    L2_latent_means = []
+    CS_latent_means = []
+    L2_cum_latent_means = []
+    CS_adv_latent = []
+
+    for proto in par_image_tensors:
+        proto_copy = proto.clone()
+        print("Printing max of proto and its copy:")
+        print(torch.max(proto))
+        print(torch.max(proto_copy))
+        print("Printing min of proto and then its copy")
+        print(torch.min(proto))
+        print(torch.min(proto_copy))
+        with torch.no_grad():
+            proto_copy_norm = transformDict['norm'](proto_copy)
+            latent_onehot, logit_onehot = model(proto_copy_norm)
+        model.eval()
+        model.multi_out = 0
+        attack = L2DeepFoolAttack(overshoot=0.02)
+        preprocessing = dict(mean=MEAN, std=STD, axis=-3)
+        fmodel = PyTorchModel(model, bounds=(0, 1), preprocessing=preprocessing)
+
+        print('Computing DF L2_stats')
+
+        raw, new_proto, is_adv = attack(fmodel, proto_copy.clone(),
+                                        torch.arange(nclass, dtype=torch.long, device=device), epsilons=10.0)
+
+        model.multi_out = 1
+
+        with torch.no_grad():
+            new_proto_norm = transformDict['norm'](new_proto.clone())
+            latent_adv, logits_adv = model(new_proto_norm)
+        L2_df_latent = torch.linalg.norm((latent_adv - latent_onehot).view(nclass, -1), dim=1)
+        CS_df_latent = 1 - F.cosine_similarity(latent_adv.view(nclass, -1), latent_onehot.view(nclass, -1))
+
+        latent_df_std, latent_df_mean = torch.std_mean(L2_df_latent)
+        L2_latent_means.append(latent_df_mean.clone())
+        CS_latent_means.append(torch.mean(CS_df_latent).clone())
+        with open('{}/Adv_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
+            f.write("\n")
+            f.write(
+                "Training split: {}, \t L2 latent mean: {} \t CS latent mean: {} \n  ".format(
+                    j, latent_df_mean.clone(),
+                    torch.mean(CS_df_latent).clone()))
+            f.write("\n")
+        f.close()
+
+
+    L2_cum_latent_std, L2_cum_latent_mean = torch.std_mean(torch.stack(L2_latent_means, dim=0), dim=0)
+    L2_cum_latent_means.append(L2_cum_latent_mean.clone())
+
+    CS_latent_std, CS_latent_mean = torch.std_mean(torch.stack(CS_latent_means, dim=0), dim=0)
+    CS_adv_latent.append(CS_latent_mean.clone())
+    with open('{}/Adv_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
+        f.write("\n")
+        f.write(f"Split {j} L2_diff latent overall mean: {L2_cum_latent_mean} \t CS_diff latent overall mean {CS_latent_mean.clone()}")
+    f.close()
 
 
 
