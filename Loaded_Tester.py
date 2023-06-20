@@ -164,6 +164,30 @@ def main():
         f.write(f"L2_diff latent overall mean: {L2_cum_latent_mean.clone()} \t CS_diff latent overall mean {CS_adv_latent.clone()}")
     f.close()
 
+    for proto in par_image_tensors:
+        proto_copy = proto.clone()
+        with torch.no_grad():
+            proto_copy_norm = transformDict['norm'](proto_copy)
+            latent_proto, logits_proto = model(proto_copy_norm)
+            preds = logits_proto.max(1, keepdim=True)[1]
+            probs = F.softmax(logits_proto)
+        for i in range(len(proto)):
+            for j in range(len(proto)):
+                if i != j:
+                    start_pred = preds[j]
+                    end_pred = preds[i]
+                    start_probs = probs[j]
+                    end_probs = probs[i]
+                    print(f"Start and End Preds and Probs: {start_pred}, {end_pred}, {start_probs}, {end_probs}")
+                    start_image = proto_copy[j].clone().detach().requires_grad_(False).to(device)
+                    target_class_image = proto_copy[i].clone().detach().requires_grad_(False).to(device)
+                    print(f"Start and target class shapes: {start_image.shape}, {target_class_image.shape}")
+                    for alpha in range(1,20):
+                        adj_alpha = 1/(alpha)
+
+
+
+
 
 
 
