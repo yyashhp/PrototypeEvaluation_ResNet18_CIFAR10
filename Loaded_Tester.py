@@ -215,8 +215,10 @@ def main():
             alphas_list.append(proto_alphas)
         final_boundaries_list.append(boundaries_list)
         final_alphas_list.append(alphas_list)
-    final_boundaries_std, final_boundaries_avg = torch.std_mean(torch.stack(final_boundaries_list, dim=0), dim=0)
-    final_alphas_std, final_alphas_avg = torch.std_mean(torch.stack(final_alphas_list, dim=0), dim=0)
+    final_boundaries_avg = torch.stack(final_boundaries_list, dim=0)
+    final_boundaries_avg = torch.mean(final_boundaries_list, dim=0)
+    final_alphas_avg = torch.stack(final_alphas_list, dim=0)
+    final_alphas_avg = torch.mean(final_alphas_avg, dim=0)
     print(f"Final average boundaries tensor: {final_boundaries_avg}\n")
     print(f"Final average alphas tensor: {final_alphas_avg}\n")
 
