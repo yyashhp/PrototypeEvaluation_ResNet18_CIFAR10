@@ -211,11 +211,11 @@ def main():
                             proto_alphas.append(adj_alpha)
                         else:
                             prev = tester
-            boundaries_list.append(proto_boundaries)
-            alphas_list.append(proto_alphas)
-        final_boundaries_list.append(boundaries_list)
-        final_alphas_list.append(alphas_list)
-    final_boundaries_avg = torch.stack(final_boundaries_list, dim=0)
+            boundaries_list.append(torch.stack(proto_boundaries, dim=0))
+            alphas_list.append(torch.stack(proto_alphas, dim=0))
+        final_boundaries_list.append(torch.stack(boundaries_list, dim=0))
+        final_alphas_list.append(torch.stack(alphas_list, dim=0))
+    final_boundaries_avg = torch.stack(final_boundaries_list, dim=1)
     final_boundaries_avg = torch.mean(final_boundaries_list, dim=0)
     final_alphas_avg = torch.stack(final_alphas_list, dim=0)
     final_alphas_avg = torch.mean(final_alphas_avg, dim=0)
