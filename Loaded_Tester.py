@@ -22,6 +22,7 @@ parser.add_argument('--model-dir', default='../ProtoRuns')
 parser.add_argument('--no-cuda', action='store_true', default=False,help='disables CUDA training')
 parser.add_argument('--model-scale', default=1.0, type=float, help='width scale of network off of baseline resnet18')
 parser.add_argument('--total-runs', default=5, type=int, help='proto instantiations')
+parser.add_argument('--dataset', default=1, type=int, help='know which dataset is loaded')
 
 args = parser.parse_args()
 
