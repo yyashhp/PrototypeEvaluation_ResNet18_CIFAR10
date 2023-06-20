@@ -80,89 +80,89 @@ def main():
     for p in model.parameters():
         p.requires_grad = False
     par_image_tensors = torch.load(f"{saved_protos_path}/Saved_Protos")
-
-    for run in range(args.total_runs):
-        _par_image_copy = par_image_tensors[run].clone().detach().requires_grad_(False).to(device)
-        _par_image_norm = transformDict['norm'](_par_image_copy)
-        L2_img, logits_img = model(_par_image_norm)
-        preds = logits_img.max(1, keepdim=True)[1]
-        probs = F.softmax(logits_img)
-        print(f"Preds for run {run}:\t {preds}\n")
-        print(f"Probs for run {run}:\t {probs}\n")
-
-    cos_matrices = []
-    for proto in par_image_tensors:
-        par_tensors_norm = transformDict['norm'](proto.clone())
-        latent_p, logits_p = model(par_tensors_norm)
-
-        # compute cos similarity matrix
-
-        cos_mat_latent_temp = torch.zeros(nclass, nclass, dtype=torch.float)
-        cos_sim = nn.CosineSimilarity(dim=0, eps=1e-6)
-
-        for i in range(len(latent_p)):
-            for q in range(len(latent_p)):
-                if i != q:
-                    cos_mat_latent_temp[i, q] = 1 - cos_sim(latent_p[i].view(-1), latent_p[q].view(-1))
-                    print(cos_mat_latent_temp[i, q])
-        cos_matrices.append(cos_mat_latent_temp.clone())
-
-    cos_mat_std, cos_mat_mean = torch.std_mean(torch.stack(cos_matrices, dim=0), dim=0)
-    CS_mean = (torch.sum(cos_mat_mean.clone()))/((nclass*nclass)-nclass)
-    with open('{}/CS_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
-        f.write("\n")
-        f.write(
-            f"Each Protos CS_Diff_Mean, {cos_mat_mean.clone()} \t Overall CS_Diff_Mean {CS_mean.clone()}")
-        f.write("\n")
-    f.close()
-    print(f"CS_DIFF_MEAN: {CS_mean}")
-
-    L2_latent_means = []
-    CS_latent_means = []
-
-    for proto in par_image_tensors:
-        proto_copy = proto.clone()
-        with torch.no_grad():
-            proto_copy_norm = transformDict['norm'](proto_copy)
-            latent_onehot, logit_onehot = model(proto_copy_norm)
-        model.eval()
-        model.multi_out = 0
-        attack = L2DeepFoolAttack(overshoot=0.02)
-        preprocessing = dict(mean=MEAN, std=STD, axis=-3)
-        fmodel = PyTorchModel(model, bounds=(0, 1), preprocessing=preprocessing)
-
-        print('Computing DF L2_stats')
-
-        raw, new_proto, is_adv = attack(fmodel, proto_copy.clone(),
-                                        torch.arange(nclass, dtype=torch.long, device=device), epsilons=10.0)
-
-        model.multi_out = 1
-
-        with torch.no_grad():
-            new_proto_norm = transformDict['norm'](new_proto.clone())
-            latent_adv, logits_adv = model(new_proto_norm)
-        L2_df_latent = torch.linalg.norm((latent_adv - latent_onehot).view(nclass, -1), dim=1)
-        CS_df_latent = 1 - F.cosine_similarity(latent_adv.view(nclass, -1), latent_onehot.view(nclass, -1))
-
-        latent_df_std, latent_df_mean = torch.std_mean(L2_df_latent)
-        L2_latent_means.append(latent_df_mean.clone())
-        CS_latent_means.append(torch.mean(CS_df_latent).clone())
-        with open('{}/trained_Adv_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
-            f.write("\n")
-            f.write(f"Batch's L2 diffs : {L2_df_latent} \n CS latent diffs: {CS_df_latent} \n L2 diff mean: {latent_df_mean} \n CS Latent diff Mean: {torch.mean(CS_df_latent).clone()}  ")
-            f.write("\n")
-        f.close()
-
-
-    L2_cum_latent_std, L2_cum_latent_mean = torch.std_mean(torch.stack(L2_latent_means, dim=0), dim=0)
-    L2_cum_latent_mean = (L2_cum_latent_mean.clone())
-
-    CS_latent_std, CS_latent_mean = torch.std_mean(torch.stack(CS_latent_means, dim=0), dim=0)
-    CS_adv_latent = CS_latent_mean.clone()
-    with open('{}/Adv_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
-        f.write("\n")
-        f.write(f"L2_diff latent overall mean: {L2_cum_latent_mean.clone()} \t CS_diff latent overall mean {CS_adv_latent.clone()}")
-    f.close()
+    #
+    # for run in range(args.total_runs):
+    #     _par_image_copy = par_image_tensors[run].clone().detach().requires_grad_(False).to(device)
+    #     _par_image_norm = transformDict['norm'](_par_image_copy)
+    #     L2_img, logits_img = model(_par_image_norm)
+    #     preds = logits_img.max(1, keepdim=True)[1]
+    #     probs = F.softmax(logits_img)
+    #    # print(f"Preds for run {run}:\t {preds}\n")
+    #    # print(f"Probs for run {run}:\t {probs}\n")
+    #
+    # cos_matrices = []
+    # for proto in par_image_tensors:
+    #     par_tensors_norm = transformDict['norm'](proto.clone())
+    #     latent_p, logits_p = model(par_tensors_norm)
+    #
+    #     # compute cos similarity matrix
+    #
+    #     cos_mat_latent_temp = torch.zeros(nclass, nclass, dtype=torch.float)
+    #     cos_sim = nn.CosineSimilarity(dim=0, eps=1e-6)
+    #
+    #     for i in range(len(latent_p)):
+    #         for q in range(len(latent_p)):
+    #             if i != q:
+    #                 cos_mat_latent_temp[i, q] = 1 - cos_sim(latent_p[i].view(-1), latent_p[q].view(-1))
+    #               #  print(cos_mat_latent_temp[i, q])
+    #     cos_matrices.append(cos_mat_latent_temp.clone())
+    #
+    # cos_mat_std, cos_mat_mean = torch.std_mean(torch.stack(cos_matrices, dim=0), dim=0)
+    # CS_mean = (torch.sum(cos_mat_mean.clone()))/((nclass*nclass)-nclass)
+    # with open('{}/CS_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
+    #     f.write("\n")
+    #     f.write(
+    #         f"Each Protos CS_Diff_Mean, {cos_mat_mean.clone()} \t Overall CS_Diff_Mean {CS_mean.clone()}")
+    #     f.write("\n")
+    # f.close()
+    # print(f"CS_DIFF_MEAN: {CS_mean}")
+    #
+    # L2_latent_means = []
+    # CS_latent_means = []
+    #
+    # for proto in par_image_tensors:
+    #     proto_copy = proto.clone()
+    #     with torch.no_grad():
+    #         proto_copy_norm = transformDict['norm'](proto_copy)
+    #         latent_onehot, logit_onehot = model(proto_copy_norm)
+    #     model.eval()
+    #     model.multi_out = 0
+    #     attack = L2DeepFoolAttack(overshoot=0.02)
+    #     preprocessing = dict(mean=MEAN, std=STD, axis=-3)
+    #     fmodel = PyTorchModel(model, bounds=(0, 1), preprocessing=preprocessing)
+    #
+    #     print('Computing DF L2_stats')
+    #
+    #     raw, new_proto, is_adv = attack(fmodel, proto_copy.clone(),
+    #                                     torch.arange(nclass, dtype=torch.long, device=device), epsilons=10.0)
+    #
+    #     model.multi_out = 1
+    #
+    #     with torch.no_grad():
+    #         new_proto_norm = transformDict['norm'](new_proto.clone())
+    #         latent_adv, logits_adv = model(new_proto_norm)
+    #     L2_df_latent = torch.linalg.norm((latent_adv - latent_onehot).view(nclass, -1), dim=1)
+    #     CS_df_latent = 1 - F.cosine_similarity(latent_adv.view(nclass, -1), latent_onehot.view(nclass, -1))
+    #
+    #     latent_df_std, latent_df_mean = torch.std_mean(L2_df_latent)
+    #     L2_latent_means.append(latent_df_mean.clone())
+    #     CS_latent_means.append(torch.mean(CS_df_latent).clone())
+    #     with open('{}/trained_Adv_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
+    #         f.write("\n")
+    #         f.write(f"Batch's L2 diffs : {L2_df_latent} \n CS latent diffs: {CS_df_latent} \n L2 diff mean: {latent_df_mean} \n CS Latent diff Mean: {torch.mean(CS_df_latent).clone()}  ")
+    #         f.write("\n")
+    #     f.close()
+    #
+    #
+    # L2_cum_latent_std, L2_cum_latent_mean = torch.std_mean(torch.stack(L2_latent_means, dim=0), dim=0)
+    # L2_cum_latent_mean = (L2_cum_latent_mean.clone())
+    #
+    # CS_latent_std, CS_latent_mean = torch.std_mean(torch.stack(CS_latent_means, dim=0), dim=0)
+    # CS_adv_latent = CS_latent_mean.clone()
+    # with open('{}/Adv_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
+    #     f.write("\n")
+    #     f.write(f"L2_diff latent overall mean: {L2_cum_latent_mean.clone()} \t CS_diff latent overall mean {CS_adv_latent.clone()}")
+    # f.close()
 
     for proto in par_image_tensors:
         proto_copy = proto.clone()
