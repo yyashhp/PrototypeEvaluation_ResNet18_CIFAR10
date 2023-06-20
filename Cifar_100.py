@@ -460,8 +460,8 @@ def main():
                 latent_adv, logits_adv = model(new_proto_norm)
             L2_df_image = torch.linalg.norm((new_proto - proto_copy).view(nclass, -1), dim=1)
             L2_df_latent = torch.linalg.norm((latent_adv - latent_onehot).view(nclass, -1), dim=1)
-            CS_df_image = F.cosine_similarity(new_proto.view(nclass, -1), proto_copy.view(nclass, -1))
-            CS_df_latent = F.cosine_similarity(latent_adv.view(nclass, -1), latent_onehot.view(nclass, -1))
+            CS_df_image = 1 - F.cosine_similarity(new_proto.view(nclass, -1), proto_copy.view(nclass, -1))
+            CS_df_latent = 1 - F.cosine_similarity(latent_adv.view(nclass, -1), latent_onehot.view(nclass, -1))
 
             im_df_std, im_df_mean = torch.std_mean(L2_df_image)
             latent_df_std, latent_df_mean = torch.std_mean(L2_df_latent)
