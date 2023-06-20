@@ -219,7 +219,7 @@ def main():
         final_alphas_list.append(alphas_list)
     final_boundaries_avg = torch.stack(final_boundaries_list, dim=0)
     final_alphas = []
-    for i in range(len(nclass)):
+    for i in range(nclass):
         final_alphas.append(mean([final_alphas_list[0][nclass], final_alphas_list[1][nclass], final_alphas_list[2][nclass], final_alphas_list[3][nclass], final_alphas_list[4][nclass]]))
 
     final_boundaries_avg = torch.mean(final_boundaries_avg, dim=0)
