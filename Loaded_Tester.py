@@ -163,8 +163,11 @@ def main():
     #     f.write("\n")
     #     f.write(f"L2_diff latent overall mean: {L2_cum_latent_mean.clone()} \t CS_diff latent overall mean {CS_adv_latent.clone()}")
     # f.close()
-
+    final_boundaries_list = []
+    final_alphas_list = []
     for proto in par_image_tensors:
+        alphas_list = []
+        boundaries_list = []
         proto_copy = proto.clone()
         with torch.no_grad():
             proto_copy_norm = transformDict['norm'](proto_copy)
@@ -172,6 +175,8 @@ def main():
             preds = logits_proto.max(1, keepdim=True)[1]
             probs = F.softmax(logits_proto)
         for i in range(len(proto)):
+            proto_boundaries = []
+            proto_alphas = []
             for j in range(len(proto)):
                 if i != j:
                     start_pred = preds[j]
@@ -183,7 +188,8 @@ def main():
                     target_class_image = proto_copy[i].clone().detach().requires_grad_(False).to(device)
                     target_class_image = torch.unsqueeze(target_class_image, dim=0)
                     print(f"Starting Pred: {start_pred}")
-                    for alpha in range(0,20):
+                    prev = start_image
+                    for alpha in range(1,20):
                         adj_alpha = alpha * 0.05
                         tester = torch.zeros(*(list(start_image.shape)))
                         tester = torch.add(tester, start_image, alpha = (1-adj_alpha))
@@ -193,7 +199,28 @@ def main():
                             latent_tester, logits_tester = model(tester_norm)
                             preds_tester = logits_tester.max(1,keepdim=True)[1]
                             probs_tester = F.softmax(logits_tester)
-                            print(F"Pred {preds_tester} with alpha {adj_alpha}")
+                        if preds_tester == end_pred:
+                            boundary = torch.zeros(*(list(tester.shape)))
+                            boundary = torch.add(boundary, prev, alpha = 0.5)
+                            boundary = torch.add(boundary, tester, alpha = 0.5)
+                            print(f"Boundary Shape: {boundary.shape}\n")
+                            print(f"Alpha needed: {adj_alpha}\n")
+                            print(f"Boundary shape needed to go from proto {j} to proto{i} is {(1-adj_alpha)*100} percent proto {j} and {adj_alpha*100} percent proto {i} \n")
+
+                            proto_boundaries.append(boundary.clone())
+                            proto_alphas.append(adj_alpha)
+                        else:
+                            prev = tester
+            boundaries_list.append(proto_boundaries.clone())
+            alphas_list.append(proto_alphas.clone())
+        final_boundaries_list.append(boundaries_list.clone())
+        final_alphas_list.append(alphas_list.clone())
+    final_boundaries_std, final_boundaries_avg = torch.std_mean(torch.stack(final_boundaries_list, dim=0), dim=0)
+    final_alphas_std, final_alphas_avg = torch.std_mean(torch.stack(final_alphas_list, dim=0), dim=0)
+    print(f"Final average boundaries tensor: {final_boundaries_avg}\n")
+    print(f"Final average alphas tensor: {final_alphas_avg}\n")
+
+
 
 
 
