@@ -213,13 +213,10 @@ def main():
                         else:
                             prev = tester
                             assert alpha != 20
-            print(f"Length of proto boundaries {len(proto_boundaries)}\n")
-            boundaries_list.append(proto_boundaries)
+            boundaries_list.append(torch.stack(proto_boundaries, dim=0))
             alphas_list.append(proto_alphas)
-        final_boundaries_list.append(boundaries_list)
-        print(f"Length of boundaries list {len(boundaries_list)}\n")
+        final_boundaries_list.append(torch.stack(boundaries_list, dim=0))
         final_alphas_list.append(alphas_list)
-    print(f"Length of final bounds list{len(final_boundaries_list)}\n")
     final_boundaries_avg = torch.stack(final_boundaries_list, dim=0)
     final_alphas = []
     for i in range(len(nclass)):
