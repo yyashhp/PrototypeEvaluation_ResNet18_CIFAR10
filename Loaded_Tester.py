@@ -49,7 +49,7 @@ if not os.path.exists(full_dir_plot):
     os.makedirs(full_dir_plot)
 
 use_cuda = not args.no_cuda and torch.cuda.is_available()
-device = 'cuda' if use_cuda else 'cpu'
+device = 'cpu' if use_cuda else 'cpu'
 
 torch.manual_seed(args.seed)
 
@@ -73,13 +73,13 @@ def main():
     nchannels = 3
 
     model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
-    model_saved = torch.load(f"{saved_model_path}/Saved_Model")
+    model_saved = torch.load(f"{saved_model_path}/Saved_Model", map_location=device)
     model.load_state_dict(model_saved)
     model.multi_out = 1
     model.eval()
     for p in model.parameters():
         p.requires_grad = False
-    par_image_tensors = torch.load(f"{saved_protos_path}/Saved_Protos")
+    par_image_tensors = torch.load(f"{saved_protos_path}/Saved_Protos", map_location=device)
     #
     # for run in range(args.total_runs):
     #     _par_image_copy = par_image_tensors[run].clone().detach().requires_grad_(False).to(device)
