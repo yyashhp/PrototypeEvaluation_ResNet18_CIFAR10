@@ -182,12 +182,18 @@ def main():
                     start_image = torch.unsqueeze(start_image, dim=0)
                     target_class_image = proto_copy[i].clone().detach().requires_grad_(False).to(device)
                     target_class_image = torch.unsqueeze(target_class_image, dim=0)
-                    for alpha in range(1,20):
+                    print(f"Starting Pred: {start_pred}")
+                    for alpha in range(0,20):
                         adj_alpha = alpha * 0.05
                         tester = torch.zeros(*(list(start_image.shape)))
                         tester = torch.add(tester, start_image, alpha = (1-adj_alpha))
                         tester = torch.add(tester, target_class_image, alpha = adj_alpha)
-                        print(f"tester-size{tester.shape}")
+                        with torch.no_grad():
+                            tester_norm = transformDict['norm'](tester)
+                            latent_tester, logits_tester = model(tester_norm)
+                            preds = logits_tester.max(1,keepdim=True)[1]
+                            probs = F.softmax(logits_tester)
+                            print(F"Pred {preds} with alpha {adj_alpha}")
 
 
 
