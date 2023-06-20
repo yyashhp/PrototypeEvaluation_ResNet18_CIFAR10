@@ -90,7 +90,6 @@ def main():
         print(f"Probs for run {run}:\t {probs}\n")
 
     cos_matrices = []
-    CS_means = []
     for proto in par_image_tensors:
         par_tensors_norm = transformDict['norm'](proto.clone())
         latent_p, logits_p = model(par_tensors_norm)
@@ -108,18 +107,16 @@ def main():
         cos_matrices.append(cos_mat_latent_temp.clone())
 
     cos_mat_std, cos_mat_mean = torch.std_mean(torch.stack(cos_matrices, dim=0), dim=0)
-    CS_means.append(torch.mean(cos_mat_mean.clone()))
+    CS_mean = torch.mean(cos_mat_mean.clone())
     with open('{}/CS_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
         f.write("\n")
         f.write(
-            f"Training split: {j}, \t Each Protos CS_Diff_Mean, {cos_mat_mean.clone()} \t Overall CS_Diff_Mean CS_diff_mean {torch.mean(cos_mat_mean.clone())}")
+            f"Each Protos CS_Diff_Mean, {cos_mat_mean.clone()} \t Overall CS_Diff_Mean {CS_mean.clone()}")
         f.write("\n")
     f.close()
 
     L2_latent_means = []
     CS_latent_means = []
-    L2_cum_latent_means = []
-    CS_adv_latent = []
 
     for proto in par_image_tensors:
         proto_copy = proto.clone()
@@ -154,24 +151,21 @@ def main():
         latent_df_std, latent_df_mean = torch.std_mean(L2_df_latent)
         L2_latent_means.append(latent_df_mean.clone())
         CS_latent_means.append(torch.mean(CS_df_latent).clone())
-        with open('{}/Adv_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
+        with open('{}/trained_Adv_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
             f.write("\n")
-            f.write(
-                "Training split: {}, \t L2 latent mean: {} \t CS latent mean: {} \n  ".format(
-                    j, latent_df_mean.clone(),
-                    torch.mean(CS_df_latent).clone()))
+            f.write(f"Batch's L2 diffs : {L2_df_latent} \n CS latent diffs: {CS_df_latent} \n L2 diff mean: {latent_df_mean} \n CS Latent diff Mean: {torch.mean(CS_df_latent).clone()}  ")
             f.write("\n")
         f.close()
 
 
     L2_cum_latent_std, L2_cum_latent_mean = torch.std_mean(torch.stack(L2_latent_means, dim=0), dim=0)
-    L2_cum_latent_means.append(L2_cum_latent_mean.clone())
+    L2_cum_latent_mean = (L2_cum_latent_mean.clone())
 
     CS_latent_std, CS_latent_mean = torch.std_mean(torch.stack(CS_latent_means, dim=0), dim=0)
-    CS_adv_latent.append(CS_latent_mean.clone())
+    CS_adv_latent = CS_latent_mean.clone()
     with open('{}/Adv_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
         f.write("\n")
-        f.write(f"Split {j} L2_diff latent overall mean: {L2_cum_latent_mean} \t CS_diff latent overall mean {CS_latent_mean.clone()}")
+        f.write(f"L2_diff latent overall mean: {L2_cum_latent_mean.clone()} \t CS_diff latent overall mean {CS_adv_latent.clone()}")
     f.close()
 
 
