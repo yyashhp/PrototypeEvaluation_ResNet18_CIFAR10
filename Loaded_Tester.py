@@ -181,7 +181,7 @@ def main():
                     start_image = proto_copy[j].clone().detach().requires_grad_(False).to(device)
                     start_image = torch.unsqueeze(start_image, dim=0)
                     target_class_image = proto_copy[i].clone().detach().requires_grad_(False).to(device)
-                    target_class_image_image = torch.unsqueeze(target_class_image_image, dim=0)
+                    target_class_image = torch.unsqueeze(target_class_image, dim=0)
                     print(f"Start and target class shapes: {start_image.shape}, {target_class_image.shape}")
                     for alpha in range(1,20):
                         adj_alpha = 1/(alpha)
