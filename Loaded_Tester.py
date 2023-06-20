@@ -223,6 +223,7 @@ def main():
         final_alphas.append(mean([mean(final_alphas_list[0][i]), mean(final_alphas_list[1][i]), mean(final_alphas_list[2][i]), mean(final_alphas_list[3][i]), mean(final_alphas_list[4][i])]))
 
     final_boundaries_avg = torch.mean(final_boundaries_avg, dim=0)
+    final_boundaries_avg = torch.squeeze(final_boundaries_avg)
     print(f"shape of Final average boundaries tensor: {final_boundaries_avg.shape}\n")
     print(f"Final average alphas list: {final_alphas}\n")
 
