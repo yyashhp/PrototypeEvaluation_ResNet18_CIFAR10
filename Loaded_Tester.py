@@ -178,9 +178,10 @@ def main():
                     end_pred = preds[i]
                     start_probs = probs[j]
                     end_probs = probs[i]
-                    print(f"Start and End Preds and Probs: {start_pred}, {end_pred}, {start_probs}, {end_probs}")
                     start_image = proto_copy[j].clone().detach().requires_grad_(False).to(device)
+                    start_image = torch.unsqueeze(start_image, dim=0)
                     target_class_image = proto_copy[i].clone().detach().requires_grad_(False).to(device)
+                    target_class_image_image = torch.unsqueeze(target_class_image_image, dim=0)
                     print(f"Start and target class shapes: {start_image.shape}, {target_class_image.shape}")
                     for alpha in range(1,20):
                         adj_alpha = 1/(alpha)
