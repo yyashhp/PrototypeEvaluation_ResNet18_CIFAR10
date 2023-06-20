@@ -107,13 +107,14 @@ def main():
         cos_matrices.append(cos_mat_latent_temp.clone())
 
     cos_mat_std, cos_mat_mean = torch.std_mean(torch.stack(cos_matrices, dim=0), dim=0)
-    CS_mean = torch.mean(cos_mat_mean.clone())
+    CS_mean = (torch.sum(cos_mat_mean.clone()))/((nclass*nclass)-nclass)
     with open('{}/CS_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
         f.write("\n")
         f.write(
             f"Each Protos CS_Diff_Mean, {cos_mat_mean.clone()} \t Overall CS_Diff_Mean {CS_mean.clone()}")
         f.write("\n")
     f.close()
+    print(f"CS_DIFF_MEAN: {CS_mean}")
 
     L2_latent_means = []
     CS_latent_means = []
