@@ -182,9 +182,12 @@ def main():
                     start_image = torch.unsqueeze(start_image, dim=0)
                     target_class_image = proto_copy[i].clone().detach().requires_grad_(False).to(device)
                     target_class_image = torch.unsqueeze(target_class_image, dim=0)
-                    print(f"Start and target class shapes: {start_image.shape}, {target_class_image.shape}")
                     for alpha in range(1,20):
-                        adj_alpha = 1/(alpha)
+                        adj_alpha = alpha * 0.05
+                        tester = torch.zeros(*(list(start_image.shape)))
+                        tester = torch.sum(tester, start_image, alpha = (1-adj_alpha))
+                        tester = torch.sum(tester, target_class_image, alpha = adj_alpha)
+                        print(f"tester-size{tester.shape}")
 
 
 
