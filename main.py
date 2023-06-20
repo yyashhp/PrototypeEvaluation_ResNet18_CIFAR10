@@ -381,7 +381,8 @@ def main():
                                                               par_images=par_image_tensors[run],
                                                               targets = par_targets,
                                                               transformDict=transformDict)
-        with open('{}/Final_Proto_Preds_And_Probs_{}.txt'.format(model_dir, date_time), 'a') as f:
+            print(f"Loss: {last_loss}")
+        with open('{}/Final_Proto_Loss_Preds_And_Probs_{}.txt'.format(model_dir, date_time), 'a') as f:
             f.write("\n")
             f.write(
                 "Final Preds : {}, \n Final Probs {}  ".format(
