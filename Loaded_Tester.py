@@ -203,18 +203,22 @@ def main():
                             boundary = torch.zeros(*(list(tester.shape)))
                             boundary = torch.add(boundary, prev, alpha = 0.5)
                             boundary = torch.add(boundary, tester, alpha = 0.5)
-                            print(f"Boundary Shape: {boundary.shape}\n")
-                            print(f"Alpha needed: {adj_alpha}\n")
-                            print(f"Boundary shape needed to go from proto {j} to proto{i} is {(1-adj_alpha)*100} percent proto {j} and {adj_alpha*100} percent proto {i} \n")
+                         #   print(f"Boundary Shape: {boundary.shape}\n")
+                        #    print(f"Alpha needed: {adj_alpha}\n")
+                           # print(f"Boundary shape needed to go from proto {j} to proto {i} is {(1-adj_alpha)*100} percent proto {j} and {adj_alpha*100} percent proto {i} \n")
 
                             proto_boundaries.append(boundary.clone())
                             proto_alphas.append(adj_alpha)
                         else:
                             prev = tester
-            boundaries_list.append(torch.stack(proto_boundaries, dim=0))
+                            assert alpha != 20
+            print(f"Length of proto boundaries {len(proto_boundaries)}\n")
+            boundaries_list.append(proto_boundaries)
             alphas_list.append(proto_alphas)
-        final_boundaries_list.append(torch.stack(boundaries_list, dim=0))
+        final_boundaries_list.append(boundaries_list)
+        print(f"Length of boundaries list {len(boundaries_list)}\n")
         final_alphas_list.append(alphas_list)
+    print(f"Length of final bounds list{len(final_boundaries_list)}\n")
     final_boundaries_avg = torch.stack(final_boundaries_list, dim=0)
     final_alphas = []
     for i in range(len(nclass)):
