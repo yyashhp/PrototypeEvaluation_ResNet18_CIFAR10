@@ -120,12 +120,6 @@ def main():
 
     for proto in par_image_tensors:
         proto_copy = proto.clone()
-        print("Printing max of proto and its copy:")
-        print(torch.max(proto))
-        print(torch.max(proto_copy))
-        print("Printing min of proto and then its copy")
-        print(torch.min(proto))
-        print(torch.min(proto_copy))
         with torch.no_grad():
             proto_copy_norm = transformDict['norm'](proto_copy)
             latent_onehot, logit_onehot = model(proto_copy_norm)

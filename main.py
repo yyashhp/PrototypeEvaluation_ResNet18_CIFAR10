@@ -76,6 +76,12 @@ if not os.path.exists(model_dir):
 
 if not os.path.exists(full_dir_plot):
     os.makedirs(full_dir_plot)
+saved_model_path = os.path.join(model_dir,'../Trained_Model.pt')
+saved_protos_path = os.path.join(model_dir,'../Saved_Protos.pt')
+if not os.path.exists(saved_model_path):
+    os.makedirs(saved_model_path)
+if not os.path.exists(saved_protos_path):
+    os.makedirs(saved_protos_path)
 
 with open('{}/commandline_args.txt'.format(model_dir), 'a') as f:
     json.dump(args.__dict__, f, indent=2)
@@ -477,12 +483,7 @@ def main():
         for i in range(len(data_schedule)):
             f.write("{0:4.4f} \t {1:4.4f}\t {2:4.4f}\t {3:4.4f}\t {4:4.4f}\t {5:4.4f}\t {6:4.4f} \n".format(data_schedule[i], test_accs[i], CS_means[i],L2_cum_latent_means[i], L2_cum_image_means[i],CS_adv_image[i], CS_adv_latent[i]))
     f.close()
-    saved_model_path = os.path.join(model_dir,'../Trained_Model.pt')
-    saved_protos_path = os.path.join(model_dir,'../Saved_Protos.pt')
-    if not os.path.exists(saved_model_path):
-        os.makedirs(saved_model_path)
-    if not os.path.exists(saved_protos_path):
-        os.makedirs(saved_protos_path)
+
 
     torch.save(model.state_dict(), f"{saved_model_path}/Saved_Model_{date_time}")
     torch.save(par_image_tensors, f"{saved_protos_path}/Saved_Protos_{date_time}")
