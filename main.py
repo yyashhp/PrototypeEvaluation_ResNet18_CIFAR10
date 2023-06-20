@@ -69,7 +69,7 @@ plottarg = "/home/lab/csc-reu/yxp441/YashProto/PrototypeEvaluation_ResNet18_CIFA
 dir_suffix = args.model_dir
 
 model_dir = os.path.join(targ, dir_suffix)
-full_dir_plot = os.path.join(plottarg, dir_suffix)
+full_dir_plot = plottarg
 
 if not os.path.exists(model_dir):
     os.makedirs(model_dir)
@@ -354,8 +354,6 @@ def main():
             with open('{}/train_hist_{}.txt'.format(model_dir, date_time), 'a') as f:
                 f.write("{0:4.3f}\t{1:4.3f}\t{2:4.0f}\t{3:4.3f}\t{4:6.5f}\n".format(acc_train,acc_test,len(train_loader.dataset),loss_train,loss_test))
             f.close()
-            #if epoch == args.epochs:
-            #    torch.save(model.state_dict(),os.path.join(model_dir, '../model-{}-epoch{}-training{}.pt'.format(network_string,epoch,j)))
         test_accs.append(mean(split_test_accs))
 
 #Saving trained model
@@ -399,7 +397,6 @@ def main():
                 for q in range(len(latent_p)):
                     if i != q:
                         cos_mat_latent_temp[i,q] = 1-cos_sim(latent_p[i].view(-1),latent_p[q].view(-1))
-                        print(cos_mat_latent_temp[i,q])
             cos_matrices.append(cos_mat_latent_temp.clone())
 
         cos_mat_std, cos_mat_mean = torch.std_mean(torch.stack(cos_matrices, dim=0), dim=0)
@@ -423,12 +420,6 @@ def main():
 
         for proto in par_image_tensors:
             proto_copy = proto.clone()
-            print("Printing max of proto and its copy:")
-            print(torch.max(proto))
-            print(torch.max(proto_copy))
-            print("Printing min of proto and then its copy")
-            print(torch.min(proto))
-            print(torch.min(proto_copy))
             with torch.no_grad():
                 proto_copy_norm = transformDict['norm'](proto_copy)
                 latent_onehot, logit_onehot = model(proto_copy_norm)
@@ -493,8 +484,8 @@ def main():
     if not os.path.exists(saved_protos_path):
         os.makedirs(saved_protos_path)
 
-    torch.save(model.state_dict(), f"{saved_model_path}/Saved_Model")
-    torch.save(par_image_tensors, f"{saved_protos_path}/Saved_Protos")
+    torch.save(model.state_dict(), f"{saved_model_path}/Saved_Model_{date_time}")
+    torch.save(par_image_tensors, f"{saved_protos_path}/Saved_Protos_{date_time}")
 
 
 

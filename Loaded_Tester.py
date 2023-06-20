@@ -37,7 +37,7 @@ plottarg = "/home/lab/csc-reu/yxp441/YashProto/PrototypeEvaluation_ResNet18_CIFA
 dir_suffix = args.model_dir
 
 model_dir = os.path.join(targ, dir_suffix)
-full_dir_plot = os.path.join(plottarg, dir_suffix)
+full_dir_plot = plottarg
 saved_model_path = os.path.join(model_dir,'../Trained_Model.pt')
 saved_protos_path = os.path.join(model_dir,'../Saved_Protos.pt')
 
