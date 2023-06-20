@@ -209,6 +209,7 @@ def main():
 
                             proto_boundaries.append(boundary.clone())
                             proto_alphas.append(adj_alpha)
+                            break
                         else:
                             prev = tester
                             assert alpha != 20
