@@ -185,8 +185,8 @@ def main():
                     for alpha in range(1,20):
                         adj_alpha = alpha * 0.05
                         tester = torch.zeros(*(list(start_image.shape)))
-                        tester = torch.sum(tester, start_image, alpha = (1-adj_alpha))
-                        tester = torch.sum(tester, target_class_image, alpha = adj_alpha)
+                        tester = torch.add(tester, start_image, alpha = (1-adj_alpha))
+                        tester = torch.add(tester, target_class_image, alpha = adj_alpha)
                         print(f"tester-size{tester.shape}")
 
 
