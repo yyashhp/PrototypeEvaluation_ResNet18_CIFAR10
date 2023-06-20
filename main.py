@@ -27,7 +27,7 @@ from statistics import mean
 
 parser = argparse.ArgumentParser(description="CIFAR10 Training")
 parser.add_argument('--lr', type=float, default = 0.1, metavar='LR', help='learning rate')
-parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed(default: 1')
+parser.add_argument('--seed', type=int, default=42, metavar='S', help='random seed(default: 1')
 parser.add_argument('--beta', default=0.1, type=float, help='loss weight for proximity')
 parser.add_argument('--norm-type', default='batch', help='batch,layer, or instance')
 parser.add_argument('--par-grad-mult', default=10.0, type=float, help='boost image gradients if desired')
@@ -126,7 +126,7 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
     print ("training images against one hot encodings")
     model.eval()
 
-    for batch_idx in range(20):
+    for batch_idx in range(100):
         _par_images_opt = par_images.clone().detach().requires_grad_(True).to(device)
 
         _par_images_opt_norm = transformDict['norm'](_par_images_opt)
@@ -144,7 +144,7 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
             #    if gradd == 0:
             #        grad_mag[grad] = torch.mean(grad_mag)
             print(f"Grad_Mag:{grad_mag}")
-            image_grads = 0.1 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
+            image_grads = 0.01 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
            # image_gradients = torch.nan_to_num(image_grads)
             #print(f"Printing image gradients here: {image_gradients}")
             if torch.mean(loss) > 1e-7:
@@ -180,6 +180,7 @@ def train(model, device, optimizer, criterion, cur_loader, epoch, max_steps, sch
         p, outputs = model(inputs_norm)
         loss = criterion(outputs, targets)
         loss.backward()
+        nn.utils.clip_grad_value_(model.parameters(), clip_value=0.5)
         optimizer.step()
 
         train_loss += loss.item()
@@ -222,9 +223,11 @@ def main():
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
 
-    MEAN = [0.4914, 0.4822, 0.4465]
-    STD = [0.2471, 0.2435, 0.2616]
-
+    #MEAN = [0.4914, 0.4822, 0.4465]
+    #STD = [0.2471, 0.2435, 0.2616]
+    MEAN = [0.5] * 3
+    STD = [0.5] * 3
+    data_schedule = [0.25, 0.4, 0.6, 0.7, 0.8, 0.9, 1.0]
     train_transform = transforms.Compose([transforms.ToTensor(),
                                           transforms.RandomHorizontalFlip(),
                                           transforms.RandomCrop(32, padding=4)])
@@ -309,7 +312,6 @@ def main():
             par_image_tensors.append(par_images_metric.clone())
     model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
     for j in range(len(splits)):
-        split_test_accs = []
         subtrain = torch.utils.data.Subset(trainset, splits[j])
         print(f"Length of subtrain: {len(subtrain)}")
 
@@ -335,8 +337,10 @@ def main():
 
         lr_init = args.lr
         print(f"Learning rate: {lr_init}")
-
-        optimizer = optim.SGD(model.parameters(), lr = lr_init, momentum=args.momentum, weight_decay=args.weight_decay, nesterov=True)
+        if j == 0:
+            optimizer = optim.SGD(model.parameters(), lr = 0.1, momentum=args.momentum, weight_decay=args.weight_decay, nesterov=True)
+        else:
+            optimizer = optim.SGD(model.parameters(), lr = 0.05, momentum=args.momentum, weight_decay=args.weight_decay, nesterov=True)
 
         steps_per_epoch = int(np.ceil(len(train_loader.dataset) / args.batch_size))
 
@@ -355,36 +359,35 @@ def main():
             print('================================================================')
             loss_train, acc_train = eval_train(model, device, train_loader, transformDict)
             loss_test, acc_test = eval_test(model, device, test_loader, transformDict)
-            split_test_accs.append(acc_test)
 
             with open('{}/train_hist_{}.txt'.format(model_dir, date_time), 'a') as f:
                 f.write("{0:4.3f}\t{1:4.3f}\t{2:4.0f}\t{3:4.3f}\t{4:6.5f}\n".format(acc_train,acc_test,len(train_loader.dataset),loss_train,loss_test))
             f.close()
-        test_accs.append(mean(split_test_accs))
+            if epoch == args.epochs:
+                test_accs.append(acc_test)
 
 #Saving trained model
+        torch.save(model.state_dict(), f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_Data_{date_time}")
         model.multi_out = 1
         model.eval()
         for p in model.parameters():
             p.requires_grad = False
 #Freezing model for protos
         for run in range(args.total_runs):
-            for epoch in range(1, int((args.epochs + 1)/4)):
-                last_loss, preds, probs = train_image_no_data(args,
+            last_loss, preds, probs = train_image_no_data(args,
                                                               model = model,
                                                               device = device,
                                                               epoch = epoch,
                                                               par_images=par_image_tensors[run],
                                                               targets = par_targets,
                                                               transformDict=transformDict)
-                if run == args.total_runs-1 and epoch == int((args.epochs+1)/4) - 2:
-                    with open('{}/Final_Proto_Preds_And_Probs_{}.txt'.format(model_dir, date_time), 'a') as f:
-                        f.write("\n")
-                        f.write(
-                            "Final Preds : {}, \n Final Probs {}  ".format(
-                                preds, probs))
-                        f.write("\n")
-                    f.close()
+        with open('{}/Final_Proto_Preds_And_Probs_{}.txt'.format(model_dir, date_time), 'a') as f:
+            f.write("\n")
+            f.write(
+                "Final Preds : {}, \n Final Probs {}  ".format(
+                    preds, probs))
+            f.write("\n")
+        f.close()
         # Protos are trained here^
 
         saved_protos.append(par_image_tensors)
@@ -475,7 +478,6 @@ def main():
             f.write("\n")
             f.write(f"Split {j} L2_diff latent overall mean: {L2_cum_latent_mean}")
         f.close()
-    data_schedule = [0.25, 0.4, 0.6, 0.7, 0.8, 0.9, 1.0]
 
 
     with open('{}/final_data_summary_{}.txt'.format(model_dir, date_time), 'a') as f:
@@ -483,10 +485,11 @@ def main():
         for i in range(len(data_schedule)):
             f.write("{0:4.4f} \t {1:4.4f}\t {2:4.4f}\t {3:4.4f}\t {4:4.4f}\t {5:4.4f}\t {6:4.4f} \n".format(data_schedule[i], test_accs[i], CS_means[i],L2_cum_latent_means[i], L2_cum_image_means[i],CS_adv_image[i], CS_adv_latent[i]))
     f.close()
+    for i in range(len(data_schedule)):
+        torch.save(saved_protos[i], f"{saved_protos_path}/{i}_Saved_Protos_with_{data_schedule[i]}_trainedProtos{date_time}")
 
-
-    torch.save(model.state_dict(), f"{saved_model_path}/Saved_Model_{date_time}")
-    torch.save(par_image_tensors, f"{saved_protos_path}/Saved_Protos_{date_time}")
+    torch.save(model.state_dict(), f"{saved_model_path}/Final_Saved_Model_{date_time}")
+    torch.save(par_image_tensors, f"{saved_protos_path}/Final_Saved_Protos_{date_time}")
 
 
 

@@ -114,7 +114,6 @@ def main():
             f"Each Protos CS_Diff_Mean, {cos_mat_mean.clone()} \t Overall CS_Diff_Mean {CS_mean.clone()}")
         f.write("\n")
     f.close()
-    print(f"Stacked matrices: {torch.stack(cos_matrices, dim=0)}")
     print(f"CS_DIFF_MEAN: {CS_mean}")
 
     L2_latent_means = []
