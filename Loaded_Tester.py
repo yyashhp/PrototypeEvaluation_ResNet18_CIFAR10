@@ -191,9 +191,9 @@ def main():
                         with torch.no_grad():
                             tester_norm = transformDict['norm'](tester)
                             latent_tester, logits_tester = model(tester_norm)
-                            preds = logits_tester.max(1,keepdim=True)[1]
-                            probs = F.softmax(logits_tester)
-                            print(F"Pred {preds} with alpha {adj_alpha}")
+                            preds_tester = logits_tester.max(1,keepdim=True)[1]
+                            probs_tester = F.softmax(logits_tester)
+                            print(F"Pred {preds_tester} with alpha {adj_alpha}")
 
 
 
