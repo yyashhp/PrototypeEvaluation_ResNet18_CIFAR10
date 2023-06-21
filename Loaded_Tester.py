@@ -232,15 +232,15 @@ def main():
     print(f"Final average alphas list: {final_alphas}\n")
 
     Boundary_L2_Diffs = []
-    proto_index = 0
-    for proto in par_image_tensors:
-        proto_clone = proto.clone()
-        Batch_Boundary_Diffs = torch.zeros(nclass, nclass, dtype=torch.float)
-        for i in range(nclass):
-            for j in range(nclass-1):
-                if i != j:
-                    Batch_Boundary_Diffs[i][j] = torch.linalg.norm((final_boundaries_avg[proto_index][i][j]-))
-
+    # proto_index = 0
+    # for proto in par_image_tensors:
+    #     proto_clone = proto.clone()
+    #     Batch_Boundary_Diffs = torch.zeros(nclass, nclass, dtype=torch.float)
+    #     for i in range(nclass):
+    #         for j in range(nclass-1):
+    #             if i != j:
+    #                 Batch_Boundary_Diffs[i][j] = torch.linalg.norm((final_boundaries_avg[proto_index][i][j])
+    #
 
 
 
