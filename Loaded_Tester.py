@@ -59,7 +59,7 @@ if not os.path.exists(saved_boundaries_path):
 
 
 use_cuda = not args.no_cuda and torch.cuda.is_available()
-device = 'cpu' if use_cuda else 'cpu'
+device = 'cuda' if use_cuda else 'cpu'
 
 torch.manual_seed(args.seed)
 
