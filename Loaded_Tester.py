@@ -235,6 +235,8 @@ def main():
     proto_index = 0
     for proto in par_image_tensors:
         proto_clone = proto.clone()
+        print(f"Proto clone shape\t {proto_clone[0].shape}\n")
+        print(f"Boundary shape\t {final_boundaries_avg[0][2][5].shape}\n")
         Batch_Boundary_Diffs = torch.zeros(nclass, nclass, dtype=torch.float)
         for i in range(nclass):
             for j in range(nclass):
