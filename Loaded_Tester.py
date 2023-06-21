@@ -347,7 +347,7 @@ def main():
         for i in range(nclass):
             trained_boundaries = []
             latents_boundaries = []
-            target_proto = torch.tensor([i])
+            target_proto = torch.tensor([i], device= device)
             for j in range(nclass):
                 if i!=j:
                     epoch = 1
