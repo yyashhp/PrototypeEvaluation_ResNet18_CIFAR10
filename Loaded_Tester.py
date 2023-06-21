@@ -356,12 +356,13 @@ def main():
                                                                   epoch=epoch, par_images=start_proto,
                                                               targets=target_proto, transformDict=transformDict)
                     print(f"Preds after {j} goes to {i}: {preds}\n")
+                    start_proto = torch.squeeze(start_proto, dim=0)
                     trained_boundaries.append(start_proto)
                     model.eval()
                     with torch.no_grad():
                         norm_trained_boundary = transformDict['norm'](start_proto.clone())
                         boundary_latent, boundary_logits = model(norm_trained_boundary)
-                    print(f"Boundary latent shape: {boundary_latent.shape}")
+                    print(f"Boundary  shape: {start_proto.shape}")
                     latents_boundaries.append(torch.squeeze(boundary_latent, dim=0))
             set_trained_boundaries.append(torch.stack(trained_boundaries, dim=0))
         stacked_sets_trained_boundaries.append(torch.stack(set_trained_boundaries, dim=0))
