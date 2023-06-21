@@ -315,7 +315,7 @@ def main():
         subtrain = torch.utils.data.Subset(trainset, splits[j])
         print(f"Length of subtrain: {len(subtrain)}")
 
-        train_loader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size, shuffle=True, **kwargs)
+        train_loader = torch.utils.data.DataLoader(subtrain, batch_size=args.batch_size, shuffle=True, **kwargs)
 
         test_loader = torch.utils.data.DataLoader(testset, batch_size=args.test_batch_size, shuffle=False, **kwargs)
 
