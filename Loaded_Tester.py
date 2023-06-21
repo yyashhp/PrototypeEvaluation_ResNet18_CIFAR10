@@ -351,7 +351,7 @@ def main():
             for j in range(nclass):
                 if i!=j:
                     epoch = 1
-                    start_proto = proto_clone[j]
+                    start_proto = torch.unsqueeze(proto_clone[j])
                     last_loss, preds, probs = train_image_no_data(args, model=model, device=device,
                                                                   epoch=epoch, par_images=start_proto,
                                                               targets=target_proto, transformDict=transformDict)
@@ -362,7 +362,7 @@ def main():
                         norm_trained_boundary = transformDict['norm'](start_proto.clone())
                         boundary_latent, boundary_logits = model(norm_trained_boundary)
                     print(f"Boundary latent shape: {boundary_latent.shape}")
-                    latents_boundaries.append(torch.unsqueeze(boundary_latent, dim=0))
+                    latents_boundaries.append(torch.squeeze(boundary_latent, dim=0))
             set_trained_boundaries.append(torch.stack(trained_boundaries, dim=0))
         stacked_sets_trained_boundaries.append(torch.stack(set_trained_boundaries, dim=0))
 
