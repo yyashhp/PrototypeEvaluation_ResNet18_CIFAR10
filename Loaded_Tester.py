@@ -68,6 +68,68 @@ torch.cuda.empty_cache()
 
 print ("cuda: ", use_cuda)
 
+MEAN = [0.5] * 3
+STD = [0.5] * 3
+data_schedule = [0.25, 0.4, 0.6, 0.7, 0.8, 0.9, 1.0]
+train_transform = transforms.Compose([transforms.ToTensor(),
+                                      transforms.RandomHorizontalFlip(),
+                                      transforms.RandomCrop(32, padding=4)])
+train_transform_tensor = transforms.Compose([transforms.RandomHorizontalFlip(),
+                                             transforms.RandomCrop(32, padding=4)])
+gen_transform_test = transforms.Compose([transforms.ToTensor()])
+transformDict = {}
+
+transformDict['basic'] = train_transform
+transformDict['flipcrop'] = train_transform_tensor
+transformDict['norm'] = transforms.Compose([transforms.Normalize(MEAN, STD)])
+transformDict['mean'] = MEAN
+transformDict['std'] = STD
+
+
+def train_image_no_data(args, model, device, epoch, par_images, targets, transformDict):
+    print ("training images against one hot encodings")
+    model.eval()
+
+    for batch_idx in range(100):
+        _par_images_opt = par_images.clone().detach().requires_grad_(True).to(device)
+
+        _par_images_opt_norm = transformDict['norm'](_par_images_opt)
+
+        L2_img, logits_img = model(_par_images_opt_norm)
+
+        loss = F.cross_entropy(logits_img, targets, reduction='none')
+        loss.backward(gradient=torch.ones_like(loss))
+
+        with torch.no_grad():
+            gradients_unscaled = _par_images_opt.grad.clone()
+            grad_mag = gradients_unscaled.view(gradients_unscaled.shape[0], -1).norm(2, dim=-1)
+            #for grad in range(len(grad_mag)):
+            #    gradd = grad_mag[grad]
+            #    if gradd == 0:
+            #        grad_mag[grad] = torch.mean(grad_mag)
+            #print(f"Grad_Mag:{grad_mag}")
+            image_grads = 0.1 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
+           # image_gradients = torch.nan_to_num(image_grads)
+            #print(f"Printing image gradients here: {image_gradients}")
+            if torch.mean(loss) > 1e-7:
+                par_images.add_(-image_grads)
+            par_images.clamp_(0.0, 1.0)
+
+            _par_images_opt.grad.zero_()
+    if batch_idx % args.log_interval == 0:
+        print('Train Epoch: {}\t BatchID: {}\t Loss {:.6f}'.format(epoch, batch_idx, torch.mean(loss).item()))
+
+    with torch.no_grad():
+        _par_images_final = par_images.clone().detach().requires_grad_(False).to(device)
+        _par_images_final_norm = transformDict['norm'](_par_images_final)
+        L2_img, logits_img = model(_par_images_final_norm)
+        pred = logits_img.max(1, keepdim=True)[1]
+        probs = F.softmax(logits_img)
+
+    return loss, pred, probs
+
+
+
 
 def main():
     torch.manual_seed(args.seed)
@@ -173,108 +235,136 @@ def main():
     #     f.write("\n")
     #     f.write(f"L2_diff latent overall mean: {L2_cum_latent_mean.clone()} \t CS_diff latent overall mean {CS_adv_latent.clone()}")
     # f.close()
-    final_boundaries_list = []
-    final_alphas_list = []
-    for proto in par_image_tensors:
-        alphas_list = []
-        boundaries_list = []
-        proto_copy = proto.clone()
-        with torch.no_grad():
-            proto_copy_norm = transformDict['norm'](proto_copy)
-            latent_proto, logits_proto = model(proto_copy_norm)
-            preds = logits_proto.max(1, keepdim=True)[1]
-            probs = F.softmax(logits_proto)
-        for i in range(len(proto)):
-            proto_boundaries = []
-            proto_alphas = []
-            for j in range(len(proto)):
-                if i == j:
-                    proto_boundaries.append(torch.zeros(1,3,32,32))
-                elif i != j:
-                    start_pred = preds[j]
-                    end_pred = preds[i]
-                    start_probs = probs[j]
-                    end_probs = probs[i]
-                    start_image = proto_copy[j].clone().detach().requires_grad_(False).to(device)
-                    start_image = torch.unsqueeze(start_image, dim=0)
-                    target_class_image = proto_copy[i].clone().detach().requires_grad_(False).to(device)
-                    target_class_image = torch.unsqueeze(target_class_image, dim=0)
-                    print(f"Starting Pred: {start_pred}")
-                    prev = start_image
-                    for alpha in range(1,20):
-                        adj_alpha = alpha * 0.05
-                        tester = torch.zeros(*(list(start_image.shape)))
-                        tester = torch.add(tester, start_image, alpha = (1-adj_alpha))
-                        tester = torch.add(tester, target_class_image, alpha = adj_alpha)
-                        with torch.no_grad():
-                            tester_norm = transformDict['norm'](tester)
-                            latent_tester, logits_tester = model(tester_norm)
-                            preds_tester = logits_tester.max(1,keepdim=True)[1]
-                            probs_tester = F.softmax(logits_tester)
-                        if preds_tester == end_pred:
-                            boundary = torch.zeros(*(list(tester.shape)))
-                            boundary = torch.add(boundary, prev, alpha = 0.5)
-                            boundary = torch.add(boundary, tester, alpha = 0.5)
-                            print(f"Boundary Shape: {boundary.shape}\n")
-                        #    print(f"Alpha needed: {adj_alpha}\n")
-                            print(f"Boundary shape needed to go from proto {j} to proto {i} is {(1-adj_alpha)*100} percent proto {j} and {adj_alpha*100} percent proto {i} \n")
-
-                            proto_boundaries.append(boundary.clone())
-                            proto_alphas.append(adj_alpha)
-                            break
-                        else:
-                            prev = tester
-                            assert alpha != 20
-            boundaries_list.append(torch.stack(proto_boundaries, dim=0))
-            alphas_list.append(proto_alphas)
-        final_boundaries_list.append(torch.stack(boundaries_list, dim=0))
-        final_alphas_list.append(alphas_list)
-    final_boundaries_avg = torch.stack(final_boundaries_list, dim=0)
-    final_alphas = []
-    for i in range(nclass):
-        final_alphas.append(mean([mean(final_alphas_list[0][i]), mean(final_alphas_list[1][i]), mean(final_alphas_list[2][i]), mean(final_alphas_list[3][i]), mean(final_alphas_list[4][i])]))
-    final_alphas =  [int(elem) for elem in final_alphas ]
-    with open('{}/Final_Alphas_{}.txt'.format(saved_boundaries_path, date_time), 'a') as f:
-        f.write("\n")
-        f.write(
-            f"Final Average Alphas (Boundary image is that percent of the respective prototype(first index) : {final_alphas}\n ")
-        f.write("\n")
-    f.close()
-    final_boundaries_avg = torch.squeeze(final_boundaries_avg)
-    final_comb_boundaries_avg = torch.mean(final_boundaries_avg, dim=0)
-    final_comb_boundaries_avg = torch.squeeze(final_comb_boundaries_avg)
-    print(f"Final average alphas list: {final_alphas}\n")
-    torch.save(final_comb_boundaries_avg, f"{saved_boundaries_path}/Final_Combined_Boundaries_{date_time}.pt")
-
-    Boundary_L2_Diffs = []
-    proto_index = 0
+    # final_boundaries_list = []
+    # final_alphas_list = []
+    # for proto in par_image_tensors:
+    #     alphas_list = []
+    #     boundaries_list = []
+    #     proto_copy = proto.clone()
+    #     with torch.no_grad():
+    #         proto_copy_norm = transformDict['norm'](proto_copy)
+    #         latent_proto, logits_proto = model(proto_copy_norm)
+    #         preds = logits_proto.max(1, keepdim=True)[1]
+    #         probs = F.softmax(logits_proto)
+    #     for i in range(len(proto)):
+    #         proto_boundaries = []
+    #         proto_alphas = []
+    #         for j in range(len(proto)):
+    #             if i == j:
+    #                 proto_boundaries.append(torch.zeros(1,3,32,32))
+    #             elif i != j:
+    #                 start_pred = preds[j]
+    #                 end_pred = preds[i]
+    #                 start_probs = probs[j]
+    #                 end_probs = probs[i]
+    #                 start_image = proto_copy[j].clone().detach().requires_grad_(False).to(device)
+    #                 start_image = torch.unsqueeze(start_image, dim=0)
+    #                 target_class_image = proto_copy[i].clone().detach().requires_grad_(False).to(device)
+    #                 target_class_image = torch.unsqueeze(target_class_image, dim=0)
+    #                 print(f"Starting Pred: {start_pred}")
+    #                 prev = start_image
+    #                 for alpha in range(1,20):
+    #                     adj_alpha = alpha * 0.05
+    #                     tester = torch.zeros(*(list(start_image.shape)))
+    #                     tester = torch.add(tester, start_image, alpha = (1-adj_alpha))
+    #                     tester = torch.add(tester, target_class_image, alpha = adj_alpha)
+    #                     with torch.no_grad():
+    #                         tester_norm = transformDict['norm'](tester)
+    #                         latent_tester, logits_tester = model(tester_norm)
+    #                         preds_tester = logits_tester.max(1,keepdim=True)[1]
+    #                         probs_tester = F.softmax(logits_tester)
+    #                     if preds_tester == end_pred:
+    #                         boundary = torch.zeros(*(list(tester.shape)))
+    #                         boundary = torch.add(boundary, prev, alpha = 0.5)
+    #                         boundary = torch.add(boundary, tester, alpha = 0.5)
+    #                         print(f"Boundary Shape: {boundary.shape}\n")
+    #                     #    print(f"Alpha needed: {adj_alpha}\n")
+    #                         print(f"Boundary shape needed to go from proto {j} to proto {i} is {(1-adj_alpha)*100} percent proto {j} and {adj_alpha*100} percent proto {i} \n")
+    #
+    #                         proto_boundaries.append(boundary.clone())
+    #                         proto_alphas.append(adj_alpha)
+    #                         break
+    #                     else:
+    #                         prev = tester
+    #                         assert alpha != 20
+    #         boundaries_list.append(torch.stack(proto_boundaries, dim=0))
+    #         alphas_list.append(proto_alphas)
+    #     final_boundaries_list.append(torch.stack(boundaries_list, dim=0))
+    #     final_alphas_list.append(alphas_list)
+    # final_boundaries_avg = torch.stack(final_boundaries_list, dim=0)
+    # final_alphas = []
+    # for i in range(nclass):
+    #     final_alphas.append(mean([mean(final_alphas_list[0][i]), mean(final_alphas_list[1][i]), mean(final_alphas_list[2][i]), mean(final_alphas_list[3][i]), mean(final_alphas_list[4][i])]))
+    # final_alphas =  [int(elem) for elem in final_alphas ]
+    # with open('{}/Final_Alphas_{}.txt'.format(saved_boundaries_path, date_time), 'a') as f:
+    #     f.write("\n")
+    #     f.write(
+    #         f"Final Average Alphas (Boundary image is that percent of the respective prototype(first index) : {final_alphas}\n ")
+    #     f.write("\n")
+    # f.close()
+    # final_boundaries_avg = torch.squeeze(final_boundaries_avg)
+    # final_comb_boundaries_avg = torch.mean(final_boundaries_avg, dim=0)
+    # final_comb_boundaries_avg = torch.squeeze(final_comb_boundaries_avg)
+    # print(f"Final average alphas list: {final_alphas}\n")
+    # torch.save(final_comb_boundaries_avg, f"{saved_boundaries_path}/Final_Combined_Linewise_Boundaries_{date_time}.pt")
+    #
+    # Boundary_L2_Diffs = []
+    # proto_index = 0
+    # for proto in par_image_tensors:
+    #     proto_clone = proto.clone()
+    #     #print(f"Proto clone shape\t {proto_clone[0].shape}\n")
+    #    # print(f"Boundary shape\t {final_boundaries_avg[0][2][5].shape}\n")
+    #     Batch_Boundary_Diffs = torch.zeros(nclass, nclass, dtype=torch.float)
+    #     for i in range(nclass):
+    #         for j in range(nclass):
+    #             if i != j:
+    #                 boundary_reshaped = torch.reshape(final_boundaries_avg[proto_index][i][j].clone(), (3, 1024))
+    #                 proto_reshaped = torch.reshape(proto_clone[i], (3, 1024))
+    #                 Batch_Boundary_Diffs[i][j] = torch.mean(torch.linalg.matrix_norm(boundary_reshaped-proto_reshaped))
+    #                 print(f"L2 Diff in batch {proto_index} between proto {i} and boundary with {j} is {Batch_Boundary_Diffs[i][j]} \n")
+    #     Boundary_L2_Diffs.append(Batch_Boundary_Diffs.clone())
+    #     proto_index+=1
+    # L2_diff_std, L2_diff_mean = torch.std_mean(torch.stack(Boundary_L2_Diffs, dim=0), dim=0)
+    # tot_L2_diff_mean = torch.mean(L2_diff_mean.clone(), dim=0)
+    # print(f"Array of average L2_diff per class WRT each boundary: {L2_diff_mean}\n")
+    # print(f"Cumulative mean of L2 per proto: {tot_L2_diff_mean}")
+    # print(f"Cumulative mean of L2 overall: {torch.mean(tot_L2_diff_mean)}")
+    # with open('{}/Final_Linewise_Boundary_L2_{}.txt'.format(saved_boundaries_path, date_time), 'a') as f:
+    #     f.write("\n")
+    #     f.write(
+    #         f"Array of average L2_diff per class WRT each boundary: {L2_diff_mean}\n \
+    #         Cumulative mean of L2 per proto: {tot_L2_diff_mean} \
+    #         Cumulative mean of L2 overall: {torch.mean(tot_L2_diff_mean)}")
+    #     f.write("\n")
+    # f.close()
+    model.multi_out = 1
+    stacked_sets_trained_boundaries = []
+    stacked_sets_latent_boundaries = []
     for proto in par_image_tensors:
         proto_clone = proto.clone()
-        #print(f"Proto clone shape\t {proto_clone[0].shape}\n")
-       # print(f"Boundary shape\t {final_boundaries_avg[0][2][5].shape}\n")
-        Batch_Boundary_Diffs = torch.zeros(nclass, nclass, dtype=torch.float)
+        set_trained_boundaries = []
+        set_latent_boundaries = []
         for i in range(nclass):
+            trained_boundaries = []
+            latents_boundaries = []
+            target_proto = i
             for j in range(nclass):
-                if i != j:
-                    boundary_reshaped = torch.reshape(final_boundaries_avg[proto_index][i][j].clone(), (3, 1024))
-                    proto_reshaped = torch.reshape(proto_clone[i], (3, 1024))
-                    Batch_Boundary_Diffs[i][j] = torch.mean(torch.linalg.matrix_norm(boundary_reshaped-proto_reshaped))
-                    print(f"L2 Diff in batch {proto_index} between proto {i} and boundary with {j} is {Batch_Boundary_Diffs[i][j]} \n")
-        Boundary_L2_Diffs.append(Batch_Boundary_Diffs.clone())
-        proto_index+=1
-    L2_diff_std, L2_diff_mean = torch.std_mean(torch.stack(Boundary_L2_Diffs, dim=0), dim=0)
-    tot_L2_diff_mean = torch.mean(L2_diff_mean.clone(), dim=0)
-    print(f"Array of average L2_diff per class WRT each boundary: {L2_diff_mean}\n")
-    print(f"Cumulative mean of L2 per proto: {tot_L2_diff_mean}")
-    print(f"Cumulative mean of L2 overall: {torch.mean(tot_L2_diff_mean)}")
-    with open('{}/Final_Boundary_L2_{}.txt'.format(saved_boundaries_path, date_time), 'a') as f:
-        f.write("\n")
-        f.write(
-            f"Array of average L2_diff per class WRT each boundary: {L2_diff_mean}\n \
-            Cumulative mean of L2 per proto: {tot_L2_diff_mean} \
-            Cumulative mean of L2 overall: {torch.mean(tot_L2_diff_mean)}")
-        f.write("\n")
-    f.close()
+                if i!=j:
+                    epoch = 1
+                    start_proto = proto_clone[j]
+                    last_loss, preds, probs = train_image_no_data(args, model=model, device=device,
+                                                                  epoch=epoch, par_images=start_proto,
+                                                              targets=target_proto, transformDict=transformDict)
+                    print(f"Preds after {j} goes to {i}: {preds}\n")
+                    trained_boundaries.append(start_proto)
+                    model.eval()
+                    with torch.no_grad():
+                        norm_trained_boundary = transformDict['norm'](start_proto.clone())
+                        boundary_latent, boundary_logits = model(norm_trained_boundary)
+                    print(f"Boundary latent shape: {boundary_latent.shape}")
+                    latents_boundaries.append(torch.unsqueeze(boundary_latent, dim=0))
+            set_trained_boundaries.append(torch.stack(trained_boundaries, dim=0))
+        stacked_sets_trained_boundaries.append(torch.stack(set_trained_boundaries, dim=0))
 
 
 
