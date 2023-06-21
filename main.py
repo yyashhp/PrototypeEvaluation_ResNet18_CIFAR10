@@ -144,7 +144,7 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
             #    if gradd == 0:
             #        grad_mag[grad] = torch.mean(grad_mag)
             #print(f"Grad_Mag:{grad_mag}")
-            image_grads = 0.1 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
+            image_grads = 0.01 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
            # image_gradients = torch.nan_to_num(image_grads)
             #print(f"Printing image gradients here: {image_gradients}")
             if torch.mean(loss) > 1e-7:
@@ -477,14 +477,19 @@ def main():
         CS_adv_latent.append(CS_latent_mean.clone())
         with open('{}/Adv_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
             f.write("\n")
-            f.write(f"Split {j} L2_diff latent overall mean: {L2_cum_latent_mean}")
+            f.write(f"Split {j} \t L2_diff latent overall mean: {L2_cum_latent_mean}\t \
+            CS_diff latent overal mean: {CS_latent_mean}\n")
         f.close()
 
-
     with open('{}/final_data_summary_{}.txt'.format(model_dir, date_time), 'a') as f:
-        f.write("Data \t Test Acc  \t CS_norm metric \t L2 adversarial latent means \t L2 adversarial image means \t CS adversarial image means \t CS adversarial latent means  \n")
+        f.write("Data \t Test Acc  \t CS_norm metric \t L2 adversarial latent means \
+        \t L2 adversarial image means \t CS adversarial image means\
+         \t CS adversarial latent means  \n")
         for i in range(len(data_schedule)):
-            f.write("{0:4.4f} \t {1:4.4f}\t {2:4.4f}\t {3:4.4f}\t {4:4.4f}\t {5:4.4f}\t {6:4.4f} \n".format(data_schedule[i], test_accs[i], CS_means[i],L2_cum_latent_means[i], L2_cum_image_means[i],CS_adv_image[i], CS_adv_latent[i]))
+            f.write("{0:4.4f} \t {1:4.4f}\t {2:4.4f}\t {3:4.4f}\t {4:4.4f}\t {5:4.4f}\t\
+             {6:4.4f} \n".format(data_schedule[i], test_accs[i], CS_means[i]
+                                 ,L2_cum_latent_means[i], L2_cum_image_means[i]
+                                ,CS_adv_image[i], CS_adv_latent[i]))
     f.close()
     for i in range(len(data_schedule)):
         torch.save(saved_protos[i], f"{saved_protos_path}/{i}_Saved_Protos_with_{data_schedule[i]}_trainedProtos{date_time}")
