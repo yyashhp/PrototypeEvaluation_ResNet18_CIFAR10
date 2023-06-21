@@ -221,11 +221,16 @@ def main():
     final_alphas = []
     for i in range(nclass):
         final_alphas.append(mean([mean(final_alphas_list[0][i]), mean(final_alphas_list[1][i]), mean(final_alphas_list[2][i]), mean(final_alphas_list[3][i]), mean(final_alphas_list[4][i])]))
-
-    final_boundaries_avg = torch.mean(final_boundaries_avg, dim=0)
     final_boundaries_avg = torch.squeeze(final_boundaries_avg)
-    print(f"shape of Final average boundaries tensor: {final_boundaries_avg.shape}\n")
+    final_comb_boundaries_avg = torch.mean(final_boundaries_avg, dim=0)
+    final_comb_boundaries_avg = torch.squeeze(final_comb_boundaries_avg)
+    print(f"shape of Final combined average boundaries tensor: {final_comb_boundaries_avg.shape}\n")
+    print(f"shape of Final batches average boundaries tensor: {final_boundaries_avg.shape}\n")
+
     print(f"Final average alphas list: {final_alphas}\n")
+
+    Boundary_L2_Diffs = torch.zeros(nclass, nclass, dtype=torch.float)
+
 
 
 
