@@ -234,7 +234,7 @@ def main():
     for i in range(nclass):
         final_alphas.append(mean([mean(final_alphas_list[0][i]), mean(final_alphas_list[1][i]), mean(final_alphas_list[2][i]), mean(final_alphas_list[3][i]), mean(final_alphas_list[4][i])]))
     final_alphas =  [int(elem) for elem in final_alphas ]
-    with open('{}/Final_Alphas_{}.txt'.format(model_dir, date_time), 'a') as f:
+    with open('{}/Final_Alphas_{}.txt'.format(saved_boundaries_path, date_time), 'a') as f:
         f.write("\n")
         f.write(
             f"Final Average Alphas (Boundary image is that percent of the respective prototype(first index) : {final_alphas}\n ")
@@ -267,7 +267,14 @@ def main():
     print(f"Array of average L2_diff per class WRT each boundary: {L2_diff_mean}\n")
     print(f"Cumulative mean of L2 per proto: {tot_L2_diff_mean}")
     print(f"Cumulative mean of L2 overall: {torch.mean(tot_L2_diff_mean)}")
-
+    with open('{}/Final_Boundary_L2_{}.txt'.format(saved_boundaries_path, date_time), 'a') as f:
+        f.write("\n")
+        f.write(
+            f"Array of average L2_diff per class WRT each boundary: {L2_diff_mean}\n \
+            Cumulative mean of L2 per proto: {tot_L2_diff_mean} \
+            Cumulative mean of L2 overall: {torch.mean(tot_L2_diff_mean)}")
+        f.write("\n")
+    f.close()
 
 
 
