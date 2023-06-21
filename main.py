@@ -374,7 +374,7 @@ def main():
             p.requires_grad = False
 #Freezing model for protos
         for run in range(args.total_runs):
-            for epoch in range(args.epochs+1):
+            for epoch in range(int(args.epochs/4)):
                 last_loss, preds, probs = train_image_no_data(args,
                                                               model = model,
                                                               device = device,
@@ -415,7 +415,7 @@ def main():
         with open('{}/CS_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
             f.write("\n")
             f.write(
-                f"Training split: {j}, \t Each Protos CS_Diff_Mean, {cos_mat_mean.clone()} \t Overall CS_Diff_Mean CS_diff_mean {torch.mean(cos_mat_mean.clone())}")
+                f"Training split: {j}, \t Each Protos CS_Diff_Mean, {cos_mat_mean.clone()} \t Overall CS_Diff_Mean CS_diff_mean {(torch.sum(cos_mat_mean.clone()))/((nclass * nclass)-nclass)}")
             f.write("\n")
         f.close()
 
