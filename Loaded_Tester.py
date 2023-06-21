@@ -179,7 +179,7 @@ def main():
             proto_alphas = []
             for j in range(len(proto)):
                 if i == j:
-                    proto_boundaries.append(torch.zeros(3,32,32))
+                    proto_boundaries.append(torch.zeros(1,3,32,32))
                 elif i != j:
                     start_pred = preds[j]
                     end_pred = preds[i]
