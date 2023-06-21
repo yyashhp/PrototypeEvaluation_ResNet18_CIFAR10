@@ -369,8 +369,8 @@ def main():
             set_latent_boundaries.append(torch.stack(latents_boundaries, dim=0))
         stacked_sets_trained_boundaries.append(torch.stack(set_trained_boundaries, dim=0))
         stacked_sets_latent_boundaries.append(torch.stack(set_latent_boundaries, dim=0))
-    combined_boundary_images = torch.mean(stacked_sets_trained_boundaries, dim=0)
-    combined_boundary_latent = torch.mean(stacked_sets_latent_boundaries, dim=0)
+    combined_boundary_images = torch.mean(torch.stack(stacked_sets_trained_boundaries,dim=0), dim=0)
+    combined_boundary_latent = torch.mean(torch.stack(stacked_sets_latent_boundaries, dim=0), dim=0)
     print(f"shape of combined_image and combined_latent: {combined_boundary_images.shape} /n {combined_boundary_latent.shape}")
 
 
