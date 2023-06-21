@@ -374,7 +374,8 @@ def main():
             p.requires_grad = False
 #Freezing model for protos
         for run in range(args.total_runs):
-            last_loss, preds, probs = train_image_no_data(args,
+            for epoch in range(args.epochs+1):
+                last_loss, preds, probs = train_image_no_data(args,
                                                               model = model,
                                                               device = device,
                                                               epoch = epoch,
