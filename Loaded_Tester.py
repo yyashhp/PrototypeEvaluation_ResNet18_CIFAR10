@@ -226,23 +226,26 @@ def main():
     final_boundaries_avg = torch.squeeze(final_boundaries_avg)
     final_comb_boundaries_avg = torch.mean(final_boundaries_avg, dim=0)
     final_comb_boundaries_avg = torch.squeeze(final_comb_boundaries_avg)
-    print(f"shape of Final combined average boundaries tensor: {final_comb_boundaries_avg.shape}\n")
-    print(f"shape of Final batches average boundaries tensor: {final_boundaries_avg.shape}\n")
+   # print(f"shape of Final combined average boundaries tensor: {final_comb_boundaries_avg.shape}\n")
+   # print(f"shape of Final batches average boundaries tensor: {final_boundaries_avg.shape}\n")
 
     print(f"Final average alphas list: {final_alphas}\n")
 
     Boundary_L2_Diffs = []
-    # proto_index = 0
-    # for proto in par_image_tensors:
-    #     proto_clone = proto.clone()
-    #     Batch_Boundary_Diffs = torch.zeros(nclass, nclass, dtype=torch.float)
-    #     for i in range(nclass):
-    #         for j in range(nclass-1):
-    #             if i != j:
-    #                 Batch_Boundary_Diffs[i][j] = torch.linalg.norm((final_boundaries_avg[proto_index][i][j])
-    #
-
-
+    proto_index = 0
+    for proto in par_image_tensors:
+        proto_clone = proto.clone()
+        Batch_Boundary_Diffs = torch.zeros(nclass, nclass, dtype=torch.float)
+        for i in range(nclass):
+            for j in range(nclass):
+                if i != j:
+                    Batch_Boundary_Diffs[i][j] = torch.linalg.norm((final_boundaries_avg[proto_index][i][j]-proto_clone[i]).view(nclass, -1), dim=1)
+        Boundary_L2_Diffs.append(Batch_Boundary_Diffs.clone())
+    L2_diff_std, L2_diff_mean = torch.std_mean(torch.stack(Boundary_L2_Diffs, dim=0), dim=0)
+    tot_L2_diff_mean = torch.mean(L2_diff_mean.clone(), dim=0)
+    print(f"Array of average L2_diff per class WRT each boundary: {L2_diff_mean}\n")
+    print(f"Cumulative mean of L2 per proto: {tot_L2_diff_mean}")
+    print(f"Cumulative mean of L2 overall: {torch.mean(tot_L2_diff_mean)}")
 
 
 
