@@ -48,6 +48,16 @@ if not os.path.exists(model_dir):
 if not os.path.exists(full_dir_plot):
     os.makedirs(full_dir_plot)
 
+if not os.path.exists(saved_model_path):
+    os.makedirs(saved_model_path)
+if not os.path.exists(saved_protos_path):
+    os.makedirs(saved_protos_path)
+
+saved_boundaries_path = os.path.join(model_dir,'../Boundary_Data')
+if not os.path.exists(saved_boundaries_path):
+    os.makedirs(saved_boundaries_path)
+
+
 use_cuda = not args.no_cuda and torch.cuda.is_available()
 device = 'cpu' if use_cuda else 'cpu'
 
@@ -223,13 +233,18 @@ def main():
     final_alphas = []
     for i in range(nclass):
         final_alphas.append(mean([mean(final_alphas_list[0][i]), mean(final_alphas_list[1][i]), mean(final_alphas_list[2][i]), mean(final_alphas_list[3][i]), mean(final_alphas_list[4][i])]))
+    final_alphas =  [int(elem) for elem in final_alphas ]
+    with open('{}/Final_Alphas_{}.txt'.format(model_dir, date_time), 'a') as f:
+        f.write("\n")
+        f.write(
+            f"Final Average Alphas (Boundary image is that percent of the respective prototype(first index) : {final_alphas}\n ")
+        f.write("\n")
+    f.close()
     final_boundaries_avg = torch.squeeze(final_boundaries_avg)
     final_comb_boundaries_avg = torch.mean(final_boundaries_avg, dim=0)
     final_comb_boundaries_avg = torch.squeeze(final_comb_boundaries_avg)
-   # print(f"shape of Final combined average boundaries tensor: {final_comb_boundaries_avg.shape}\n")
-   # print(f"shape of Final batches average boundaries tensor: {final_boundaries_avg.shape}\n")
-
-   # print(f"Final average alphas list: {final_alphas}\n")
+    print(f"Final average alphas list: {final_alphas}\n")
+    torch.save(final_comb_boundaries_avg, f"{saved_boundaries_path}/Final_Combined_Boundaries_{date_time}.pt")
 
     Boundary_L2_Diffs = []
     proto_index = 0
