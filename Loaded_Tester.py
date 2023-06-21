@@ -169,7 +169,7 @@ def main():
     #
     #     # compute cos similarity matrix
     #
-    #     cos_mat_latent_temp = torch.zeros(nclass, nclass, dtype=torch.float)
+    #     cos_mat_latent_temp = torch.zeros(nclass, nclass, dtype=torch.float, device = device)
     #     cos_sim = nn.CosineSimilarity(dim=0, eps=1e-6)
     #
     #     for i in range(len(latent_p)):
@@ -251,7 +251,7 @@ def main():
     #         proto_alphas = []
     #         for j in range(len(proto)):
     #             if i == j:
-    #                 proto_boundaries.append(torch.zeros(1,3,32,32))
+    #                 proto_boundaries.append(torch.zeros(1,3,32,32), device=device)
     #             elif i != j:
     #                 start_pred = preds[j]
     #                 end_pred = preds[i]
@@ -265,7 +265,7 @@ def main():
     #                 prev = start_image
     #                 for alpha in range(1,20):
     #                     adj_alpha = alpha * 0.05
-    #                     tester = torch.zeros(*(list(start_image.shape)))
+    #                     tester = torch.zeros(*(list(start_image.shape)), device=device)
     #                     tester = torch.add(tester, start_image, alpha = (1-adj_alpha))
     #                     tester = torch.add(tester, target_class_image, alpha = adj_alpha)
     #                     with torch.no_grad():
@@ -274,7 +274,7 @@ def main():
     #                         preds_tester = logits_tester.max(1,keepdim=True)[1]
     #                         probs_tester = F.softmax(logits_tester)
     #                     if preds_tester == end_pred:
-    #                         boundary = torch.zeros(*(list(tester.shape)))
+    #                         boundary = torch.zeros(*(list(tester.shape)), device=device)
     #                         boundary = torch.add(boundary, prev, alpha = 0.5)
     #                         boundary = torch.add(boundary, tester, alpha = 0.5)
     #                         print(f"Boundary Shape: {boundary.shape}\n")
@@ -314,7 +314,7 @@ def main():
     #     proto_clone = proto.clone()
     #     #print(f"Proto clone shape\t {proto_clone[0].shape}\n")
     #    # print(f"Boundary shape\t {final_boundaries_avg[0][2][5].shape}\n")
-    #     Batch_Boundary_Diffs = torch.zeros(nclass, nclass, dtype=torch.float)
+    #     Batch_Boundary_Diffs = torch.zeros(nclass, nclass, dtype=torch.float, device=device)
     #     for i in range(nclass):
     #         for j in range(nclass):
     #             if i != j:
@@ -349,6 +349,9 @@ def main():
             latents_boundaries = []
             target_proto = torch.tensor([i], device= device)
             for j in range(nclass):
+                if i == j:
+                    trained_boundaries.append(torch.zeros(3,3,32), device=device)
+                    latents_boundaries.append(torch.zeros(512, device=device))
                 if i!=j:
                     epoch = 1
                     start_proto = torch.unsqueeze(proto_clone[j], dim = 0)
