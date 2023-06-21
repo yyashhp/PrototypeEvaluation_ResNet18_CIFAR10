@@ -229,20 +229,24 @@ def main():
    # print(f"shape of Final combined average boundaries tensor: {final_comb_boundaries_avg.shape}\n")
    # print(f"shape of Final batches average boundaries tensor: {final_boundaries_avg.shape}\n")
 
-    print(f"Final average alphas list: {final_alphas}\n")
+   # print(f"Final average alphas list: {final_alphas}\n")
 
     Boundary_L2_Diffs = []
     proto_index = 0
     for proto in par_image_tensors:
         proto_clone = proto.clone()
-        print(f"Proto clone shape\t {proto_clone[0].shape}\n")
-        print(f"Boundary shape\t {final_boundaries_avg[0][2][5].shape}\n")
+        #print(f"Proto clone shape\t {proto_clone[0].shape}\n")
+       # print(f"Boundary shape\t {final_boundaries_avg[0][2][5].shape}\n")
         Batch_Boundary_Diffs = torch.zeros(nclass, nclass, dtype=torch.float)
         for i in range(nclass):
             for j in range(nclass):
                 if i != j:
-                    Batch_Boundary_Diffs[i][j] = torch.mean(torch.linalg.norm((final_boundaries_avg[proto_index][i][j]-proto_clone[i]).view(3*32*32,-1), dim=1, ord=2))
+                    boundary_reshaped = torch.reshape(final_boundaries_avg[proto_index][i][j].clone(), (3, 1024))
+                    proto_reshaped = torch.reshape(proto_clone[i], (3, 1024))
+                    Batch_Boundary_Diffs[i][j] = torch.mean(torch.linalg.matrix_norm(boundary_reshaped-proto_reshaped))
+                    print(f"L2 Diff in batch {proto_index} between proto {i} and boundary with {j} is {Batch_Boundary_Diffs[i][j]} \n")
         Boundary_L2_Diffs.append(Batch_Boundary_Diffs.clone())
+        proto_index+=1
     L2_diff_std, L2_diff_mean = torch.std_mean(torch.stack(Boundary_L2_Diffs, dim=0), dim=0)
     tot_L2_diff_mean = torch.mean(L2_diff_mean.clone(), dim=0)
     print(f"Array of average L2_diff per class WRT each boundary: {L2_diff_mean}\n")
