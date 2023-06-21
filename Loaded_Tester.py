@@ -356,18 +356,22 @@ def main():
                                                                   epoch=epoch, par_images=start_proto,
                                                               targets=target_proto, transformDict=transformDict)
                     print(f"Preds after {j} goes to {i}: {preds}\n")
-                    start_proto = torch.squeeze(start_proto, dim=0)
-                    trained_boundaries.append(start_proto)
+
                     model.eval()
                     with torch.no_grad():
                         norm_trained_boundary = transformDict['norm'](start_proto.clone())
                         boundary_latent, boundary_logits = model(norm_trained_boundary)
+                    start_proto = torch.squeeze(start_proto, dim=0)
                     print(f"Boundary  shape: {start_proto.shape}")
+                    trained_boundaries.append(start_proto)
                     latents_boundaries.append(torch.squeeze(boundary_latent, dim=0))
             set_trained_boundaries.append(torch.stack(trained_boundaries, dim=0))
+            set_latent_boundaries.append(torch.stack(latents_boundaries, dim=0))
         stacked_sets_trained_boundaries.append(torch.stack(set_trained_boundaries, dim=0))
-
-
+        stacked_sets_latent_boundaries.append(torch.stack(set_latent_boundaries, dim=0))
+    combined_boundary_images = torch.mean(stacked_sets_trained_boundaries, dim=0)
+    combined_boundary_latent = torch.mean(stacked_sets_latent_boundaries, dim=0)
+    print(f"shape of combined_image and combined_latent: {combined_boundary_images.shape} /n {combined_boundary_latent.shape}")
 
 
 
