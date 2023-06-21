@@ -241,7 +241,7 @@ def main():
         for i in range(nclass):
             for j in range(nclass):
                 if i != j:
-                    Batch_Boundary_Diffs[i][j] = torch.linalg.norm((final_boundaries_avg[proto_index][i][j]-proto_clone[i]), dim=1)
+                    Batch_Boundary_Diffs[i][j] = torch.linalg.norm((final_boundaries_avg[proto_index][i][j]-proto_clone[i]), dim=1, ord=2)
         Boundary_L2_Diffs.append(Batch_Boundary_Diffs.clone())
     L2_diff_std, L2_diff_mean = torch.std_mean(torch.stack(Boundary_L2_Diffs, dim=0), dim=0)
     tot_L2_diff_mean = torch.mean(L2_diff_mean.clone(), dim=0)
