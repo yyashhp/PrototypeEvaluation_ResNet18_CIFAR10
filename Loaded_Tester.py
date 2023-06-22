@@ -310,9 +310,12 @@ def main():
                                     norm_boundary = torch.unsqueeze(norm_boundary, dim=0)
                                     boundary_latent, boundary_logits = model(norm_boundary)
                                 cs_diff.append(cos_sim(latent_proto[i].view(-1),boundary_latent.view(-1) ))
+                                print(f"CS Diff as {k} goes to {i}:{cos_sim(latent_proto[i].view(-1),boundary_latent.view(-1) )}\m ")
+
                             # boundary_reshaped = torch.reshape(boundary.clone(), (3,1024))
 
                                 l2_diff.append(torch.mean(torch.linalg.norm(torch.unsqueeze(boundary.clone() - proto_copy[i]), dim=0), dim=1))
+                                print(f"l2-val as {k} goes to {i}: {torch.mean(torch.linalg.norm(torch.unsqueeze(boundary.clone() - proto_copy[i]), dim=0), dim=1)}\n" )
                                 break
                             else:
                                 prev = tester
