@@ -93,7 +93,7 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
     for batch_idx in range(100):
         _par_images_opt = par_images.clone().detach().requires_grad_(True).to(device)
 
-        _par_images_opt_norm = transformDict['basic'](_par_images_opt)
+        _par_images_opt_norm = transformDict['norm'](_par_images_opt)
 
         L2_img, logits_img = model(_par_images_opt_norm)
 
@@ -171,14 +171,14 @@ def main():
         for p in model.parameters():
             p.requires_grad = False
         for run in range(args.total_runs):
-            for epoch in range(1, 4):
+            for epoch in range(1, 3):
                 last_loss, preds, probs = train_image_no_data(args, model=model,
                                                               device=device,
                                                               epoch = epoch,
                                                               par_images=par_image_tensors[run],
                                                               targets = par_targets,
                                                               transformDict=transformDict)
-                if epoch == 3:
+                if epoch == 2:
                     print(last_loss)
                     with open('{}/LOADED_LOSS_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
                         f.write("\n")
