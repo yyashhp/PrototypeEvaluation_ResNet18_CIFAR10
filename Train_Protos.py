@@ -180,7 +180,7 @@ def main():
                                                               transformDict=transformDict)
                 if epoch == 0:
                     print(last_loss)
-        torch.save(par_image_tensors, f"{saved_protos_path}/CIFAR_100_Final_Saved_Protos_SPLIT_{j}")
+        torch.save(par_image_tensors, f"{saved_protos_path}/CIFAR_100_Final_Saved_Protos_2_SPLIT_{j}")
         saved_protos.append(par_image_tensors)
         # cos similarites
         cos_matrices = []
