@@ -259,6 +259,7 @@ def main():
             logits_list = []
             proto_copy = proto.clone()
             with torch.no_grad():
+                model.multi_out = 1
                 proto_copy_norm = transformDict['norm'](proto_copy)
                 latent_proto, logits_proto = model(proto_copy_norm)
                 preds = logits_proto.max(1, keepdim=True)[1]
