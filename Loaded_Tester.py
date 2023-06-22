@@ -272,7 +272,7 @@ def main():
                 l2_diff = []
                 for k in range(len(proto)):
                     if i == k:
-                        proto_boundaries.append(torch.zeros(1, 3, 32, 32), device=device)
+                        proto_boundaries.append((torch.zeros([1, 3, 32, 32], device=device)))
                     elif i != k:
                         start_pred = preds[k]
                         end_pred = preds[i]
