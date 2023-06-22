@@ -171,14 +171,14 @@ def main():
         for p in model.parameters():
             p.requires_grad = False
         for run in range(args.total_runs):
-            for epoch in range(1, 3):
+            for epoch in range(1, 4):
                 last_loss, preds, probs = train_image_no_data(args, model=model,
                                                               device=device,
                                                               epoch = epoch,
                                                               par_images=par_image_tensors[run],
                                                               targets = par_targets,
                                                               transformDict=transformDict)
-                if epoch == 2:
+                if epoch == 3:
                     print(last_loss)
                     with open('{}/LOADED_LOSS_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
                         f.write("\n")
@@ -205,7 +205,7 @@ def main():
 
         cos_mat_std, cos_mat_mean = torch.std_mean(torch.stack(cos_matrices, dim=0), dim=0)
         CS_means.append(1-(torch.mean(cos_mat_mean.clone())))
-        CS_mean_no_zero.append((torch.sum(cos_mat_mean.clone())) / ((nclass * nclass) - nclass))
+        CS_mean_no_zero.append(1-((torch.sum(cos_mat_mean.clone())) / ((nclass * nclass) - nclass)))
         with open('{}/LOADED_CS_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
             f.write("\n")
             f.write(
