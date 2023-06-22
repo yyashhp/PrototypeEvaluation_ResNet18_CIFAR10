@@ -158,7 +158,7 @@ def main():
     CS_means = []
     for run in range(args.total_runs):
         with torch.no_grad():
-            par_image_fresh = torch.rand([nclass,H, W ], dtype=torch.float, device=device)
+            par_image_fresh = torch.rand([nclass,nchannels,H, W ], dtype=torch.float, device=device)
             par_image_tensors.append(par_image_fresh.clone())
     for j in range(len(data_schedule)-2):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
