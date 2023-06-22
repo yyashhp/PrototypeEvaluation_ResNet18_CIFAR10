@@ -39,7 +39,7 @@ dir_suffix = args.model_dir
 
 model_dir = os.path.join(targ, dir_suffix)
 full_dir_plot = plottarg
-saved_model_path = os.path.join(model_dir,'../Saved_Models.pt')
+saved_model_path = os.path.join(model_dir,'../Saved_Models')
 saved_protos_path = os.path.join(model_dir,'../Saved_Protos.pt')
 
 if not os.path.exists(model_dir):
