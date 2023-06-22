@@ -241,7 +241,7 @@ def main():
                 latent_adv, logits_adv = model(new_proto_norm)
             L2_df_image = torch.linalg.norm((new_proto - proto_copy).view(nclass, -1), dim=1)
             L2_df_latent = torch.linalg.norm((latent_adv - latent_onehot).view(nclass, -1), dim=1)
-            CS_df_image = F.cosine_similarity(new_proto.view(nclass, -1), proto_copy.view(nclass, -1))
+            CS_df_image = 1 - F.cosine_similarity(new_proto.view(nclass, -1), proto_copy.view(nclass, -1))
             CS_df_latent = F.cosine_similarity(latent_adv.view(nclass, -1), latent_onehot.view(nclass, -1))
 
             im_df_std, im_df_mean = torch.std_mean(L2_df_image)
@@ -268,11 +268,11 @@ def main():
         CS_df_std, CS_df_mean = torch.std_mean(torch.stack(CS_image_means, dim=0), dim=0)
         CS_adv_image.append(CS_df_mean.clone())
         CS_latent_std, CS_latent_mean = torch.std_mean(torch.stack(CS_latent_means, dim=0), dim=0)
-        CS_adv_latent.append(1-(CS_latent_mean.clone()))
+        CS_adv_latent.append((CS_latent_mean.clone()))
         with open('{}/CIFAR_100_LOADED_Adv_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
             f.write("\n")
             f.write(f"Split {j} \t L2_diff latent overall mean: {L2_cum_latent_mean}\t \
-                    CS_diff latent overall mean: {1-CS_latent_mean}\n")
+                    CS_diff latent overall mean: {CS_latent_mean}\n")
         f.close()
 
     with open('{}/CIFAR_100_LOADED_final_data_summary_{}.txt'.format(model_dir, date_time), 'a') as f:
