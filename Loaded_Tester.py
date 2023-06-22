@@ -303,20 +303,20 @@ def main():
                                 print(
                                 f"Boundary shape needed to go from proto {j} to proto {i} is {(1 - adj_alpha) * 100} percent proto {j} and {adj_alpha * 100} percent proto {i} \n")
 
-                            proto_boundaries.append(boundary.clone())
-                            proto_alphas.append(adj_alpha)
-                            with torch.no_grad():
-                                norm_boundary = transformDict['norm'](boundary.clone())
-                                norm_boundary = torch.unsqueeze(norm_boundary, dim=0)
-                                boundary_latent, boundary_logits = model(norm_boundary)
-                            cs_diff.append(cos_sim(latent_proto[i].view(-1),boundary_latent.view(-1) ))
-                           # boundary_reshaped = torch.reshape(boundary.clone(), (3,1024))
+                                proto_boundaries.append(boundary.clone())
+                                proto_alphas.append(adj_alpha)
+                                with torch.no_grad():
+                                    norm_boundary = transformDict['norm'](boundary.clone())
+                                    norm_boundary = torch.unsqueeze(norm_boundary, dim=0)
+                                    boundary_latent, boundary_logits = model(norm_boundary)
+                                cs_diff.append(cos_sim(latent_proto[i].view(-1),boundary_latent.view(-1) ))
+                            # boundary_reshaped = torch.reshape(boundary.clone(), (3,1024))
 
-                            l2_diff.append(torch.mean(torch.linalg.norm(torch.unsqueeze(boundary.clone() - proto_copy[i]), dim=0), dim=1))
-                            break
-                        else:
-                            prev = tester
-                            assert alpha != 20
+                                l2_diff.append(torch.mean(torch.linalg.norm(torch.unsqueeze(boundary.clone() - proto_copy[i]), dim=0), dim=1))
+                                break
+                            else:
+                                prev = tester
+                                assert alpha != 20
                 boundaries_list.append(torch.stack(proto_boundaries, dim=0))
                 alphas_list.append(proto_alphas)
                 batch_l2_diff.append(torch.stack(l2_diff, dim=0))
