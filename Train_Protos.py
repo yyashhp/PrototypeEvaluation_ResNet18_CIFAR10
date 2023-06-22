@@ -172,6 +172,7 @@ def main():
             for epoch in range(1, 51):
                 last_loss, preds, probs = train_image_no_data(args, model=model,
                                                               device=device,
+                                                              epoch = epoch,
                                                               par_images=par_image_tensors[run],
                                                               targets = par_targets,
                                                               transformDict=transformDict)
