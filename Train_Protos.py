@@ -284,7 +284,7 @@ def main():
                 \t L2 adversarial image means \t CS adversarial image means\
                  \t CS adversarial latent means  \n")
         for i in range(len(data_schedule)):
-            f.write("{0:4.4f} \t {1:4.4f}\t {2:4.4f}\t {3:4.4f}\t {4:4.4f}\t {5:4.4f}\n".format(data_schedule[i], CS_means[i]
+            f.write("{0:4.4f} \t {1:4.4f}\t {2:4.4f}\t {3:4.4f}\t {4:4.4f}\t {5:4.4f} \t {6:4.4f} \n".format(data_schedule[i], CS_means[i]
                                          , CS_mean_no_zero[i]
                                         ,L2_cum_latent_means[i], L2_cum_image_means[i]
                                          , CS_adv_image[i], CS_adv_latent[i]))
