@@ -160,7 +160,7 @@ def main():
         with torch.no_grad():
             par_image_fresh = torch.rand([nclass,nchannels,H, W ], dtype=torch.float, device=device)
             par_image_tensors.append(par_image_fresh.clone())
-    for j in range(len(data_schedule)-1):
+    for j in range(len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
         model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_Data_0621_16_53_47", map_location=device)
         model.load_state_dict(model_saved)
@@ -273,7 +273,7 @@ def main():
         f.write("Data \t Test Acc  \t CS_norm metric \t L2 adversarial latent means \
                 \t L2 adversarial image means \t CS adversarial image means\
                  \t CS adversarial latent means  \n")
-        for i in range(len(data_schedule)-1):
+        for i in range(len(data_schedule)):
             f.write("{0:4.4f} \t {1:4.4f}\t {2:4.4f}\t {3:4.4f}\t {4:4.4f}\t {5:4.4f}\n".format(data_schedule[i], CS_means[i]
                                          , L2_cum_latent_means[i], L2_cum_image_means[i]
                                          , CS_adv_image[i], CS_adv_latent[i]))
