@@ -93,7 +93,7 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
     for batch_idx in range(100):
         _par_images_opt = par_images.clone().detach().requires_grad_(True).to(device)
 
-        _par_images_opt_norm = transformDict['norm'](_par_images_opt)
+        _par_images_opt_norm = transformDict['basic'](_par_images_opt)
 
         L2_img, logits_img = model(_par_images_opt_norm)
 
