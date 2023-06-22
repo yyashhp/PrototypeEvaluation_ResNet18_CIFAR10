@@ -171,14 +171,14 @@ def main():
         for p in model.parameters():
             p.requires_grad = False
         for run in range(args.total_runs):
-            for epoch in range(1, 51):
+            for epoch in range(1, 4):
                 last_loss, preds, probs = train_image_no_data(args, model=model,
                                                               device=device,
                                                               epoch = epoch,
                                                               par_images=par_image_tensors[run],
                                                               targets = par_targets,
                                                               transformDict=transformDict)
-                if epoch == 50:
+                if epoch == 3:
                     print(last_loss)
                     with open('{}/LOADED_LOSS_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
                         f.write("\n")
