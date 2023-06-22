@@ -280,27 +280,27 @@ def main():
                         end_probs = probs[i]
                         start_image = proto_copy[k].clone().detach().requires_grad_(False).to(device)
                         start_image = torch.unsqueeze(start_image, dim=0)
-                    target_class_image = proto_copy[i].clone().detach().requires_grad_(False).to(device)
-                    target_class_image = torch.unsqueeze(target_class_image, dim=0)
-                    print(f"Starting Pred: {start_pred}")
-                    prev = start_image
-                    for alpha in range(1, 20):
-                        adj_alpha = alpha * 0.05
-                        tester = torch.zeros(*(list(start_image.shape)), device=device)
-                        tester = torch.add(tester, start_image, alpha=(1 - adj_alpha))
-                        tester = torch.add(tester, target_class_image, alpha=adj_alpha)
-                        with torch.no_grad():
-                            tester_norm = transformDict['norm'](tester)
-                            latent_tester, logits_tester = model(tester_norm)
-                            preds_tester = logits_tester.max(1, keepdim=True)[1]
-                            probs_tester = F.softmax(logits_tester)
-                        if preds_tester == end_pred:
-                            boundary = torch.zeros(*(list(tester.shape)), device=device)
-                            boundary = torch.add(boundary, prev, alpha=0.5)
-                            boundary = torch.add(boundary, tester, alpha=0.5)
-                            print(f"Boundary Shape: {boundary.shape}\n")
-                            #    print(f"Alpha needed: {adj_alpha}\n")
-                            print(
+                        target_class_image = proto_copy[i].clone().detach().requires_grad_(False).to(device)
+                        target_class_image = torch.unsqueeze(target_class_image, dim=0)
+                        print(f"Starting Pred: {start_pred}")
+                        prev = start_image
+                        for alpha in range(1, 20):
+                            adj_alpha = alpha * 0.05
+                            tester = torch.zeros(*(list(start_image.shape)), device=device)
+                            tester = torch.add(tester, start_image, alpha=(1 - adj_alpha))
+                            tester = torch.add(tester, target_class_image, alpha=adj_alpha)
+                            with torch.no_grad():
+                                tester_norm = transformDict['norm'](tester)
+                                latent_tester, logits_tester = model(tester_norm)
+                                preds_tester = logits_tester.max(1, keepdim=True)[1]
+                                probs_tester = F.softmax(logits_tester)
+                            if preds_tester == end_pred:
+                                boundary = torch.zeros(*(list(tester.shape)), device=device)
+                                boundary = torch.add(boundary, prev, alpha=0.5)
+                                boundary = torch.add(boundary, tester, alpha=0.5)
+                                print(f"Boundary Shape: {boundary.shape}\n")
+                                #    print(f"Alpha needed: {adj_alpha}\n")
+                                print(
                                 f"Boundary shape needed to go from proto {j} to proto {i} is {(1 - adj_alpha) * 100} percent proto {j} and {adj_alpha * 100} percent proto {i} \n")
 
                             proto_boundaries.append(boundary.clone())
