@@ -40,7 +40,7 @@ dir_suffix = args.model_dir
 model_dir = os.path.join(targ, dir_suffix)
 full_dir_plot = plottarg
 saved_model_path = os.path.join(model_dir,'../Saved_Models')
-saved_protos_path = os.path.join(model_dir,'../Saved_Protos.pt')
+saved_protos_path = os.path.join(model_dir,'../Saved_FINAL_Protos.pt')
 
 if not os.path.exists(model_dir):
     os.makedirs(model_dir)
@@ -171,16 +171,16 @@ def main():
         for p in model.parameters():
             p.requires_grad = False
         for run in range(args.total_runs):
-            for epoch in range(1,7):
+            for epoch in range(1,4):
                 last_loss, preds, probs = train_image_no_data(args, model=model,
                                                               device=device,
                                                               epoch = epoch,
                                                               par_images=par_image_tensors[run],
                                                               targets = par_targets,
                                                               transformDict=transformDict)
-                if epoch == 6:
+                if epoch == 3:
                     print(last_loss)
-       # torch.save(par_image_tensors, f"{saved_protos_path}/FinalSaved_Protos_SPLIT_{run}")
+        torch.save(par_image_tensors, f"{saved_protos_path}/CIFAR_100_FinalSaved_Protos_SPLIT_{run}")
         saved_protos.append(par_image_tensors)
         # cos similarites
         cos_matrices = []
