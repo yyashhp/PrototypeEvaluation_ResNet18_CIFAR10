@@ -294,6 +294,7 @@ def main():
                                 latent_tester, logits_tester = model(tester_norm)
                                 preds_tester = logits_tester.max(1, keepdim=True)[1]
                                 probs_tester = F.softmax(logits_tester)
+                            print(f"Preds:Tester!: {preds_tester}")
                             if preds_tester == end_pred:
                                 boundary = torch.zeros(*(list(tester.shape)), device=device)
                                 boundary = torch.add(boundary, prev, alpha=0.5)
