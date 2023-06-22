@@ -40,7 +40,7 @@ dir_suffix = args.model_dir
 model_dir = os.path.join(targ, dir_suffix)
 full_dir_plot = plottarg
 saved_model_path = os.path.join(model_dir,'../Trained_Model.pt')
-saved_protos_path = os.path.join(model_dir,'../Saved_Protos.pt')
+saved_protos_path = os.path.join(model_dir,'../Saved_FINAL_Protos.pt')
 
 if not os.path.exists(model_dir):
     os.makedirs(model_dir)
@@ -180,6 +180,7 @@ def main():
                                                               transformDict=transformDict)
                 if epoch == 6:
                     print(last_loss)
+        torch.save(par_image_tensors, f"{saved_protos_path}/Final_Saved_Protos_SPLIT_{run}")
         saved_protos.append(par_image_tensors)
         # cos similarites
         cos_matrices = []
