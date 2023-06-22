@@ -171,14 +171,14 @@ def main():
         for p in model.parameters():
             p.requires_grad = False
         for run in range(args.total_runs):
-            for epoch in range(1,4):
+            for epoch in range(1):
                 last_loss, preds, probs = train_image_no_data(args, model=model,
                                                               device=device,
                                                               epoch = epoch,
                                                               par_images=par_image_tensors[run],
                                                               targets = par_targets,
                                                               transformDict=transformDict)
-                if epoch == 3:
+                if epoch == 0:
                     print(last_loss)
         torch.save(par_image_tensors, f"{saved_protos_path}/CIFAR_100_FinalSaved_Protos_SPLIT_{j}")
         saved_protos.append(par_image_tensors)
