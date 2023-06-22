@@ -171,20 +171,15 @@ def main():
         for p in model.parameters():
             p.requires_grad = False
         for run in range(args.total_runs):
-            for epoch in range(1, 6):
+            for epoch in range(1,7):
                 last_loss, preds, probs = train_image_no_data(args, model=model,
                                                               device=device,
                                                               epoch = epoch,
                                                               par_images=par_image_tensors[run],
                                                               targets = par_targets,
                                                               transformDict=transformDict)
-                if epoch == 3:
+                if epoch == 6:
                     print(last_loss)
-                    with open('{}/LOADED_LOSS_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
-                        f.write("\n")
-                        f.write(
-                            f"Training split: {j}, \t Last Loss, {last_loss} ")
-                    f.close()
         saved_protos.append(par_image_tensors)
         # cos similarites
         cos_matrices = []
