@@ -171,7 +171,7 @@ def main():
         for p in model.parameters():
             p.requires_grad = False
         for run in range(args.total_runs):
-            for epoch in range(1, 4):
+            for epoch in range(1, 3):
                 last_loss, preds, probs = train_image_no_data(args, model=model,
                                                               device=device,
                                                               epoch = epoch,
@@ -280,12 +280,11 @@ def main():
         f.close()
 
     with open('{}/LOADED_final_data_summary_{}.txt'.format(model_dir, date_time), 'a') as f:
-        f.write("Data  \t CS_norm metric \t CS_norm_metric_NO_ZEROES \t L2 adversarial latent means \
+        f.write("Data  \t CS_norm metric \t L2 adversarial latent means \
                 \t L2 adversarial image means \t CS adversarial image means\
                  \t CS adversarial latent means  \n")
         for i in range(len(data_schedule)):
-            f.write("{0:4.4f} \t {1:4.4f}\t {2:4.4f}\t {3:4.4f}\t {4:4.4f}\t {5:4.4f} \t {6:4.4f} \n".format(data_schedule[i], CS_means[i]
-                                         , CS_mean_no_zero[i]
+            f.write("{0:4.4f} \t {1:4.4f}\t {2:4.4f}\t {3:4.4f}\t {4:4.4f}\t {5:4.4f} \t \n".format(data_schedule[i], CS_means[i]
                                         ,L2_cum_latent_means[i], L2_cum_image_means[i]
                                          , CS_adv_image[i], CS_adv_latent[i]))
     f.close()
