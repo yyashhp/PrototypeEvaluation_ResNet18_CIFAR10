@@ -196,7 +196,7 @@ def main():
 
         cos_mat_std, cos_mat_mean = torch.std_mean(torch.stack(cos_matrices, dim=0), dim=0)
         CS_means.append(torch.mean(cos_mat_mean.clone()))
-        with open('{}/CS_LOADED_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
+        with open('{}/LOADED_CS_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
             f.write("\n")
             f.write(
                 f"Training split: {j}, \t Each Protos CS_Diff_Mean, {cos_mat_mean.clone()} \t Overall CS_Diff_Mean CS_diff_mean {(torch.sum(cos_mat_mean.clone())) / ((nclass * nclass) - nclass)}")
