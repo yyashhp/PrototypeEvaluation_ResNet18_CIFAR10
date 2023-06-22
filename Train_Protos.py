@@ -138,15 +138,16 @@ def main():
     #MEAN = [0.4914, 0.4822, 0.4465]
     MEAN = [0.5] * 3
     STD = [0.5] * 3
-
+    H, W = 32, 32
     #STD = [0.2471, 0.2435, 0.2616]
     data_schedule = [0.25, 0.4, 0.6, 0.7, 0.8, 0.9, 1.0]
     transformDict = {}
     transformDict['norm'] = transforms.Compose([transforms.Normalize(MEAN, STD)])
+    transformDict['basic'] = transforms.Compose([transforms.RandomHorizontalFlip(), transforms.RandomCrop(H, padding=4),transforms.Normalize(MEAN, STD)])
 
     nclass = 10
     nchannels = 3
-    H, W = 32, 32
+
 
     par_targets = torch.arange(nclass, dtype=torch.long, device=device)
     par_image_tensors = []
