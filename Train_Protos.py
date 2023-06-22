@@ -180,7 +180,7 @@ def main():
                                                               transformDict=transformDict)
                 if epoch == 0:
                     print(last_loss)
-        torch.save(par_image_tensors, f"{saved_protos_path}/CIFAR_100_Final_Saved_Protos_2_SPLIT_{j}")
+        torch.save(par_image_tensors, f"{saved_protos_path}/CIFAR_100_Final_Saved_Protos_3_SPLIT_{j}")
         saved_protos.append(par_image_tensors)
         # cos similarites
         cos_matrices = []
@@ -242,7 +242,7 @@ def main():
             L2_df_image = torch.linalg.norm((new_proto - proto_copy).view(nclass, -1), dim=1)
             L2_df_latent = torch.linalg.norm((latent_adv - latent_onehot).view(nclass, -1), dim=1)
             CS_df_image = 1 - F.cosine_similarity(new_proto.view(nclass, -1), proto_copy.view(nclass, -1))
-            CS_df_latent = F.cosine_similarity(latent_adv.view(nclass, -1), latent_onehot.view(nclass, -1))
+            CS_df_latent = 1 - F.cosine_similarity(latent_adv.view(nclass, -1), latent_onehot.view(nclass, -1))
 
             im_df_std, im_df_mean = torch.std_mean(L2_df_image)
             latent_df_std, latent_df_mean = torch.std_mean(L2_df_latent)
