@@ -156,6 +156,7 @@ def main():
     CS_adv_image = []
     CS_adv_latent = []
     CS_means = []
+    CS_mean_no_zero = []
     for run in range(args.total_runs):
         with torch.no_grad():
             par_image_fresh = torch.rand([nclass,nchannels,H, W ], dtype=torch.float, device=device)
@@ -196,10 +197,11 @@ def main():
 
         cos_mat_std, cos_mat_mean = torch.std_mean(torch.stack(cos_matrices, dim=0), dim=0)
         CS_means.append(torch.mean(cos_mat_mean.clone()))
+        CS_mean_no_zero.append((torch.sum(cos_mat_mean.clone())) / ((nclass * nclass) - nclass))
         with open('{}/LOADED_CS_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
             f.write("\n")
             f.write(
-                f"Training split: {j}, \t Each Protos CS_Diff_Mean, {cos_mat_mean.clone()} \t Overall CS_Diff_Mean CS_diff_mean {(torch.sum(cos_mat_mean.clone())) / ((nclass * nclass) - nclass)}")
+                f"Training split: {j}, \t Each Protos CS_Diff_Mean, {cos_mat_mean.clone()} \t Overall CS_Diff_Mean: {torch.mean(cos_mat_mean.clone())}\t CS_diff_mean with no zeroes: {(torch.sum(cos_mat_mean.clone())) / ((nclass * nclass) - nclass)}\n")
             f.write("\n")
         f.close()
 
@@ -270,12 +272,13 @@ def main():
         f.close()
 
     with open('{}/LOADED_final_data_summary_{}.txt'.format(model_dir, date_time), 'a') as f:
-        f.write("Data \t Test Acc  \t CS_norm metric \t L2 adversarial latent means \
+        f.write("Data  \t CS_norm metric \t CS_norm_metric_NO_ZEROES \t L2 adversarial latent means \
                 \t L2 adversarial image means \t CS adversarial image means\
                  \t CS adversarial latent means  \n")
         for i in range(len(data_schedule)):
             f.write("{0:4.4f} \t {1:4.4f}\t {2:4.4f}\t {3:4.4f}\t {4:4.4f}\t {5:4.4f}\n".format(data_schedule[i], CS_means[i]
-                                         , L2_cum_latent_means[i], L2_cum_image_means[i]
+                                         , CS_mean_no_zero[i]
+                                        ,L2_cum_latent_means[i], L2_cum_image_means[i]
                                          , CS_adv_image[i], CS_adv_latent[i]))
     f.close()
 
