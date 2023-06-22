@@ -178,6 +178,13 @@ def main():
                                                               par_images=par_image_tensors[run],
                                                               targets = par_targets,
                                                               transformDict=transformDict)
+                if epoch == 50:
+                    print(last_loss)
+                    with open('{}/LOADED_LOSS_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
+                        f.write("\n")
+                        f.write(
+                            f"Training split: {j}, \t Last Loss, {last_loss} ")
+                    f.close()
         saved_protos.append(par_image_tensors)
         # cos similarites
         cos_matrices = []
