@@ -205,7 +205,7 @@ def main():
         with open('{}/CIFAR_100_LOADED_CS_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
             f.write("\n")
             f.write(
-                f"Training split: {j}, \t Each Protos CS_Diff_Mean, {cos_mat_mean.clone()} \t Overall CS_Diff_Mean: {torch.mean(cos_mat_mean.clone())}\t CS_diff_mean with no zeroes: {(torch.sum(cos_mat_mean.clone())) / ((nclass * nclass) - nclass)}\n")
+                f"Training split: {j}, \t Each Protos CS_Similarity_Mean, {cos_mat_mean.clone()} \t Overall CS_Diff_Mean: {1-torch.mean(cos_mat_mean.clone())}\t CS_diff_mean with no zeroes: {1-((torch.sum(cos_mat_mean.clone())) / ((nclass * nclass) - nclass))}\n")
             f.write("\n")
         f.close()
 
