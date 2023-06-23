@@ -352,9 +352,10 @@ def main():
         alpha_means = np.mean(final_alphas, axis = 0)
         alpha_means = np.mean(alpha_means, axis = 0)
         alpha_means = np.round(alpha_means, 2)
-        final_comb_alphas_avg.append(alpha_means)
-        final_comb_cum_alphas_avg.append(np.mean(alpha_means))
+        mean_alpha_mean = np.mean(alpha_means)
         alpha_means = alpha_means.tolist()
+        final_comb_alphas_avg.append(alpha_means)
+        final_comb_cum_alphas_avg.append(mean_alpha_mean)
         # for i in range(nclass):
         #     final_alphas.append(mean(
         #         [mean(final_alphas_list[0][i]), mean(final_alphas_list[1][i]), mean(final_alphas_list[2][i]),
@@ -444,6 +445,7 @@ def main():
 
     # print(f"shape of combined_image and combined_latent: {combined_boundary_images.shape} /n {combined_boundary_latent.shape}")
 
+    final_comb_alphas_avg = final_comb_alphas_avg
     with open('{}/BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
         f.write("Split \t Alphas  \t CS_Diffs \t L2 diffs \
            \t cumulative alpha \t Cumuluative cs diff\
