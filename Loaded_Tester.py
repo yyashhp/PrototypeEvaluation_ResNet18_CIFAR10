@@ -284,7 +284,7 @@ def main():
                         target_class_image = torch.unsqueeze(target_class_image, dim=0)
                         print(f"Starting Pred: {start_pred}, target pred: {end_pred}")
                         prev = start_image
-                        for alpha in range(1, 20):
+                        for alpha in range(1, 21):
                             adj_alpha = alpha * 0.05
                             tester = torch.zeros(*(list(start_image.shape)), device=device)
                             tester = torch.add(tester, start_image, alpha=(1 - adj_alpha))
