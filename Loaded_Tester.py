@@ -283,23 +283,18 @@ def main():
                         start_image = proto_copy[k].clone().detach().requires_grad_(True).to(device)
                         #start_image = torch.unsqueeze(start_image, dim=0)
                         target_class_image = proto_copy[i].clone().detach().requires_grad_(True).to(device)
-                        with torch.no_grad():
-                            start_norm = transformDict['norm'](target_class_image)
-                            start_lat, start_logs = model(torch.unsqueeze(start_norm, dim=0))
-                            print(f"Target_Image pred : {start_logs.max(1, keepdim=True)[1]}\n")
-
                        # target_class_image = torch.unsqueeze(target_class_image, dim=0)
                         print(f"Starting Pred: {start_pred}, target pred: {end_pred}")
                         prev = start_image
                         for alpha in range(1, 21):
                             adj_alpha = alpha * 0.05
                             tester = torch.zeros(*(list(start_image.shape)), device=device)
-                            tester = torch.add(tester, start_image, alpha=1)
-                            #tester = torch.add(tester, target_class_image, alpha=adj_alpha)
+                            tester = torch.add(tester, start_image, alpha=(1-adj_alpha))
+                            tester = torch.add(tester, target_class_image, alpha=adj_alpha)
                             tester_shaped = torch.unsqueeze(tester, dim=0)
                             #print(f"Tester Tensor: {tester_shaped}")
                             with torch.no_grad():
-                                tester_norm = transformDict['norm'](tester_shaped)
+                                tester_norm = transformDict['norm'](tester_shaped.clone())
                                 print(f"Tester_norm shape {tester_norm.shape}")
                                 latent_tester, logits_tester = model(tester_norm)
                                 preds_tester = logits_tester.max(1, keepdim=True)[1]
