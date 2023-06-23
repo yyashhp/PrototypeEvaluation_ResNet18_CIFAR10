@@ -283,7 +283,7 @@ def main():
                         start_image = proto_copy[k].clone().detach().requires_grad_(True).to(device)
                         with torch.no_grad():
                             start_norm = transformDict['norm'](start_image)
-                            start_lat, start_logs = model(start_norm)
+                            start_lat, start_logs = model(torch.unsqueeze(start_norm, dim=0))
                             print(f"Start_Image pred : {start_logs.max(1, keepdim=True)[1]}\n")
 
                         #start_image = torch.unsqueeze(start_image, dim=0)
