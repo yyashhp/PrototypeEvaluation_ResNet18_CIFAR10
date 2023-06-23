@@ -281,13 +281,13 @@ def main():
                         start_probs = probs[k]
                         end_probs = probs[i]
                         start_image = proto_copy[k].clone().detach().requires_grad_(True).to(device)
+                        #start_image = torch.unsqueeze(start_image, dim=0)
+                        target_class_image = proto_copy[i].clone().detach().requires_grad_(True).to(device)
                         with torch.no_grad():
                             start_norm = transformDict['norm'](start_image)
                             start_lat, start_logs = model(torch.unsqueeze(start_norm, dim=0))
-                            print(f"Start_Image pred : {start_logs.max(1, keepdim=True)[1]}\n")
+                            print(f"Target_Image pred : {start_logs.max(1, keepdim=True)[1]}\n")
 
-                        #start_image = torch.unsqueeze(start_image, dim=0)
-                        target_class_image = proto_copy[i].clone().detach().requires_grad_(True).to(device)
                        # target_class_image = torch.unsqueeze(target_class_image, dim=0)
                         print(f"Starting Pred: {start_pred}, target pred: {end_pred}")
                         prev = start_image
@@ -297,7 +297,7 @@ def main():
                             tester = torch.add(tester, start_image, alpha=1)
                             #tester = torch.add(tester, target_class_image, alpha=adj_alpha)
                             tester_shaped = torch.unsqueeze(tester, dim=0)
-                            print(f"Tester Tensor: {tester_shaped}")
+                            #print(f"Tester Tensor: {tester_shaped}")
                             with torch.no_grad():
                                 tester_norm = transformDict['norm'](tester_shaped)
                                 print(f"Tester_norm shape {tester_norm.shape}")
