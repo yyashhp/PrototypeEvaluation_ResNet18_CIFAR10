@@ -496,8 +496,9 @@ def main():
 
     with open('{}/BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
         for i in range(len(data_schedule)):
-            f.write(f"\n Split: {data_schedule[i]} \t Alphas: {final_comb_alphas_avg[i]}  \t cumulative alpha: {final_comb_cum_alphas_avg[i]} \t CS_Line_Diffs: {[val.item() for val in final_ind_cs_diffs[i]]} \
-            \n CS_Trained_Diffs{[val.item() for val in final_ind_trained_cs_diffs]} \n Cumulative cs_Line diff: {final_comb_cs_diffs[i]} \n \
+            f.write(f"\n Split: {data_schedule[i]} \t Alphas: {final_comb_alphas_avg[i]}  \t cumulative alpha: {final_comb_cum_alphas_avg[i]} \t CS_Line_Diffs:\
+             {[val.item() for val in final_ind_cs_diffs[i]]} \
+            \n CS_Trained_Diffs{[val.item() for val in final_ind_trained_cs_diffs[i]]} \n Cumulative cs_Line diff: {final_comb_cs_diffs[i]} \n \
              Cumulative cs_trained_diff: {final_comb_trained_cs_diffs[i]} \n L2 line diffs(image): {final_ind_l2_diffs[i].tolist()} \
                        \t  Cumulative L2 Diff: {final_comb_l2_diffs[i]}  \t \n \
                             L2_Trained_Diffs(latent): {final_ind_trained_l2_diffs[i].tolist()} \t Cumulative L2_Trained_Diff: {final_comb_trained_l2_diffs[i]}\n \n")
