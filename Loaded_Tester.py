@@ -365,7 +365,7 @@ def main():
         final_split_comb_boundaries_avg = torch.mean(final_boundaries_avg, dim=0)
         final_comb_boundaries_avg.append(torch.squeeze(final_split_comb_boundaries_avg, dim=0))
         print(f"average alphas list at split {j}: {final_alphas}\n")
-        with open('{}/Line_Stats{}.txt'.format(saved_boundaries_path, j, date_time), 'a') as f:
+        with open('{}/Line_Stats{}.txt'.format(saved_boundaries_path, date_time), 'a') as f:
             f.write("\n")
             f.write(
                 f"Split {j} Average Alphas : {alpha_means}\n  average L2s: {batch_cum_l2}\n average CS_diff: {[1-val for val in batch_cum_cs]}\n,\
@@ -445,10 +445,7 @@ def main():
 
     # print(f"shape of combined_image and combined_latent: {combined_boundary_images.shape} /n {combined_boundary_latent.shape}")
 
-    final_comb_alphas_avg = tuple(final_comb_alphas_avg)
-    #final_comb_l2_diffs = tuple(final_comb_l2_diffs)
-    final_ind_l2_diffs = tuple(final_ind_l2_diffs)
-    final_ind_cs_diffs = tuple(final_ind_cs_diffs)
+    
     print(f"length of comb alphas : {len(final_comb_alphas_avg)}")
     print(f"length of l2s : {len(final_ind_l2_diffs)}")
     print(f"length of cs's : {len(final_ind_cs_diffs)}")
