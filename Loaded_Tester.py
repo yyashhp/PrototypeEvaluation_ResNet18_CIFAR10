@@ -338,7 +338,7 @@ def main():
         batch_cs = torch.mean(torch.stack(final_cs_diffs, dim=0), dim=0)
         print(f"Shape of batch_cs, {batch_cs.shape}")
         batch_cum_cs = torch.mean(batch_cs, dim=0)
-        cum_cs_avg = torch.mean(batch_cum_cs)
+        cum_cs_avg = 1 - torch.mean(batch_cum_cs)
         final_comb_cs_diffs.append(cum_cs_avg)
         final_ind_cs_diffs.append([1-val for val in batch_cum_cs])
 
