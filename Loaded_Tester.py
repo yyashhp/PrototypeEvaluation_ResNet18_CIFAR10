@@ -151,7 +151,7 @@ def main():
     model.eval()
     for p in model.parameters():
         p.requires_grad = False
-    for j in range(6, len(data_schedule)):
+    for j in range(len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
         model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_Data_0621_16_53_47", map_location=device)
         model.load_state_dict(model_saved)
@@ -264,6 +264,7 @@ def main():
                 latent_proto, logits_proto = model(proto_copy_norm)
                 preds = logits_proto.max(1, keepdim=True)[1]
                 probs = F.softmax(logits_proto)
+                print(f"Proto preds: {preds}")
             for i in range(len(proto)):
                 proto_boundaries = []
                 proto_alphas = []
