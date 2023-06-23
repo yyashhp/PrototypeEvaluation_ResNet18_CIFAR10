@@ -344,7 +344,7 @@ def main():
 
         batch_l2 = torch.mean(torch.stack(final_l2_diffs.clone(), dim=0), dim=0)
         batch_cum_l2 = torch.mean(batch_l2, dim=0)
-        final_comb_l2_diffs.append(torch.mean(batch_cum_l2.clone()))
+        final_comb_l2_diffs.append(torch.mean(batch_cum_l2))
         final_ind_l2_diffs.append(batch_cum_l2)
 
 
