@@ -465,8 +465,8 @@ def main():
             stacked_trained_l2.append(torch.stack(batch_l2_trained_diff, dim=0))
 
           #  stacked_sets_latent_boundaries.append(torch.stack(set_latent_boundaries, dim=0))
-        combined_boundary_images = torch.mean(torch.stack(stacked_sets_trained_boundaries,dim=0), dim=0)
-        combined_boundary_latent = torch.mean(torch.stack(stacked_sets_latent_boundaries, dim=0), dim=0)
+       # combined_boundary_images = torch.mean(torch.stack(stacked_sets_trained_boundaries,dim=0), dim=0)
+       # combined_boundary_latent = torch.mean(torch.stack(stacked_sets_latent_boundaries, dim=0), dim=0)
         batch_trained_cs = torch.mean(torch.stack(cos_trained_latent_matrices, dim=0), dim=0)
         batch_cum_trained_cs = torch.mean(batch_trained_cs, dim=0)
         cum_trained_cs_avg = 1 - torch.mean(batch_cum_trained_cs)
@@ -480,7 +480,7 @@ def main():
         final_ind_trained_l2_diffs.append(batch_cum_trained_l2)
 
 
-        print(f"shape of combined_image and combined_latent: {combined_boundary_images.shape} /n {combined_boundary_latent.shape}")
+       # print(f"shape of combined_image and combined_latent: {combined_boundary_images.shape} /n {combined_boundary_latent.shape}")
 
         with open('{}/Trained_Stats{}.txt'.format(saved_boundaries_path, date_time), 'a') as f:
             f.write("\n")
