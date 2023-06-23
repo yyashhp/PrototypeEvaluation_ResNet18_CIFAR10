@@ -251,6 +251,7 @@ def main():
         final_comb_l2_diffs = []
         final_ind_cs_diffs = []
         final_ind_l2_diffs = []
+        model.eval()
         for proto in par_image_tensors:
             batch_cs_diff = []
             batch_l2_diff = []
@@ -280,6 +281,11 @@ def main():
                         start_probs = probs[k]
                         end_probs = probs[i]
                         start_image = proto_copy[k].clone().detach().requires_grad_(True).to(device)
+                        with torch.no_grad:
+                            start_norm = transforms['norm'](start_image)
+                            start_lat, start_logs = model(start_norm)
+                            print(f"Start_Image pred : {start_logs.max(1, keepdim=True)[1]}\n")
+
                         #start_image = torch.unsqueeze(start_image, dim=0)
                         target_class_image = proto_copy[i].clone().detach().requires_grad_(True).to(device)
                        # target_class_image = torch.unsqueeze(target_class_image, dim=0)
