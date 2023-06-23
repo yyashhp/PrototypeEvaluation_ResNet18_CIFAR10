@@ -280,9 +280,9 @@ def main():
                         start_probs = probs[k]
                         end_probs = probs[i]
                         start_image = proto_copy[k].clone().detach().requires_grad_(True).to(device)
-                        start_image = torch.unsqueeze(start_image, dim=0)
+                        #start_image = torch.unsqueeze(start_image, dim=0)
                         target_class_image = proto_copy[i].clone().detach().requires_grad_(True).to(device)
-                        target_class_image = torch.unsqueeze(target_class_image, dim=0)
+                       # target_class_image = torch.unsqueeze(target_class_image, dim=0)
                         print(f"Starting Pred: {start_pred}, target pred: {end_pred}")
                         prev = start_image
                         for alpha in range(1, 21):
@@ -290,8 +290,9 @@ def main():
                             tester = torch.zeros(*(list(start_image.shape)), device=device)
                             tester = torch.add(tester, start_image, alpha=(1 - adj_alpha))
                             tester = torch.add(tester, target_class_image, alpha=adj_alpha)
+                            tester_shaped = torch.unsqueeze(tester, dim=0)
                             with torch.no_grad():
-                                tester_norm = transformDict['norm'](tester)
+                                tester_norm = transformDict['norm'](tester_shaped)
                                 print(f"Tester_norm shape {tester_norm.shape}")
                                 latent_tester, logits_tester = model(tester_norm)
                                 preds_tester = logits_tester.max(1, keepdim=True)[1]
@@ -301,7 +302,9 @@ def main():
                                 boundary = torch.zeros(*(list(tester.shape)), device=device)
                                 boundary = torch.add(boundary, prev, alpha=0.5)
                                 boundary = torch.add(boundary, tester, alpha=0.5)
-                                print(f"Boundary Shape: {boundary.shape}\n")
+                                print(f"Boundary tensor: {boundary}")
+                                boundary_shaped = torch.unsqueeze(boundary, dim=0)
+                                print(f"Boundary Shape: {boundary_shaped.shape}\n")
                                 #    print(f"Alpha needed: {adj_alpha}\n")
                                 print(
                                 f"Boundary shape needed to go from proto {k} to proto {i} is {(1 - adj_alpha) * 100} percent proto {j} and {adj_alpha * 100} percent proto {i} \n")
@@ -309,14 +312,14 @@ def main():
                                 proto_boundaries.append(boundary.clone())
                                 proto_alphas.append(adj_alpha)
                                 with torch.no_grad():
-                                    norm_boundary = transformDict['norm'](boundary.clone())
+                                    norm_boundary = transformDict['norm'](boundary_shaped.clone())
                                     boundary_latent, boundary_logits = model(norm_boundary)
                                 cs_diff.append(cos_sim(latent_proto[i].view(-1),boundary_latent.view(-1) ))
                                 print(f"CS Diff as {k} goes to {i}: {cos_sim(latent_proto[i].view(-1),boundary_latent.view(-1) )}\m ")
 
                             # boundary_reshaped = torch.reshape(boundary.clone(), (3,1024))
 
-                                l2_diff.append(torch.mean(torch.linalg.norm(torch.unsqueeze((boundary.clone() - proto_copy[i]), dim=0), dim=1)))
+                                l2_diff.append(torch.mean(torch.linalg.norm((boundary.clone() - proto_copy[i]), dim=1)))
                                 print(f"l2-val as {k} goes to {i}: {torch.mean(torch.linalg.norm(torch.unsqueeze((boundary.clone() - proto_copy[i]), dim=0), dim=0), dim=1)}\n" )
                                 break
                             else:
