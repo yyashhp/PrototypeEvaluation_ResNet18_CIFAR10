@@ -435,7 +435,7 @@ def main():
                 l2_trained_diff = []
                 for k in range(nclass):
                     if i == k:
-                        trained_boundaries.append((torch.zeros(3,3,32), device=device))
+                        trained_boundaries.append((torch.zeros([3, 32, 32], device=device)))
                         latents_boundaries.append(torch.zeros(512, device=device))
                     if i!=k:
                         epoch = 1
