@@ -315,7 +315,7 @@ def main():
 
                             # boundary_reshaped = torch.reshape(boundary.clone(), (3,1024))
 
-                                l2_diff.append(torch.mean(torch.linalg.norm(torch.unsqueeze(boundary.clone() - proto_copy[i]), dim=0), dim=1))
+                                l2_diff.append(torch.mean(torch.linalg.norm(torch.unsqueeze((boundary.clone() - proto_copy[i]), dim=0), dim=1)))
                                 print(f"l2-val as {k} goes to {i}: {torch.mean(torch.linalg.norm(torch.unsqueeze((boundary.clone() - proto_copy[i]), dim=0), dim=0), dim=1)}\n" )
                                 break
                             else:
