@@ -454,7 +454,7 @@ def main():
                         boundary_latent = torch.squeeze(boundary_latent, dim=0)
                         cos_trained_latent[i][k] = cos_sim(boundary_latent.view(-1), protos_latent[i].view(-1))
                         trained_boundaries.append(start_proto)
-                        l2_trained_diff.append(torch.mean(torch.linalg.norm((boundary_latent.clone() - protos_latent[i]), dim=1)))
+                        l2_trained_diff.append(torch.mean(torch.linalg.norm((boundary_latent.clone() - protos_latent[i]), dim=0)))
                         latents_boundaries.append(torch.squeeze(boundary_latent, dim=0))
 
                 set_trained_boundaries.append(torch.stack(trained_boundaries, dim=0))
