@@ -291,6 +291,7 @@ def main():
                             tester = torch.add(tester, start_image, alpha=(1 - adj_alpha))
                             tester = torch.add(tester, target_class_image, alpha=adj_alpha)
                             tester_shaped = torch.unsqueeze(tester, dim=0)
+                            print(f"Tester Tensor: {tester_shaped}")
                             with torch.no_grad():
                                 tester_norm = transformDict['norm'](tester_shaped)
                                 print(f"Tester_norm shape {tester_norm.shape}")
