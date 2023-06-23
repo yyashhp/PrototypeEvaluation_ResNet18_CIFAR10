@@ -456,13 +456,11 @@ def main():
     print(f"length of cs's : {len(final_ind_cs_diffs)}")
 
     with open('{}/BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
-        f.write("Split \t Alphas  \t CS_Diffs \t L2 diffs \
-           \t cumulative alpha \t Cumuluative cs diff\
-            \t Cumulative L2 Diff  \n")
         for i in range(len(data_schedule)):
-            f.write(f"{data_schedule[i]} \n {final_comb_alphas_avg[i]}\n {[val.item() for val in final_ind_cs_diffs[i]]}\n {final_ind_l2_diffs[i].tolist()}\n {final_comb_cum_alphas_avg[i]}\t {final_comb_cs_diffs[i]}\t\\"
-                    f" {final_comb_l2_diffs[i]}\t \
-                \n")
+            f.write(f"\n Split: {data_schedule[i]} \t Alphas: {final_comb_alphas_avg[i]}  \t CS_Diffs: {[val.item() for val in final_ind_cs_diffs[i]]} \
+            \t L2 diffs: {final_ind_l2_diffs[i].tolist()} \
+                       \t cumulative alpha: {final_comb_cum_alphas_avg[i]} \t Cumuluative cs diff: {final_comb_cs_diffs[i]}\
+                        \t Cumulative L2 Diff: {final_comb_l2_diffs[i]}  \n")
     f.close()
 
 
