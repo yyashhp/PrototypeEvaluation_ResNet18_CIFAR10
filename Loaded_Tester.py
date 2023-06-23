@@ -286,7 +286,7 @@ def main():
                         #start_image = torch.unsqueeze(start_image, dim=0)
                         target_class_image = proto_copy[i].clone().detach().requires_grad_(True).to(device)
                        # target_class_image = torch.unsqueeze(target_class_image, dim=0)
-                        print(f"Starting Pred: {start_pred}, target pred: {end_pred}")
+                        print(f"Starting Pred: {start_pred}, target pred: {end_pred}\n")
                         prev = start_image
                         for alpha in range(1, 21):
                             adj_alpha = alpha * 0.05
@@ -297,11 +297,11 @@ def main():
                             #print(f"Tester Tensor: {tester_shaped}")
                             with torch.no_grad():
                                 tester_norm = transformDict['norm'](tester_shaped.clone())
-                                print(f"Tester_norm shape {tester_norm.shape}")
+                           #     print(f"Tester_norm shape {tester_norm.shape}")
                                 latent_tester, logits_tester = model(tester_norm)
                                 preds_tester = logits_tester.max(1, keepdim=True)[1]
                                 probs_tester = F.softmax(logits_tester)
-                            print(f"Preds:Tester!: {preds_tester}")
+                       #     print(f"Preds:Tester!: {preds_tester}")
                             if preds_tester == end_pred:
                                 boundary = torch.zeros(*(list(tester.shape)), device=device)
                                 boundary = torch.add(boundary, prev, alpha=0.5)
