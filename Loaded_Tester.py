@@ -303,7 +303,7 @@ def main():
                                 print(f"Boundary Shape: {boundary.shape}\n")
                                 #    print(f"Alpha needed: {adj_alpha}\n")
                                 print(
-                                f"Boundary shape needed to go from proto {j} to proto {i} is {(1 - adj_alpha) * 100} percent proto {j} and {adj_alpha * 100} percent proto {i} \n")
+                                f"Boundary shape needed to go from proto {k} to proto {i} is {(1 - adj_alpha) * 100} percent proto {j} and {adj_alpha * 100} percent proto {i} \n")
 
                                 proto_boundaries.append(boundary.clone())
                                 proto_alphas.append(adj_alpha)
@@ -311,12 +311,12 @@ def main():
                                     norm_boundary = transformDict['norm'](boundary.clone())
                                     boundary_latent, boundary_logits = model(norm_boundary)
                                 cs_diff.append(cos_sim(latent_proto[i].view(-1),boundary_latent.view(-1) ))
-                                print(f"CS Diff as {k} goes to {i}:{cos_sim(latent_proto[i].view(-1),boundary_latent.view(-1) )}\m ")
+                                print(f"CS Diff as {k} goes to {i}: {cos_sim(latent_proto[i].view(-1),boundary_latent.view(-1) )}\m ")
 
                             # boundary_reshaped = torch.reshape(boundary.clone(), (3,1024))
 
                                 l2_diff.append(torch.mean(torch.linalg.norm(torch.unsqueeze(boundary.clone() - proto_copy[i]), dim=0), dim=1))
-                                print(f"l2-val as {k} goes to {i}: {torch.mean(torch.linalg.norm(torch.unsqueeze(boundary.clone() - proto_copy[i]), dim=0), dim=1)}\n" )
+                                print(f"l2-val as {k} goes to {i}: {torch.mean(torch.linalg.norm(torch.unsqueeze((boundary.clone() - proto_copy[i]), dim=0), dim=0), dim=1)}\n" )
                                 break
                             else:
                                 prev = tester
