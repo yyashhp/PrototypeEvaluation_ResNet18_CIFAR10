@@ -444,15 +444,19 @@ def main():
     # combined_boundary_latent = torch.mean(torch.stack(stacked_sets_latent_boundaries, dim=0), dim=0)
 
     # print(f"shape of combined_image and combined_latent: {combined_boundary_images.shape} /n {combined_boundary_latent.shape}")
+    
+    final_comb_alphas_avg = tuple(final_comb_alphas_avg)
+    #final_comb_l2_diffs = tuple(final_comb_l2_diffs)
+    final_ind_l2_diffs = tuple(final_ind_l2_diffs)
+    final_ind_cs_diffs = tuple(final_ind_cs_diffs)
 
-    final_comb_alphas_avg = final_comb_alphas_avg
     with open('{}/BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
         f.write("Split \t Alphas  \t CS_Diffs \t L2 diffs \
            \t cumulative alpha \t Cumuluative cs diff\
             \t Cumulative L2 Diff  \n")
         for i in range(len(data_schedule)):
-            f.write("{0:4.4f} \t {1:4.4f}\t {2:4.4f}\t {3:4.4f}\t {4:4.4f}\t {5:4.4f}\t\
-                \n".format(data_schedule[i], final_comb_alphas_avg[i], final_ind_cs_diffs[i]
+            f.write("{0:4.4f} \t {1:4.4f}\t {2:4.4f}\t {3:4.4f}\t {4:4.4f}\t {5:4.4f}\t\ {6:4.4f}\t \
+                \n".format(data_schedule[i], final_comb_alphas_avg[i], final_ind_cs_diffs[i], final_ind_l2_diffs[i]
                                     , final_comb_cum_alphas_avg[i], final_comb_cs_diffs[i]
                                     , final_comb_l2_diffs[i]))
     f.close()
