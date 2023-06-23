@@ -279,9 +279,9 @@ def main():
                         end_pred = preds[i]
                         start_probs = probs[k]
                         end_probs = probs[i]
-                        start_image = proto_copy[k].clone().detach().requires_grad_(False).to(device)
+                        start_image = proto_copy[k].clone().detach().requires_grad_(True).to(device)
                         start_image = torch.unsqueeze(start_image, dim=0)
-                        target_class_image = proto_copy[i].clone().detach().requires_grad_(False).to(device)
+                        target_class_image = proto_copy[i].clone().detach().requires_grad_(True).to(device)
                         target_class_image = torch.unsqueeze(target_class_image, dim=0)
                         print(f"Starting Pred: {start_pred}, target pred: {end_pred}")
                         prev = start_image
