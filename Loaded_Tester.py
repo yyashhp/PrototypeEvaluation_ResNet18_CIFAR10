@@ -149,6 +149,16 @@ def main():
     model.load_state_dict(model_saved)
     model.multi_out = 1
     model.eval()
+
+    final_comb_cs_diffs = []
+    final_comb_l2_diffs = []
+    final_ind_cs_diffs = []
+    final_ind_l2_diffs = []
+    final_comb_boundaries_avg = []
+    final_comb_alphas_avg = []
+    final_comb_cum_alphas_avg = []
+
+    
     for p in model.parameters():
         p.requires_grad = False
     for j in range(len(data_schedule)):
@@ -239,18 +249,13 @@ def main():
     #     f.write("\n")
     #     f.write(f"L2_diff latent overall mean: {L2_cum_latent_mean.clone()} \t CS_diff latent overall mean {CS_adv_latent.clone()}")
     # f.close()
+
+
         final_boundaries_list = []
         final_alphas_list = []
-        final_comb_boundaries_avg = []
-        final_comb_alphas_avg = []
-        final_comb_cum_alphas_avg = []
-        final_latent_list = []
         final_cs_diffs = []
         final_l2_diffs = []
-        final_comb_cs_diffs = []
-        final_comb_l2_diffs = []
-        final_ind_cs_diffs = []
-        final_ind_l2_diffs = []
+
         model.eval()
         for proto in par_image_tensors:
             batch_cs_diff = []
@@ -364,7 +369,7 @@ def main():
         final_boundaries_avg = torch.squeeze(final_boundaries_avg)
         final_split_comb_boundaries_avg = torch.mean(final_boundaries_avg, dim=0)
         final_comb_boundaries_avg.append(torch.squeeze(final_split_comb_boundaries_avg, dim=0))
-        print(f"average alphas list at split {j}: {final_alphas}\n")
+        print(f"average alphas list at split {j}: {alpha_means}\n")
         with open('{}/Line_Stats{}.txt'.format(saved_boundaries_path, date_time), 'a') as f:
             f.write("\n")
             f.write(
@@ -445,7 +450,7 @@ def main():
 
     # print(f"shape of combined_image and combined_latent: {combined_boundary_images.shape} /n {combined_boundary_latent.shape}")
 
-    
+
     print(f"length of comb alphas : {len(final_comb_alphas_avg)}")
     print(f"length of l2s : {len(final_ind_l2_diffs)}")
     print(f"length of cs's : {len(final_ind_cs_diffs)}")
