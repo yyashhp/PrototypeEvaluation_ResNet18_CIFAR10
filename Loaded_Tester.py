@@ -309,7 +309,6 @@ def main():
                                 proto_alphas.append(adj_alpha)
                                 with torch.no_grad():
                                     norm_boundary = transformDict['norm'](boundary.clone())
-                                    norm_boundary = torch.unsqueeze(norm_boundary, dim=0)
                                     boundary_latent, boundary_logits = model(norm_boundary)
                                 cs_diff.append(cos_sim(latent_proto[i].view(-1),boundary_latent.view(-1) ))
                                 print(f"CS Diff as {k} goes to {i}:{cos_sim(latent_proto[i].view(-1),boundary_latent.view(-1) )}\m ")
