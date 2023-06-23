@@ -342,7 +342,7 @@ def main():
         final_comb_cs_diffs.append(cum_cs_avg)
         final_ind_cs_diffs.append([1-val for val in batch_cum_cs])
 
-        batch_l2 = torch.mean(torch.stack(final_l2_diffs.clone(), dim=0), dim=0)
+        batch_l2 = torch.mean(torch.stack(final_l2_diffs, dim=0), dim=0)
         batch_cum_l2 = torch.mean(batch_l2, dim=0)
         final_comb_l2_diffs.append(torch.mean(batch_cum_l2))
         final_ind_l2_diffs.append(batch_cum_l2)
