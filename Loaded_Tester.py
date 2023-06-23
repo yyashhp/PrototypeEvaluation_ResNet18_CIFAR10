@@ -321,7 +321,7 @@ def main():
                                 break
                             else:
                                 prev = tester
-                                assert alpha != 20
+                                assert alpha != 21
                 boundaries_list.append(torch.stack(proto_boundaries, dim=0))
                 alphas_list.append(proto_alphas)
                 batch_l2_diff.append(torch.stack(l2_diff, dim=0))
