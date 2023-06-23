@@ -274,7 +274,7 @@ def main():
                 l2_diff = []
                 for k in range(len(proto)):
                     if i == k:
-                        proto_boundaries.append((torch.zeros([1, 3, 32, 32], device=device)))
+                        proto_boundaries.append((torch.zeros([3, 32, 32], device=device)))
                     elif i != k:
                         start_pred = preds[k]
                         end_pred = preds[i]
@@ -304,10 +304,7 @@ def main():
                                 boundary = torch.zeros(*(list(tester.shape)), device=device)
                                 boundary = torch.add(boundary, prev, alpha=0.5)
                                 boundary = torch.add(boundary, tester, alpha=0.5)
-                                print(f"Boundary tensor: {boundary}")
                                 boundary_shaped = torch.unsqueeze(boundary, dim=0)
-                                print(f"Boundary Shape: {boundary_shaped.shape}\n")
-                                #    print(f"Alpha needed: {adj_alpha}\n")
                                 print(
                                 f"Boundary shape needed to go from proto {k} to proto {i} is {(1 - adj_alpha) * 100} percent proto {j} and {adj_alpha * 100} percent proto {i} \n")
 
