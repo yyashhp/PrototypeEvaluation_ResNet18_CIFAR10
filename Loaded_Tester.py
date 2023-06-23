@@ -288,8 +288,8 @@ def main():
                         for alpha in range(1, 21):
                             adj_alpha = alpha * 0.05
                             tester = torch.zeros(*(list(start_image.shape)), device=device)
-                            tester = torch.add(tester, start_image, alpha=(1 - adj_alpha))
-                            tester = torch.add(tester, target_class_image, alpha=adj_alpha)
+                            tester = torch.add(tester, start_image, alpha=1)
+                            #tester = torch.add(tester, target_class_image, alpha=adj_alpha)
                             tester_shaped = torch.unsqueeze(tester, dim=0)
                             print(f"Tester Tensor: {tester_shaped}")
                             with torch.no_grad():
