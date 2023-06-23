@@ -335,9 +335,9 @@ def main():
             final_cs_diffs.append(cos_latent_temp.clone())
             final_l2_diffs.append(torch.stack(batch_l2_diff, dim=0))
 
-        batch_cs = torch.mean(torch.stack(final_cs_diffs.clone(), dim=0), dim=0)
+        batch_cs = torch.mean(torch.stack(final_cs_diffs, dim=0), dim=0)
         print(f"Shape of batch_cs, {batch_cs.shape}")
-        batch_cum_cs = torch.mean(batch_cs.clone(), dim=0)
+        batch_cum_cs = torch.mean(batch_cs, dim=0)
         cum_cs_avg = torch.mean(batch_cum_cs)
         final_comb_cs_diffs.append(cum_cs_avg)
         final_ind_cs_diffs.append([1-val for val in batch_cum_cs])
