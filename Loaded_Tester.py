@@ -361,7 +361,7 @@ def main():
         final_boundaries_avg = torch.stack(final_boundaries_list, dim=0)
         final_boundaries_avg = torch.squeeze(final_boundaries_avg)
         final_split_comb_boundaries_avg = torch.mean(final_boundaries_avg, dim=0)
-        final_comb_boundaries_avg.append(torch.squeeze(final_split_comb_boundaries_avg),dim=0)
+        final_comb_boundaries_avg.append(torch.squeeze(final_split_comb_boundaries_avg, dim=0))
         print(f"average alphas list at split {j}: {final_alphas}\n")
         with open('{}/Split_{}_Line_Stats{}.txt'.format(saved_boundaries_path, j, date_time), 'a') as f:
             f.write("\n")
