@@ -352,8 +352,8 @@ def main():
         alpha_means = np.mean(final_alphas, axis = 0)
         alpha_means = np.mean(alpha_means, axis = 0)
         alpha_means = np.round(alpha_means, 2)
-        final_comb_alphas_avg.append(alpha_means.clone())
-        final_comb_cum_alphas_avg.append(np.mean(alpha_means.clone()))
+        final_comb_alphas_avg.append(alpha_means)
+        final_comb_cum_alphas_avg.append(np.mean(alpha_means))
         # for i in range(nclass):
         #     final_alphas.append(mean(
         #         [mean(final_alphas_list[0][i]), mean(final_alphas_list[1][i]), mean(final_alphas_list[2][i]),
