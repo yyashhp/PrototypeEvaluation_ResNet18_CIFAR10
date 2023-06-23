@@ -282,7 +282,7 @@ def main():
                         start_image = torch.unsqueeze(start_image, dim=0)
                         target_class_image = proto_copy[i].clone().detach().requires_grad_(False).to(device)
                         target_class_image = torch.unsqueeze(target_class_image, dim=0)
-                        print(f"Starting Pred: {start_pred}")
+                        print(f"Starting Pred: {start_pred}, target pred: {end_pred}")
                         prev = start_image
                         for alpha in range(1, 20):
                             adj_alpha = alpha * 0.05
