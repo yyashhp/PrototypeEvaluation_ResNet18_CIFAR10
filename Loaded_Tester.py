@@ -259,6 +259,8 @@ def main():
             boundaries_list = []
             logits_list = []
             proto_copy = proto.clone()
+            cos_latent_temp = torch.zeros(nclass, nclass, dtype=torch.float)
+            #L2_latent_temp = torch.zeros(nclass, nclass, dtype=torch.float)
             with torch.no_grad():
                 model.multi_out = 1
                 proto_copy_norm = transformDict['norm'](proto_copy)
@@ -313,7 +315,7 @@ def main():
                                 with torch.no_grad():
                                     norm_boundary = transformDict['norm'](boundary_shaped.clone())
                                     boundary_latent, boundary_logits = model(norm_boundary)
-                                cs_diff.append(cos_sim(latent_proto[i].view(-1),boundary_latent.view(-1) ))
+                                cos_latent_temp[i][k] = (cos_sim(latent_proto[i].view(-1),boundary_latent.view(-1) ))
                                 print(f"CS Diff as {k} goes to {i}: {cos_sim(latent_proto[i].view(-1),boundary_latent.view(-1) )}\m ")
 
                             # boundary_reshaped = torch.reshape(boundary.clone(), (3,1024))
@@ -327,10 +329,10 @@ def main():
                 boundaries_list.append(torch.stack(proto_boundaries, dim=0))
                 alphas_list.append(proto_alphas)
                 batch_l2_diff.append(torch.stack(l2_diff, dim=0))
-                batch_cs_diff.append(torch.stack(cs_diff,dim=0))
+                #batch_cs_diff.append(cs_diff)
             final_boundaries_list.append(torch.stack(boundaries_list, dim=0))
             final_alphas_list.append(alphas_list)
-            final_cs_diffs.append(torch.stack(batch_cs_diff, dim=0))
+            final_cs_diffs.append(cos_latent_temp.clone())
             final_l2_diffs.append(torch.stack(batch_l2_diff, dim=0))
 
         batch_cs = torch.mean(torch.stack(final_cs_diffs.clone(), dim=0), dim=0)
