@@ -157,6 +157,10 @@ def main():
     final_comb_boundaries_avg = []
     final_comb_alphas_avg = []
     final_comb_cum_alphas_avg = []
+    final_comb_trained_cs_diffs = []
+    final_ind_trained_cs_diffs = []
+    final_comb_trained_l2_diffs = []
+    final_ind_trained_l2_diffs = []
 
 
     for p in model.parameters():
@@ -410,57 +414,93 @@ def main():
     #         f.write("\n")
     #     f.close()
     #
-    #     model.multi_out = 1
-    #     stacked_sets_trained_boundaries = []
-    #     stacked_sets_latent_boundaries = []
-    #     for proto in par_image_tensors:
-    #         proto_clone = proto.clone()
-    #         set_trained_boundaries = []
-    #     set_latent_boundaries = []
-    #     for i in range(nclass):
-    #         trained_boundaries = []
-    #         latents_boundaries = []
-    #         target_proto = torch.tensor([i], device= device)
-    #         for j in range(nclass):
-    #             if i == j:
-    #                 trained_boundaries.append(torch.zeros(3,3,32), device=device)
-    #                 latents_boundaries.append(torch.zeros(512, device=device))
-    #             if i!=j:
-    #                 epoch = 1
-    #                 start_proto = torch.unsqueeze(proto_clone[j], dim = 0)
-    #                 last_loss, preds, probs = train_image_no_data(args, model=model, device=device,
-    #                                                               epoch=epoch, par_images=start_proto,
-    #                                                           targets=target_proto, transformDict=transformDict)
-    #                 print(f"Preds after {j} goes to {i}: {preds}\n")
-    #
-    #                 model.eval()
-    #                 with torch.no_grad():
-    #                     norm_trained_boundary = transformDict['norm'](start_proto.clone())
-    #                     boundary_latent, boundary_logits = model(norm_trained_boundary)
-    #                 start_proto = torch.squeeze(start_proto, dim=0)
-    #                 print(f"Boundary  shape: {start_proto.shape}")
-    #                 trained_boundaries.append(start_proto)
-    #                 latents_boundaries.append(torch.squeeze(boundary_latent, dim=0))
-    #         set_trained_boundaries.append(torch.stack(trained_boundaries, dim=0))
-    #         set_latent_boundaries.append(torch.stack(latents_boundaries, dim=0))
-    #     stacked_sets_trained_boundaries.append(torch.stack(set_trained_boundaries, dim=0))
-    #     stacked_sets_latent_boundaries.append(torch.stack(set_latent_boundaries, dim=0))
-    # combined_boundary_images = torch.mean(torch.stack(stacked_sets_trained_boundaries,dim=0), dim=0)
-    # combined_boundary_latent = torch.mean(torch.stack(stacked_sets_latent_boundaries, dim=0), dim=0)
+        model.multi_out = 1
+        stacked_sets_trained_boundaries = []
+        stacked_sets_latent_boundaries = []
+        cos_trained_latent_matrices = []
+        stacked_trained_l2 = []
+        for proto in par_image_tensors:
+            cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
+            proto_clone = proto.clone()
+            set_trained_boundaries = []
+            batch_l2_trained_diff = []
+       #     set_latent_boundaries = []
+            with torch.no_grad():
+                normed_protos = transformDict['norm'](proto_clone.clone())
+                protos_latent, protos_logits = model(normed_protos)
+            for i in range(nclass):
+                trained_boundaries = []
+                latents_boundaries = []
+                target_proto = torch.tensor([i], device= device)
+                l2_trained_diff = []
+                for k in range(nclass):
+                    if i == k:
+                        trained_boundaries.append(torch.zeros(3,3,32), device=device)
+                        latents_boundaries.append(torch.zeros(512, device=device))
+                    if i!=k:
+                        epoch = 1
+                        start_proto = torch.unsqueeze(proto_clone[j], dim = 0)
+                        last_loss, preds, probs = train_image_no_data(args, model=model, device=device,
+                                                                   epoch=epoch, par_images=start_proto,
+                                                               targets=target_proto, transformDict=transformDict)
+                        print(f"Preds after {k} goes to {i}: {preds}\n")
 
-    # print(f"shape of combined_image and combined_latent: {combined_boundary_images.shape} /n {combined_boundary_latent.shape}")
+                        model.eval()
+                        with torch.no_grad():
+                            norm_trained_boundary = transformDict['norm'](start_proto.clone())
+                            boundary_latent, boundary_logits = model(norm_trained_boundary)
+                        start_proto = torch.squeeze(start_proto, dim=0)
+                        print(f"Boundary  shape: {start_proto.shape}")
+                        boundary_latent = torch.squeeze(boundary_latent, dim=0)
+                        cos_trained_latent[i][k] = cos_sim(boundary_latent.view(-1), protos_latent[i].view(-1))
+                        trained_boundaries.append(start_proto)
+                        l2_trained_diff.append(torch.mean(torch.linalg.norm((boundary_latent.clone() - proto_copy[i]), dim=1)))
+                        latents_boundaries.append(torch.squeeze(boundary_latent, dim=0))
+
+                set_trained_boundaries.append(torch.stack(trained_boundaries, dim=0))
+             #   set_latent_boundaries.append(torch.stack(latents_boundaries, dim=0))
+                batch_l2_trained_diff.append(torch.stack(l2_trained_diff, dim=0))
+            cos_trained_latent_matrices.append(cos_trained_latent.clone())
+            stacked_sets_trained_boundaries.append(torch.stack(set_trained_boundaries, dim=0))
+            stacked_trained_l2.append(torch.stack(batch_l2_trained_diff, dim=0))
+
+          #  stacked_sets_latent_boundaries.append(torch.stack(set_latent_boundaries, dim=0))
+        combined_boundary_images = torch.mean(torch.stack(stacked_sets_trained_boundaries,dim=0), dim=0)
+        combined_boundary_latent = torch.mean(torch.stack(stacked_sets_latent_boundaries, dim=0), dim=0)
+        batch_trained_cs = torch.mean(torch.stack(cos_trained_latent_matrices, dim=0), dim=0)
+        batch_cum_trained_cs = torch.mean(batch_trained_cs, dim=0)
+        cum_trained_cs_avg = 1 - torch.mean(batch_cum_trained_cs)
+        final_comb_trained_cs_diffs.append(cum_trained_cs_avg)
+        final_ind_trained_cs_diffs.append([1 - val for val in batch_cum_trained_cs])
 
 
-    print(f"length of comb alphas : {len(final_comb_alphas_avg)}")
-    print(f"length of l2s : {len(final_ind_l2_diffs)}")
-    print(f"length of cs's : {len(final_ind_cs_diffs)}")
+        batch_trained_l2 = torch.mean(torch.stack(stacked_trained_l2, dim=0), dim=0)
+        batch_cum_trained_l2 = torch.mean(batch_trained_l2, dim=0)
+        final_comb_trained_l2_diffs.append(torch.mean(batch_cum_trained_l2))
+        final_ind_trained_l2_diffs.append(batch_cum_trained_l2)
+
+
+        print(f"shape of combined_image and combined_latent: {combined_boundary_images.shape} /n {combined_boundary_latent.shape}")
+
+        with open('{}/Trained_Stats{}.txt'.format(saved_boundaries_path, date_time), 'a') as f:
+            f.write("\n")
+            f.write(
+                f"Split {j} \n  average L2s: {batch_cum_trained_l2}\n average CS_diff: {[1-val for val in batch_cum_trained_cs]}\n,\
+                 Cumulative L2: {torch.mean(batch_cum_trained_l2.clone())}\n Cumulative CS_diff: {cum_trained_cs_avg}")
+            f.write("\n")
+        f.close()
+
+    # print(f"length of comb alphas : {len(final_comb_alphas_avg)}")
+    # print(f"length of l2s : {len(final_ind_l2_diffs)}")
+    # print(f"length of cs's : {len(final_ind_cs_diffs)}")
 
     with open('{}/BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
         for i in range(len(data_schedule)):
-            f.write(f"\n Split: {data_schedule[i]} \t Alphas: {final_comb_alphas_avg[i]}  \t CS_Diffs: {[val.item() for val in final_ind_cs_diffs[i]]} \
-            \t L2 diffs: {final_ind_l2_diffs[i].tolist()} \
-                       \t cumulative alpha: {final_comb_cum_alphas_avg[i]} \t Cumuluative cs diff: {final_comb_cs_diffs[i]}\
-                        \t Cumulative L2 Diff: {final_comb_l2_diffs[i]}  \n")
+            f.write(f"\n Split: {data_schedule[i]} \t Alphas: {final_comb_alphas_avg[i]}  \t cumulative alpha: {final_comb_cum_alphas_avg[i]} \t CS_Line_Diffs: {[val.item() for val in final_ind_cs_diffs[i]]} \
+            \n CS_Trained_Diffs{[val.item() for val in final_ind_trained_cs_diffs]} \n Cumulative cs_Line diff: {final_comb_cs_diffs[i]} \n \
+             Cumulative cs_trained_diff: {final_comb_trained_cs_diffs[i]} \n L2 line diffs(image): {final_ind_l2_diffs[i].tolist()} \
+                       \t  Cumulative L2 Diff: {final_comb_l2_diffs[i]}  \t \n \
+                            L2_Trained_Diffs(latent): {final_ind_trained_l2_diffs[i].tolist()} \t Cumulative L2_Trained_Diff: {final_comb_trained_l2_diffs[i]}\n \n")
     f.close()
 
 
