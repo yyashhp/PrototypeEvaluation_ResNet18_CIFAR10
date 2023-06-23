@@ -449,6 +449,9 @@ def main():
     #final_comb_l2_diffs = tuple(final_comb_l2_diffs)
     final_ind_l2_diffs = tuple(final_ind_l2_diffs)
     final_ind_cs_diffs = tuple(final_ind_cs_diffs)
+    print(f"length of comb alphas : {len(final_comb_alphas_avg)}")
+    print(f"length of l2s : {len(final_ind_l2_diffs)}")
+    print(f"length of cs's : {len(final_ind_cs_diffs)}")
 
     with open('{}/BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
         f.write("Split \t Alphas  \t CS_Diffs \t L2 diffs \
