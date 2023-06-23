@@ -291,6 +291,7 @@ def main():
                             tester = torch.add(tester, target_class_image, alpha=adj_alpha)
                             with torch.no_grad():
                                 tester_norm = transformDict['norm'](tester)
+                                print(f"Tester_norm shape {tester_norm.shape}")
                                 latent_tester, logits_tester = model(tester_norm)
                                 preds_tester = logits_tester.max(1, keepdim=True)[1]
                                 probs_tester = F.softmax(logits_tester)
