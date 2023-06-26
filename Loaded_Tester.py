@@ -430,12 +430,14 @@ def main():
         cos_trained_latent_col_matrices = []
         stacked_trained_l2 = []
         set = -1
+        cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
+        cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
       #  for proto in par_image_tensors:
         for t in range(1):
             proto = par_image_tensors[0]
             set+=1
-            cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
-            cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
+            # cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
+            # cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
             proto_clone = proto.clone()
             set_trained_boundaries = []
             batch_l2_trained_diff = []
@@ -490,9 +492,9 @@ def main():
        # batch_diff_std.append(batch_trained_std)
       #  batch_diff_col_std.append(batch_trained_col_std)
       #  batch_cum_trained_cs, batch_cum_trained_cs_std = torch.std_mean(batch_trained_cs, dim=0)
-        batch_cum_trained_cs, batch_cum_trained_cs_std = torch.std_mean(torch.stack(cos_trained_latent_matrices, dim = 0), dim=0)
+        batch_cum_trained_cs, batch_cum_trained_cs_std = torch.std_mean(cos_trained_latent.clone(), dim=0)
      #   batch_cum_trained_col_cs, batch_cum_trained_col_cs_std = torch.std_mean(batch_trained_col_cs, dim=1)
-        batch_cum_trained_col_cs, batch_cum_trained_col_cs_std = torch.std_mean(torch.stack(cos_trained_latent_col_matrices, dim=0),dim=1)
+        batch_cum_trained_col_cs, batch_cum_trained_col_cs_std = torch.std_mean(cos_trained_latent_col.clone(),dim=1)
         cum_trained_cs_avg = 1 - torch.mean(batch_cum_trained_cs)
         cum_trained_col_cs = 1 - torch.mean(batch_cum_trained_col_cs)
         final_comb_trained_cs_diffs.append(cum_trained_cs_avg)
