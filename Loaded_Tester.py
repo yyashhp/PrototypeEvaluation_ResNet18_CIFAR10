@@ -548,12 +548,12 @@ def main():
         #         \t \t cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
         #          Mispredictions: {mispredictions}")
         f.write(f" row wise CS diffs: {final_ind_trained_cs_diffs[0]} \n \n \
-                   row wise CS stds: {final_ind_trained_cs_diffs_std[0]} \n \n  \
-                   column-wise CS diffs: {final_ind_trained_col_cs_diffs[0]} \n \n \
-                    column-wise CS stds: {final_ind_trained_cs_col_stds[0]} \n \n \
-                    \n \n cumulative row-wise CS diff: {final_comb_trained_cs_diffs[0]} \n \n \
+                   row wise CS stds: {final_ind_trained_cs_diffs_std[0]} \n   \
+                   column-wise CS diffs: {final_ind_trained_col_cs_diffs[0]} \n  \
+                    column-wise CS stds: {final_ind_trained_cs_col_stds[0]} \n  \
+                    \n \n cumulative row-wise CS diff: {final_comb_trained_cs_diffs[0]} \n  \
                      cumulative row-wise CS Std; {final_comb_trained_cs_std} \
-                      \n \n cumulative column-wise CS diff {final_comb_trained_cols_cs_diffs[0]} \
+                      \n  cumulative column-wise CS diff {final_comb_trained_cols_cs_diffs[0]} \
                        \n \n cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
                         Mispredictions: {mispredictions}")
 
