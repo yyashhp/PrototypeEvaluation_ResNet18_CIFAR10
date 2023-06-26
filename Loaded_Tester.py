@@ -458,7 +458,7 @@ def main():
                                                                targets=target_proto, transformDict=transformDict)
                         print(f"Preds after {k} goes to {i}: {preds}\n")
                         if preds != i:
-                            mispredictions.append([set, k, i, preds])
+                            mispredictions.append([set, k, i, preds.item()])
                         model.eval()
                         with torch.no_grad():
                             norm_trained_boundary = transformDict['norm'](start_proto.clone())
