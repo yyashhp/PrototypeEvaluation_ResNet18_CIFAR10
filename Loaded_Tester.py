@@ -430,7 +430,9 @@ def main():
         cos_trained_latent_col_matrices = []
         stacked_trained_l2 = []
         set = -1
-        for proto in par_image_tensors:
+      #  for proto in par_image_tensors:
+        for t in range(1):
+            proto = par_image_tensors[0]
             set+=1
             cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
             cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
@@ -483,12 +485,14 @@ def main():
           #  stacked_sets_latent_boundaries.append(torch.stack(set_latent_boundaries, dim=0))
        # combined_boundary_images = torch.mean(torch.stack(stacked_sets_trained_boundaries,dim=0), dim=0)
        # combined_boundary_latent = torch.mean(torch.stack(stacked_sets_latent_boundaries, dim=0), dim=0)
-        batch_trained_cs, batch_trained_std = torch.std_mean(torch.stack(cos_trained_latent_matrices, dim=0), dim=0)
-        batch_trained_col_cs, batch_trained_col_std = torch.std_mean(torch.stack(cos_trained_latent_col_matrices, dim=0), dim=0)
-        batch_diff_std.append(batch_trained_std)
-        batch_diff_col_std.append(batch_trained_col_std)
-        batch_cum_trained_cs, batch_cum_trained_cs_std = torch.std_mean(batch_trained_cs, dim=0)
-        batch_cum_trained_col_cs, batch_cum_trained_col_cs_std = torch.std_mean(batch_trained_col_cs, dim=1)
+      #  batch_trained_cs, batch_trained_std = torch.std_mean(torch.stack(cos_trained_latent_matrices, dim=0), dim=0)
+      #  batch_trained_col_cs, batch_trained_col_std = torch.std_mean(torch.stack(cos_trained_latent_col_matrices, dim=0), dim=0)
+       # batch_diff_std.append(batch_trained_std)
+      #  batch_diff_col_std.append(batch_trained_col_std)
+      #  batch_cum_trained_cs, batch_cum_trained_cs_std = torch.std_mean(batch_trained_cs, dim=0)
+        batch_cum_trained_cs, batch_cum_trained_cs_std = torch.std_mean(cos_trained_latent_matrices, dim = 0)
+     #   batch_cum_trained_col_cs, batch_cum_trained_col_cs_std = torch.std_mean(batch_trained_col_cs, dim=1)
+        batch_cum_trained_col_cs, batch_cum_trained_col_cs_std = torch.std_mean(cos_trained_latent_col_matrices, dim=1)
         cum_trained_cs_avg = 1 - torch.mean(batch_cum_trained_cs)
         cum_trained_col_cs = 1 - torch.mean(batch_cum_trained_col_cs)
         final_comb_trained_cs_diffs.append(cum_trained_cs_avg)
@@ -530,17 +534,26 @@ def main():
             #            \t  Cumulative L2 Diff: {final_comb_l2_diffs[i]}  \t \n \
             #                 L2_Trained_Diffs(latent): {final_ind_trained_l2_diffs[i].tolist()} \t Cumulative L2_Trained_Diff: {final_comb_trained_l2_diffs[i]}\n \n")
 
-        f.write(f"inter-batch std of row-wise CS diff: {batch_diff_std[0]} \n \
-         inter-batch std of col-wise CS diff {batch_diff_col_std[0]} \n \
-           row wise CS diffs: {final_ind_trained_cs_diffs[0]} \t \t \
-            row wise CS stds: {final_ind_trained_cs_diffs_std[0]} \n \n  \
-            column-wise CS diffs: {final_ind_trained_col_cs_diffs[0]} \t \t \
-             column-wise CS stds: {final_ind_trained_cs_col_stds[0]} \n \n \
-             \n \n cumulative row-wise CS diff: {final_comb_trained_cs_diffs[0]} \t \t \
-              cumulative row-wise CS Std; {final_comb_trained_cs_std} \
-               \n \n cumulative column-wise CS diff {final_comb_trained_cols_cs_diffs[0]} \
-                \t \t cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
-                 Mispredictions: {mispredictions}")
+        # f.write(f"inter-batch std of row-wise CS diff: {batch_diff_std[0]} \n \
+        #  inter-batch std of col-wise CS diff {batch_diff_col_std[0]} \n \
+        #    row wise CS diffs: {final_ind_trained_cs_diffs[0]} \t \t \
+        #     row wise CS stds: {final_ind_trained_cs_diffs_std[0]} \n \n  \
+        #     column-wise CS diffs: {final_ind_trained_col_cs_diffs[0]} \t \t \
+        #      column-wise CS stds: {final_ind_trained_cs_col_stds[0]} \n \n \
+        #      \n \n cumulative row-wise CS diff: {final_comb_trained_cs_diffs[0]} \t \t \
+        #       cumulative row-wise CS Std; {final_comb_trained_cs_std} \
+        #        \n \n cumulative column-wise CS diff {final_comb_trained_cols_cs_diffs[0]} \
+        #         \t \t cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
+        #          Mispredictions: {mispredictions}")
+        f.write(f" row wise CS diffs: {final_ind_trained_cs_diffs[0]} \t \t \
+                   row wise CS stds: {final_ind_trained_cs_diffs_std[0]} \n \n  \
+                   column-wise CS diffs: {final_ind_trained_col_cs_diffs[0]} \t \t \
+                    column-wise CS stds: {final_ind_trained_cs_col_stds[0]} \n \n \
+                    \n \n cumulative row-wise CS diff: {final_comb_trained_cs_diffs[0]} \t \t \
+                     cumulative row-wise CS Std; {final_comb_trained_cs_std} \
+                      \n \n cumulative column-wise CS diff {final_comb_trained_cols_cs_diffs[0]} \
+                       \t \t cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
+                        Mispredictions: {mispredictions}")
 
     f.close()
 
