@@ -169,6 +169,7 @@ def main():
     final_ind_trained_cs_col_stds = []
     batch_diff_std = []
     batch_diff_col_std = []
+    mispredictions = []
 
 
     for p in model.parameters():
@@ -428,7 +429,9 @@ def main():
         cos_trained_latent_matrices = []
         cos_trained_latent_col_matrices = []
         stacked_trained_l2 = []
+        set = -1
         for proto in par_image_tensors:
+            set+=1
             cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
             cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
             proto_clone = proto.clone()
@@ -454,7 +457,8 @@ def main():
                                                                    epoch=epoch, par_images=start_proto,
                                                                targets=target_proto, transformDict=transformDict)
                         print(f"Preds after {k} goes to {i}: {preds}\n")
-
+                        if preds != i:
+                            mispredictions.append([set, k, i, preds])
                         model.eval()
                         with torch.no_grad():
                             norm_trained_boundary = transformDict['norm'](start_proto.clone())
@@ -535,7 +539,8 @@ def main():
              \n \n cumulative row-wise CS diff: {final_comb_trained_cs_diffs[0]} \t \t \
               cumulative row-wise CS Std; {final_comb_trained_cs_std} \
                \n \n cumulative column-wise CS diff {final_comb_trained_cols_cs_diffs[0]} \
-                \t \t cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]}")
+                \t \t cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
+                 Mispredictions: {mispredictions}")
 
     f.close()
 
