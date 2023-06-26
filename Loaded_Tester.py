@@ -501,10 +501,10 @@ def main():
         final_comb_trained_cols_cs_diffs.append(cum_trained_col_cs.item())
         final_comb_trained_cs_std.append(torch.mean(batch_cum_trained_cs_std).item())
         final_comb_trained_col_cs_std.append(torch.mean(batch_cum_trained_col_cs_std).item())
-        final_ind_trained_col_cs_diffs.append([1 - val.item() for val in batch_cum_trained_col_cs])
-        final_ind_trained_cs_col_stds.append([val.item() for val in batch_cum_trained_col_cs_std])
-        final_ind_trained_cs_diffs.append([1 - val.item() for val in batch_cum_trained_cs])
-        final_ind_trained_cs_diffs_std.append([val.item() for val in batch_cum_trained_cs_std])
+        final_ind_trained_col_cs_diffs.append([round(1 - val.item(),3) for val in batch_cum_trained_col_cs])
+        final_ind_trained_cs_col_stds.append([round(val.item(), 3) for val in batch_cum_trained_col_cs_std])
+        final_ind_trained_cs_diffs.append([round(1 - val.item(), 3) for val in batch_cum_trained_cs])
+        final_ind_trained_cs_diffs_std.append([round(val.item(), 3) for val in batch_cum_trained_cs_std])
 
 
         batch_trained_l2 = torch.mean(torch.stack(stacked_trained_l2, dim=0), dim=0)
