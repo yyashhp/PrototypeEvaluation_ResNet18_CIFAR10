@@ -170,11 +170,16 @@ def main():
     batch_diff_std = []
     batch_diff_col_std = []
     mispredictions = []
+    inter_row_image_diff = []
     cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
     cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
     last_loss_save = torch.zeros(nclass, nclass, dtype=torch.float)
     end_logits =  torch.zeros(nclass, nclass, dtype=torch.float)
+    trained_boundary_sets = []
+    stacked_sets_latent_boundaries = []
 
+    stacked_trained_l2 = []
+    stacked_sets_trained_boundaries = []
 
     for j in range(6, len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
@@ -429,11 +434,11 @@ def main():
     #     f.close()
     #
         model.multi_out = 1
-        stacked_sets_trained_boundaries = []
-        stacked_sets_latent_boundaries = []
+     #   stacked_sets_trained_boundaries = []
+    #    stacked_sets_latent_boundaries = []
         cos_trained_latent_matrices = []
         cos_trained_latent_col_matrices = []
-        stacked_trained_l2 = []
+        #stacked_trained_l2 = []
         set = -1
         # cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
         # cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
@@ -446,7 +451,7 @@ def main():
             proto_clone = proto.clone()
             set_trained_boundaries = []
             batch_l2_trained_diff = []
-       #     set_latent_boundaries = []
+            set_latent_boundaries = []
             with torch.no_grad():
                 normed_protos = transformDict['norm'](proto_clone.clone())
                 protos_latent, protos_logits = model(normed_protos)
@@ -479,22 +484,24 @@ def main():
                         start_proto = torch.squeeze(start_proto, dim=0)
                         print(f"Boundary  shape: {start_proto.shape}")
                         boundary_latent = torch.squeeze(boundary_latent, dim=0)
-                        cos_trained_latent[i][k] = cos_sim(boundary_latent.view(-1), protos_latent[i].view(-1))
-                        cos_trained_latent_col[i][k] = cos_sim(boundary_latent.view(-1), protos_latent[k].view(-1))
+                        cos_trained_latent[i][k] = cos_sim(boundary_latent, protos_latent[i])
+                        cos_trained_latent_col[i][k] = cos_sim(boundary_latent, protos_latent[k])
                         trained_boundaries.append(start_proto)
                         l2_trained_diff.append(torch.mean(torch.linalg.norm((boundary_latent.clone() - protos_latent[i]), dim=0)))
-                        latents_boundaries.append(torch.squeeze(boundary_latent, dim=0))
+                        latents_boundaries.append(boundary_latent)
 
                 set_trained_boundaries.append(torch.stack(trained_boundaries, dim=0))
-             #   set_latent_boundaries.append(torch.stack(latents_boundaries, dim=0))
+                set_latent_boundaries.append(torch.stack(latents_boundaries, dim=0))
                 batch_l2_trained_diff.append(torch.stack(l2_trained_diff, dim=0))
             cos_trained_latent_matrices.append(cos_trained_latent.clone())
             cos_trained_latent_col_matrices.append(cos_trained_latent_col.clone())
             stacked_sets_trained_boundaries.append(torch.stack(set_trained_boundaries, dim=0))
             stacked_trained_l2.append(torch.stack(batch_l2_trained_diff, dim=0))
 
-          #  stacked_sets_latent_boundaries.append(torch.stack(set_latent_boundaries, dim=0))
-       # combined_boundary_images = torch.mean(torch.stack(stacked_sets_trained_boundaries,dim=0), dim=0)
+            stacked_sets_latent_boundaries.append(torch.stack(set_latent_boundaries, dim=0))
+      # combined_boundary_images = torch.mean(torch.stack(stacked_sets_trained_boundaries,dim=0), dim=0)
+       # trained_boundary_sets.append(torch.stack(stacked_sets_trained_boundaries, dim=0))
+       # print(len(trained_boundary_sets))
        # combined_boundary_latent = torch.mean(torch.stack(stacked_sets_latent_boundaries, dim=0), dim=0)
       #  batch_trained_cs, batch_trained_std = torch.std_mean(torch.stack(cos_trained_latent_matrices, dim=0), dim=0)
       #  batch_trained_col_cs, batch_trained_col_std = torch.std_mean(torch.stack(cos_trained_latent_col_matrices, dim=0), dim=0)
@@ -520,6 +527,31 @@ def main():
         batch_cum_trained_l2 = torch.mean(batch_trained_l2, dim=0)
         final_comb_trained_l2_diffs.append(torch.mean(batch_cum_trained_l2))
         final_ind_trained_l2_diffs.append(batch_cum_trained_l2)
+
+
+        class_diffs = []
+        class_latent_diffs = []
+
+
+        #
+        # for t in range(1):
+        #     matrix = stacked_sets_trained_boundaries
+        #     for i in range(len(stacked_sets_trained_boundaries)):
+        #         basefound = False
+        #         inter_class_diffs = []
+        #         inter_class_latent_diffs = []
+        #         base = 0
+        #         for j in range(len(stacked_sets_trained_boundaries)):
+        #             if basefound == False and j != i:
+        #                 base = stacked_sets_trained_boundaries[i][j].clone()
+        #                 basefound == True
+        #                 based_index = j
+        #             else:
+        #                 inter_diff =
+        #                 inter_class_diffs.append([i, based_index, j ])
+        #         
+
+
 
 
        # print(f"shape of combined_image and combined_latent: {combined_boundary_images.shape} /n {combined_boundary_latent.shape}")
