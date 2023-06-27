@@ -503,7 +503,7 @@ def main():
         final_comb_trained_cols_cs_diffs.append(cum_trained_col_cs.item())
         final_comb_trained_cs_std.append(torch.mean(batch_cum_trained_cs_std).item())
         final_comb_trained_col_cs_std.append(torch.mean(batch_cum_trained_col_cs_std).item())
-        final_ind_trained_col_cs_diffs.append([round(1 - val.item(),4) for val in batch_cum_trained_col_cs])
+        final_ind_trained_col_cs_diffs.append([round(1 - val.item(), 4) for val in batch_cum_trained_col_cs])
         final_ind_trained_cs_col_stds.append([round(val.item(), 4) for val in batch_cum_trained_col_cs_std])
         final_ind_trained_cs_diffs.append([round(1 - val.item(), 4) for val in batch_cum_trained_cs])
         final_ind_trained_cs_diffs_std.append([round(val.item(), 4) for val in batch_cum_trained_cs_std])
@@ -549,8 +549,8 @@ def main():
         #        \n \n cumulative column-wise CS diff {final_comb_trained_cols_cs_diffs[0]} \
         #         \t \t cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
         #          Mispredictions: {mispredictions}")
-        f.write(f" Matrix of Row-Wise CS diffs: {(torch.sub(cos_trained_latent, 1))}\n \
-                Matrix of Column-Wise CS diffs: {(torch.sub(cos_trained_latent_col, 1))} \n \
+        f.write(f" Matrix of Row-Wise CS diffs: {-(torch.sub(cos_trained_latent, 1))}\n \
+                Matrix of Column-Wise CS diffs: {-(torch.sub(cos_trained_latent_col, 1))} \n \
                    row wise CS diffs: {final_ind_trained_cs_diffs[0]} \n \n \
                    row wise CS stds: {final_ind_trained_cs_diffs_std[0]} \n   \
                    column-wise CS diffs: {final_ind_trained_col_cs_diffs[0]} \n  \
