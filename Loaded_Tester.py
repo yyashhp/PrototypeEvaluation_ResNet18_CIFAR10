@@ -172,6 +172,8 @@ def main():
     mispredictions = []
     cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
     cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
+    last_loss_save = torch.zeros(nclass, nclass, dtype=torch.float)
+    end_logits = [0 * 10] * 10
 
 
     for j in range(6, len(data_schedule)):
@@ -467,6 +469,8 @@ def main():
                         if preds != i:
                             mispredictions.append([set, k, i, preds.item()])
                         model.eval()
+                        last_loss_save[i][k] = last_loss
+                        end_logits[i][k] = probs
                         with torch.no_grad():
                             norm_trained_boundary = transformDict['norm'](start_proto.clone())
                             boundary_latent, boundary_logits = model(norm_trained_boundary)
@@ -550,7 +554,9 @@ def main():
         #        \n \n cumulative column-wise CS diff {final_comb_trained_cols_cs_diffs[0]} \
         #         \t \t cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
         #          Mispredictions: {mispredictions}")
-        f.write(f" Matrix of Row-Wise CS diffs: {-(torch.sub(cos_trained_latent, 1))}\n \
+        f.write(f" Final Probabilities Matrix: {end_logits} \n \n \n \n \
+                Final Loss Matrix: {last_loss_save} \n \n \
+                Matrix of Row-Wise CS diffs: {-(torch.sub(cos_trained_latent, 1))} \n \
                 Matrix of Column-Wise CS diffs: {-(torch.sub(cos_trained_latent_col, 1))} \n \
                    row wise CS diffs: {final_ind_trained_cs_diffs[0]} \n \n \
                    row wise CS stds: {final_ind_trained_cs_diffs_std[0]} \n   \
