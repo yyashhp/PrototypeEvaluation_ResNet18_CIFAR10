@@ -550,7 +550,7 @@ def main():
                         inter_class_diffs.append([i, based_index, j, 1 - round(inter_diff.item(),4), 1 - round(inter_latent.item(), 2) ])
                     else:
                         inter_class_diffs.append([0.0,0.0,0.0,0.0,0.0])
-            class_diffs.append(torch.stack(inter_class_diffs, dim=0))
+            class_diffs.append(inter_class_diffs)
 
 
 
