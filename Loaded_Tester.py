@@ -173,7 +173,7 @@ def main():
     cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
     cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
     last_loss_save = torch.zeros(nclass, nclass, dtype=torch.float)
-    end_logits = [0 * 10] * 10
+    end_logits =  torch.zeros(nclass, nclass, dtype=torch.float)
 
 
     for j in range(6, len(data_schedule)):
