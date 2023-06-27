@@ -548,10 +548,10 @@ def main():
                     elif k != i:
                         inter_diff = cos_sim(matrix[i][k], matrix[i][based_index])
                         inter_latent = cos_sim(stacked_sets_latent_boundaries[0][i][k], stacked_sets_latent_boundaries[0][i][based_index])
-                        inter_class_diffs.append([i, based_index, k, 1 - round(torch.mean(inter_diff).item(),4), 1 - round(inter_latent.item(), 2) ])
+                        inter_class_diffs.append([i, based_index, k, 1 - round(torch.mean(inter_diff).item(),4), 1 - round(inter_latent.item(), 4) ])
                     else:
                         inter_class_diffs.append([0.0,0.0,0.0,0.0,0.0])
-            class_diffs.append(inter_class_diffs)
+                class_diffs.append(inter_class_diffs)
 
 
 
