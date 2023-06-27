@@ -535,19 +535,19 @@ def main():
 
         for t in range(1):
             matrix = stacked_sets_trained_boundaries
-            for i in range(len(stacked_sets_trained_boundaries)):
+            for i in range(len(matrix)):
                 basefound = False
                 inter_class_diffs = []
                 base = 0
-                for j in range(len(matrix)):
-                    if basefound == False and j != i:
-                        base = matrix[i][j].clone()
+                for k in range(len(matrix)):
+                    if basefound == False and k != i:
+                        base = matrix[i][k].clone()
                         basefound == True
-                        based_index = j
-                    elif j != i:
-                        inter_diff = cos_sim(matrix[i][j], matrix[i][base])
-                        inter_latent = cos_sim(stacked_sets_latent_boundaries[i][j], stacked_sets_latent_boundaries[i][base])
-                        inter_class_diffs.append([i, based_index, j, 1 - round(inter_diff.item(),4), 1 - round(inter_latent.item(), 2) ])
+                        based_index = k
+                    elif k != i:
+                        inter_diff = cos_sim(matrix[i][k], matrix[i][base])
+                        inter_latent = cos_sim(stacked_sets_latent_boundaries[i][k], stacked_sets_latent_boundaries[i][base])
+                        inter_class_diffs.append([i, based_index, k, 1 - round(inter_diff.item(),4), 1 - round(inter_latent.item(), 2) ])
                     else:
                         inter_class_diffs.append([0.0,0.0,0.0,0.0,0.0])
             class_diffs.append(inter_class_diffs)
