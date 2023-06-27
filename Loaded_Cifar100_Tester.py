@@ -146,9 +146,9 @@ def main():
     cos_sim = nn.CosineSimilarity(dim=0, eps=1e-6)
   #  model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
  #   model_saved = torch.load(f"{saved_model_path}/6_Saved_Model_with_1.0_Data_0621_16_53_47", map_location=device)
-    model.load_state_dict(model_saved)
-    model.multi_out = 1
-    model.eval()
+   # model.load_state_dict(model_saved)
+  #  model.multi_out = 1
+  #  model.eval()
 
     final_comb_cs_diffs = []
     final_comb_l2_diffs = []
@@ -178,9 +178,9 @@ def main():
         p.requires_grad = False
     for j in range(6, len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
-        model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_Data_0621_16_53_47", map_location=device)
+        model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_Data_0621_13_24_49", map_location=device)
         model.load_state_dict(model_saved)
-        par_image_tensors = torch.load(f"{saved_protos_path}/Final_Saved_Protos_SPLIT_{j}", map_location=device)
+        par_image_tensors = torch.load(f"{saved_protos_path}/CIFAR_100_Final_Saved_Protos_SPLIT_{j}", map_location=device)
     #
     # for run in range(args.total_runs):
     #     _par_image_copy = par_image_tensors[run].clone().detach().requires_grad_(False).to(device)
@@ -517,7 +517,7 @@ def main():
 
        # print(f"shape of combined_image and combined_latent: {combined_boundary_images.shape} /n {combined_boundary_latent.shape}")
 
-        with open('{}/Trained_Stats{}.txt'.format(saved_boundaries_path, date_time), 'a') as f:
+        with open('{}/Trained_CIFAR100_Stats{}.txt'.format(saved_boundaries_path, date_time), 'a') as f:
             f.write("\n")
             f.write(
                 f"Split {j} \n  average L2s: {batch_cum_trained_l2}\n average CS_diff: {[1-val for val in batch_cum_trained_cs]}\n,\
@@ -529,7 +529,7 @@ def main():
     # print(f"length of l2s : {len(final_ind_l2_diffs)}")
     # print(f"length of cs's : {len(final_ind_cs_diffs)}")
 
-    with open('{}/BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
+    with open('{}/CIFAR100_BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
         #for i in range(6, len(data_schedule)):
         # f.write(f"\n Split: {data_schedule[i]} \t Alphas: {final_comb_alphas_avg[i]}  \t cumulative alpha: {final_comb_cum_alphas_avg[i]} \t CS_Line_Diffs:\
             #  {[val.item() for val in final_ind_cs_diffs[i]]} \
