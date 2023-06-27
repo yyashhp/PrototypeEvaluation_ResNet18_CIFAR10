@@ -530,26 +530,28 @@ def main():
 
 
         class_diffs = []
-        class_latent_diffs = []
 
 
-        #
-        # for t in range(1):
-        #     matrix = stacked_sets_trained_boundaries
-        #     for i in range(len(stacked_sets_trained_boundaries)):
-        #         basefound = False
-        #         inter_class_diffs = []
-        #         inter_class_latent_diffs = []
-        #         base = 0
-        #         for j in range(len(stacked_sets_trained_boundaries)):
-        #             if basefound == False and j != i:
-        #                 base = stacked_sets_trained_boundaries[i][j].clone()
-        #                 basefound == True
-        #                 based_index = j
-        #             else:
-        #                 inter_diff =
-        #                 inter_class_diffs.append([i, based_index, j ])
-        #
+
+        for t in range(1):
+            matrix = stacked_sets_trained_boundaries
+            for i in range(len(stacked_sets_trained_boundaries)):
+                basefound = False
+                inter_class_diffs = []
+                base = 0
+                for j in range(len(matrix)):
+                    if basefound == False and j != i:
+                        base = matrix[i][j].clone()
+                        basefound == True
+                        based_index = j
+                    elif j != i:
+                        inter_diff = cos_sim(matrix[i][j], matrix[i][base])
+                        inter_latent = cos_sim(stacked_sets_latent_boundaries[i][j], stacked_sets_latent_boundaries[i][base])
+                        inter_class_diffs.append([i, based_index, j, 1 - round(inter_diff.item(),4), 1 - round(inter_latent.item(), 2) ])
+                    else:
+                        inter_class_diffs.append([0.0,0.0,0.0,0.0,0.0])
+            class_diffs.append(torch.stack(inter_class_diffs, dim=0))
+
 
 
 
@@ -589,6 +591,7 @@ def main():
         #         \t \t cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
         #          Mispredictions: {mispredictions}")
         f.write(f" Final Loss Matrix: {last_loss_save} \n \n \
+                Class Diffs: [Class, Based Boundary, Comparator, Image CS Diff, Latent CS Diff] : {class_diffs} \n \n \
                 Matrix of Row-Wise CS diffs: {-(torch.sub(cos_trained_latent, 1))} \n \
                 Matrix of Column-Wise CS diffs: {-(torch.sub(cos_trained_latent_col, 1))} \n \
                    row wise CS diffs: {final_ind_trained_cs_diffs[0]} \n \n \
