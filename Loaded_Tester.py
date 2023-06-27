@@ -530,28 +530,39 @@ def main():
 
 
         class_diffs = []
+        diffs_check = []
 
 
 
         for t in range(1):
-            matrix = stacked_sets_trained_boundaries[0]
+            matrix = stacked_sets_trained_boundaries[0].clone()
+            protos_copy = par_image_tensors[0].clone()
+            with torch.no_grad():
+                norm_protos = transformDict['norm'](protos_copy)
+                proto_latent, proto_logits = model(norm_protos)
             print(f"Length of matrix: {len(matrix)}")
             for i in range(len(matrix)):
                 basefound = False
                 inter_class_diffs = []
+                inter_diffs_check = []
                 base = 0
                 for k in range(len(matrix)):
                     if basefound is False and k != i:
                         base = matrix[i][k].clone()
                         basefound = True
                         based_index = k
+                        inter_diffs_check.append(
+                            1 - round(cos_sim(proto_latent[i], stacked_sets_latent_boundaries[0][i][k]).item(), 4))
                     elif k != i:
                         inter_diff = cos_sim(matrix[i][k], matrix[i][based_index])
                         inter_latent = cos_sim(stacked_sets_latent_boundaries[0][i][k], stacked_sets_latent_boundaries[0][i][based_index])
                         inter_class_diffs.append([i, based_index, k, 1 - round(torch.mean(inter_diff).item(),4), 1 - round(inter_latent.item(), 4) ])
+                        inter_diffs_check.append(1-round(cos_sim(proto_latent[i], stacked_sets_latent_boundaries[0][i][k]).item(), 4))
                     else:
                         inter_class_diffs.append([0.0,0.0,0.0,0.0,0.0])
+                        inter_diffs_check.append(0)
                 class_diffs.append(inter_class_diffs)
+                diffs_check.append(inter_diffs_check)
 
 
 
@@ -593,6 +604,7 @@ def main():
         #          Mispredictions: {mispredictions}")
         f.write(f" Final Loss Matrix: {last_loss_save} \n \n \
                 Class Diffs: [Class, Based Boundary, Comparator, Image CS Diff, Latent CS Diff] : {class_diffs} \n \n \
+                Diffs Check: {diffs_check} \n \n \
                 Matrix of Row-Wise CS diffs: {-(torch.sub(cos_trained_latent, 1))} \n \
                 Matrix of Column-Wise CS diffs: {-(torch.sub(cos_trained_latent_col, 1))} \n \
                    row wise CS diffs: {final_ind_trained_cs_diffs[0]} \n \n \
