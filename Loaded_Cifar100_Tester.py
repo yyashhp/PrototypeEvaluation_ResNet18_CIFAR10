@@ -108,7 +108,7 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
             #    if gradd == 0:
             #        grad_mag[grad] = torch.mean(grad_mag)
             #print(f"Grad_Mag:{grad_mag}")
-            image_grads = 0.01 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
+            image_grads = 0.1 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
            # image_gradients = torch.nan_to_num(image_grads)
             #print(f"Printing image gradients here: {image_gradients}")
             if torch.mean(loss) > 1e-7:
@@ -141,14 +141,14 @@ def main():
     transformDict = {}
     transformDict['norm'] = transforms.Compose([transforms.Normalize(MEAN, STD)])
 
-    nclass = 10
+    nclass = 100
     nchannels = 3
     cos_sim = nn.CosineSimilarity(dim=0, eps=1e-6)
-   # model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
-   # model_saved = torch.load(f"{saved_model_path}/6_Saved_Model_with_1.0_Data_0621_16_53_47", map_location=device)
-  #  model.load_state_dict(model_saved)
-  #  model.multi_out = 1
-  #  model.eval()
+  #  model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
+ #   model_saved = torch.load(f"{saved_model_path}/6_Saved_Model_with_1.0_Data_0621_16_53_47", map_location=device)
+    model.load_state_dict(model_saved)
+    model.multi_out = 1
+    model.eval()
 
     final_comb_cs_diffs = []
     final_comb_l2_diffs = []
@@ -180,7 +180,6 @@ def main():
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
         model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_Data_0621_16_53_47", map_location=device)
         model.load_state_dict(model_saved)
-        model.eval()
         par_image_tensors = torch.load(f"{saved_protos_path}/Final_Saved_Protos_SPLIT_{j}", map_location=device)
     #
     # for run in range(args.total_runs):
