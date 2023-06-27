@@ -174,11 +174,11 @@ def main():
     cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
 
 
-    for p in model.parameters():
-        p.requires_grad = False
     for j in range(6, len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
         model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_Data_0621_13_24_49", map_location=device)
+        for p in model.parameters():
+            p.requires_grad = False
         model.load_state_dict(model_saved)
         par_image_tensors = torch.load(f"{saved_protos_path}/CIFAR_100_Final_Saved_Protos_SPLIT_{j}", map_location=device)
     #
