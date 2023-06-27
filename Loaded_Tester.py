@@ -170,6 +170,8 @@ def main():
     batch_diff_std = []
     batch_diff_col_std = []
     mispredictions = []
+    cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
+    cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
 
 
     for p in model.parameters():
@@ -430,8 +432,8 @@ def main():
         cos_trained_latent_col_matrices = []
         stacked_trained_l2 = []
         set = -1
-        cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
-        cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
+        # cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
+        # cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
       #  for proto in par_image_tensors:
         for t in range(1):
             proto = par_image_tensors[0]
@@ -547,7 +549,9 @@ def main():
         #        \n \n cumulative column-wise CS diff {final_comb_trained_cols_cs_diffs[0]} \
         #         \t \t cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
         #          Mispredictions: {mispredictions}")
-        f.write(f" row wise CS diffs: {final_ind_trained_cs_diffs[0]} \n \n \
+        f.write(f" Matrix of Row-Wise CS diffs: {[1-val.item() for val in cos_trained_latent]}\n \
+                Matrix of Column-Wise CS diffs: {[1-val.items() for val in cos_trained_latent_col]} \n \
+                   row wise CS diffs: {final_ind_trained_cs_diffs[0]} \n \n \
                    row wise CS stds: {final_ind_trained_cs_diffs_std[0]} \n   \
                    column-wise CS diffs: {final_ind_trained_col_cs_diffs[0]} \n  \
                     column-wise CS stds: {final_ind_trained_cs_col_stds[0]} \n  \
