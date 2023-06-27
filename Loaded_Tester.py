@@ -540,9 +540,9 @@ def main():
                 inter_class_diffs = []
                 base = 0
                 for k in range(len(matrix)):
-                    if basefound == False and k != i:
+                    if basefound is False and k != i:
                         base = matrix[i][k].clone()
-                        basefound == True
+                        basefound = True
                         based_index = k
                     elif k != i:
                         inter_diff = cos_sim(matrix[i][k], matrix[i][base])
