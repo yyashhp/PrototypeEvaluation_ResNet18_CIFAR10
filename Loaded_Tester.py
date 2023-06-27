@@ -534,7 +534,7 @@ def main():
 
 
         for t in range(1):
-            matrix = stacked_sets_trained_boundaries
+            matrix = stacked_sets_trained_boundaries[0]
             print(f"Length of matrix: {len(matrix)}")
             for i in range(len(matrix)):
                 basefound = False
@@ -547,7 +547,7 @@ def main():
                         based_index = k
                     elif k != i:
                         inter_diff = cos_sim(matrix[i][k], matrix[i][based_index])
-                        inter_latent = cos_sim(stacked_sets_latent_boundaries[i][k], stacked_sets_latent_boundaries[i][based_index])
+                        inter_latent = cos_sim(stacked_sets_latent_boundaries[0][i][k], stacked_sets_latent_boundaries[0][i][based_index])
                         inter_class_diffs.append([i, based_index, k, 1 - round(inter_diff.item(),4), 1 - round(inter_latent.item(), 2) ])
                     else:
                         inter_class_diffs.append([0.0,0.0,0.0,0.0,0.0])
