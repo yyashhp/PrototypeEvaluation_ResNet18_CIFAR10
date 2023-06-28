@@ -546,7 +546,7 @@ def main():
             for val in row:
                 if val>0:
                     shortlist.append(val)
-            std_list.append(torch.stacl(shortlist, dim=0))
+            std_list.append(torch.stack(shortlist, dim=0))
         std_ave = torch.std(std_list, dim=0)
         print(f"Length of std_array {len(std_ave)}")
 
