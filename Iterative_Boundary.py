@@ -189,7 +189,8 @@ def main():
         for p in model.parameters():
             p.requires_grad = False
         model.eval()
-        par_image_tensors = torch.load(f"{saved_protos_path}/Final_Saved_Protos_SPLIT_{j}", map_location=device)
+        par_image_tensors_loaded = torch.load(f"{saved_protos_path}/Final_Saved_Protos_SPLIT_{j}", map_location=device)
+        par_image_tensors = par_image_tensors_loaded.clone()
     #
     # for run in range(args.total_runs):
     #     _par_image_copy = par_image_tensors[run].clone().detach().requires_grad_(False).to(device)
@@ -478,7 +479,7 @@ def main():
                         print(f"Preds after {k} goes to {i}: {preds}\n")
                         if preds != i:
                             mispredictions.append([set, k, i, preds.item()])
-                        with open('{}/Iterative_Until_Target_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time), 'a') as f:
+                        with open('{}/Iterative_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time), 'a') as f:
                             f.write(f"Going from {k} to {i}, probabilities of {probs} \t loss: {last_loss} \t \t Iterations Needed: {iterations}\n\n")
                         f.close()
                         iterations_needed[i][k] = iterations
@@ -588,7 +589,7 @@ def main():
     # print(f"length of l2s : {len(final_ind_l2_diffs)}")
     # print(f"length of cs's : {len(final_ind_cs_diffs)}")
 
-    with open('{}/Iterative_Until_Target_BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
+    with open('{}/Iterative_Until_Low_Loss_BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
         #for i in range(6, len(data_schedule)):
         # f.write(f"\n Split: {data_schedule[i]} \t Alphas: {final_comb_alphas_avg[i]}  \t cumulative alpha: {final_comb_cum_alphas_avg[i]} \t CS_Line_Diffs:\
             #  {[val.item() for val in final_ind_cs_diffs[i]]} \
