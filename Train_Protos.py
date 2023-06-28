@@ -108,7 +108,7 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
             #    if gradd == 0:
             #        grad_mag[grad] = torch.mean(grad_mag)
             #print(f"Grad_Mag:{grad_mag}")
-            image_grads = 0.1 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
+            image_grads = 0.01 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
            # image_gradients = torch.nan_to_num(image_grads)
             #print(f"Printing image gradients here: {image_gradients}")
             if torch.mean(loss) > 1e-7:
@@ -145,7 +145,7 @@ def main():
     transformDict['norm'] = transforms.Compose([transforms.Normalize(MEAN, STD)])
     transformDict['basic'] = transforms.Compose([transforms.RandomHorizontalFlip(), transforms.RandomCrop(H, padding=4),transforms.Normalize(MEAN, STD)])
 
-    nclass = 100
+    nclass = 10
     nchannels = 3
 
 
@@ -164,7 +164,7 @@ def main():
             par_image_tensors.append(par_image_fresh.clone())
     for j in range(len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
-        model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
+        model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_Data_0621_16_53_47", map_location=device)
         model.load_state_dict(model_saved)
         model.multi_out = 1
         model.eval()
@@ -180,7 +180,13 @@ def main():
                                                               transformDict=transformDict)
                 if epoch == 0:
                     print(last_loss)
-        torch.save(par_image_tensors, f"{saved_protos_path}/CIFAR_100_Final_Saved_Protos_3_SPLIT_{j}")
+        torch.save(par_image_tensors, f"{saved_protos_path}/Checked_Final_Saved_Protos_SPLIT_{j}")
+        with open('{}/LOADED_Predictions_{}.txt'.format(model_dir, date_time), 'a') as f:
+            f.write("\n")
+            f.write(
+                f"Training split: {j}, \t Predictions: {preds} \n")
+            f.write("\n")
+        f.close()
         saved_protos.append(par_image_tensors)
         # cos similarites
         cos_matrices = []
@@ -202,7 +208,7 @@ def main():
         cos_mat_std, cos_mat_mean = torch.std_mean(torch.stack(cos_matrices, dim=0), dim=0)
         CS_means.append(1-(torch.mean(cos_mat_mean.clone())))
         CS_mean_no_zero.append(1-((torch.sum(cos_mat_mean.clone())) / ((nclass * nclass) - nclass)))
-        with open('{}/CIFAR_100_LOADED_CS_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
+        with open('{}/LOADED_CS_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
             f.write("\n")
             f.write(
                 f"Training split: {j}, \t Each Protos CS_Similarity_Mean, {cos_mat_mean.clone()} \t Overall CS_Diff_Mean: {1-torch.mean(cos_mat_mean.clone())}\t CS_diff_mean with no zeroes: {1-((torch.sum(cos_mat_mean.clone())) / ((nclass * nclass) - nclass))}\n")
@@ -250,7 +256,7 @@ def main():
             L2_latent_means.append(latent_df_mean.clone())
             CS_image_means.append(torch.mean(CS_df_image).clone())
             CS_latent_means.append(torch.mean(CS_df_latent).clone())
-            with open('{}/CIFAR_100_LOADED_Adv_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
+            with open('{}/LOADED_Adv_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
                 f.write("\n")
                 f.write(
                     "Training split: {}, \t L2 image and latent means: {} \t {} \t CS image and latent means: {} \t {}  ".format(
@@ -269,13 +275,13 @@ def main():
         CS_adv_image.append(CS_df_mean.clone())
         CS_latent_std, CS_latent_mean = torch.std_mean(torch.stack(CS_latent_means, dim=0), dim=0)
         CS_adv_latent.append((CS_latent_mean.clone()))
-        with open('{}/CIFAR_100_LOADED_Adv_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
+        with open('{}/LOADED_Adv_stats_{}.txt'.format(model_dir, date_time), 'a') as f:
             f.write("\n")
             f.write(f"Split {j} \t L2_diff latent overall mean: {L2_cum_latent_mean}\t \
                     CS_diff latent overall mean: {CS_latent_mean}\n")
         f.close()
 
-    with open('{}/CIFAR_100_LOADED_final_data_summary_{}.txt'.format(model_dir, date_time), 'a') as f:
+    with open('{}/LOADED_final_data_summary_{}.txt'.format(model_dir, date_time), 'a') as f:
         f.write("Data  \t CS_norm metric \t L2 adversarial latent means \
                 \t L2 adversarial image means \t CS adversarial image means\
                  \t CS adversarial latent means  \n")
