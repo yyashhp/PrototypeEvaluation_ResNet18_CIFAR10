@@ -645,6 +645,7 @@ def main():
                 Matrix of Column-Wise CS diffs: {-(torch.sub(cos_trained_latent_col, 1))} \n \
                    row wise CS diffs: {final_ind_trained_cs_diffs[0]} \n \n \
                    row wise CS stds: {final_ind_trained_cs_diffs_std[0]} \n   \
+                   row wise CS STD_AVES_NO_ZERO: {std_ave} \n \n \
                    column-wise CS diffs: {final_ind_trained_col_cs_diffs[0]} \n  \
                     column-wise CS stds: {final_ind_trained_cs_col_stds[0]} \n  \
                     \n \n cumulative row-wise CS diff: {final_comb_trained_cs_diffs[0]} \n  \
