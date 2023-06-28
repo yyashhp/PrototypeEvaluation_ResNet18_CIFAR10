@@ -472,7 +472,7 @@ def main():
                         last_loss = 100
                         start_proto = torch.unsqueeze(proto_clone[j].clone(), dim=0).clone()
                         if i == 6:
-                            start_proto_copy = start_proto.clone().detach().requires_grad(False).to(device)
+                            start_proto_copy = start_proto.clone()
                             with torch.no_grad():
                                 normed_start = transformDict['norm'](start_proto_copy)
                                 start_latent, start_logits = model(normed_start)
