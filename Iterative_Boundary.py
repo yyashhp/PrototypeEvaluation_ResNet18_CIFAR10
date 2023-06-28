@@ -471,6 +471,13 @@ def main():
                         epoch = 1
                         last_loss = 100
                         start_proto = torch.unsqueeze(proto_clone[j].clone(), dim=0).clone()
+                        if i == 6:
+                            start_proto_copy = start_proto.clone().detach().requires_grad(False).to(device)
+                            with torch.no_grad():
+                                normed_start = transformDict['norm'](start_proto_copy)
+                                start_latent, start_logits = model(normed_start)
+                            start_preds_six = F.softmax(start_logits)
+
                         while last_loss>1e-2:
                             iterations += 1
                             last_loss, preds, probs = train_image_no_data(args, model=model, device=device,
@@ -480,7 +487,7 @@ def main():
                         if preds != i:
                             mispredictions.append([set, k, i, preds.item()])
                         with open('{}/Iterative_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time), 'a') as f:
-                            f.write(f"Going from {k} to {i}, probabilities of {probs} \t loss: {last_loss} \t \t Iterations Needed: {iterations}\n\n")
+                            f.write(f"Going from {k} to {i}, Starting Probabilities: {start_preds_six} \t after training: probabilities of {probs} \t loss: {last_loss} \t \t Iterations Needed: {iterations}\n\n")
                         f.close()
                         iterations_needed[i][k] = iterations
                         model.eval()
