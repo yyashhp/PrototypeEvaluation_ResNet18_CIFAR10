@@ -467,17 +467,17 @@ def main():
                     if i!=k:
                         iterations = 0
                         epoch = 1
-                        preds = i+1
-                        while preds!=i:
+                        last_loss = 100
+                        while last_loss>1e-2:
                             start_proto = torch.unsqueeze(proto_clone[j], dim = 0)
                             last_loss, preds, probs = train_image_no_data(args, model=model, device=device,
                                                                    epoch=epoch, par_images=start_proto,
                                                                targets=target_proto, transformDict=transformDict)
                             iterations += 1
-                      #  print(f"Preds after {k} goes to {i}: {preds}\n")
-                       # if preds != i:
-                            #mispredictions.append([set, k, i, preds.item()])
-                        with open('{}/Iterative_Until_Target_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time), 'a') as f:
+                        print(f"Preds after {k} goes to {i}: {preds}\n")
+                        if preds != i:
+                            mispredictions.append([set, k, i, preds.item()])
+                        with open('{}/Iterative_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time), 'a') as f:
                             f.write(f"Going from {k} to {i}, probabilities of {probs} \t loss: {last_loss} \t \t Iterations Needed: {iterations}\n\n")
                         f.close()
                         model.eval()
@@ -586,7 +586,7 @@ def main():
     # print(f"length of l2s : {len(final_ind_l2_diffs)}")
     # print(f"length of cs's : {len(final_ind_cs_diffs)}")
 
-    with open('{}/Iterative_Until_Target_BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
+    with open('{}/Iterative_Until_Low_Loss_BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
         #for i in range(6, len(data_schedule)):
         # f.write(f"\n Split: {data_schedule[i]} \t Alphas: {final_comb_alphas_avg[i]}  \t cumulative alpha: {final_comb_cum_alphas_avg[i]} \t CS_Line_Diffs:\
             #  {[val.item() for val in final_ind_cs_diffs[i]]} \
