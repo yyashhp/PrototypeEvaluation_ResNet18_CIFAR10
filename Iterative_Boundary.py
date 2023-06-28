@@ -474,7 +474,7 @@ def main():
                         if preds != i:
                             mispredictions.append([set, k, i, preds.item()])
                             with open('{}/BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time), 'a') as f:
-                                f.write(f"Going from {k} to {i}, probabilities of {probs} \n\n")
+                                f.write(f"Going from {k} to {i}, probabilities of {probs} \t loss: {last_loss} \n\n")
                             f.close()
                         model.eval()
                         last_loss_save[i][k] = last_loss
