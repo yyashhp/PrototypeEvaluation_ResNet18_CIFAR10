@@ -470,7 +470,7 @@ def main():
                         iterations = 0
                         epoch = 1
                         last_loss = 100
-                        start_proto = torch.unsqueeze(proto_clone[j].clone(), dim=0).clone()
+                        start_proto = torch.unsqueeze(proto_clone[k].clone(), dim=0).clone()
                        # if i == 6:
                         start_proto_copy = start_proto.clone()
                         with torch.no_grad():
