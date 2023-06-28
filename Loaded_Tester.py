@@ -444,7 +444,7 @@ def main():
         # cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
       #  for proto in par_image_tensors:
         for t in range(1):
-            proto = par_image_tensors[0]
+            proto = par_image_tensors[0].clone()
             set+=1
             # cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
             # cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
@@ -481,14 +481,14 @@ def main():
                         with torch.no_grad():
                             norm_trained_boundary = transformDict['norm'](start_proto.clone())
                             boundary_latent, boundary_logits = model(norm_trained_boundary)
-                        start_proto = torch.squeeze(start_proto, dim=0)
-                        print(f"Boundary  shape: {start_proto.shape}")
+                        start_proto_squeezed = torch.squeeze(start_proto.clone(), dim=0)
+                        print(f"Boundary  shape: {start_proto_squeezed.shape}")
                         boundary_latent = torch.squeeze(boundary_latent, dim=0)
-                        cos_trained_latent[i][k] = cos_sim(boundary_latent, protos_latent[i])
-                        cos_trained_latent_col[i][k] = cos_sim(boundary_latent, protos_latent[k])
-                        trained_boundaries.append(start_proto)
-                        l2_trained_diff.append(torch.mean(torch.linalg.norm((boundary_latent.clone() - protos_latent[i]), dim=0)))
-                        latents_boundaries.append(boundary_latent)
+                        cos_trained_latent[i][k] = cos_sim(boundary_latent, protos_latent[i].clone())
+                        cos_trained_latent_col[i][k] = cos_sim(boundary_latent, protos_latent[k].clone())
+                        trained_boundaries.append(start_proto_squeezed.clone())
+                        l2_trained_diff.append(torch.mean(torch.linalg.norm((boundary_latent.clone() - protos_latent[i].clone()), dim=0)))
+                        latents_boundaries.append(boundary_latent.clone())
 
                 set_trained_boundaries.append(torch.stack(trained_boundaries, dim=0))
                 set_latent_boundaries.append(torch.stack(latents_boundaries, dim=0))
