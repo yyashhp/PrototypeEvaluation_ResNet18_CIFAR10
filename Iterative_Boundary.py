@@ -555,7 +555,7 @@ def main():
         final_ind_trained_col_cs_diffs.append([round(1 - val.item(), 4) for val in batch_cum_trained_col_cs])
         final_ind_trained_cs_col_stds.append([round(val.item(), 4) for val in batch_cum_trained_col_cs_std])
         final_ind_trained_cs_diffs.append([round(1 - val.item(), 4) for val in batch_cum_trained_cs])
-        final_ind_trained_cs_diffs_std.append([round(val.item(), 4) for val in std_ave])
+        final_ind_trained_cs_diffs_std.append([round(val.item(), 4) for val in batch_cum_trained_cs_std])
 
 
         batch_trained_l2 = torch.mean(torch.stack(stacked_trained_l2, dim=0), dim=0)
@@ -649,6 +649,7 @@ def main():
                    column-wise CS diffs: {final_ind_trained_col_cs_diffs[0]} \n  \
                     column-wise CS stds: {final_ind_trained_cs_col_stds[0]} \n  \
                     \n \n cumulative row-wise CS diff: {final_comb_trained_cs_diffs[0]} \n  \
+                    cumulative row-wise CS diff NO ZERO: {torch.mean(std_ave).item()} \n \
                      cumulative row-wise CS Std; {final_comb_trained_cs_std} \
                       \n  cumulative column-wise CS diff {final_comb_trained_cols_cs_diffs[0]} \
                        \n \n cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
