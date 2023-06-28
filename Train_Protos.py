@@ -108,7 +108,7 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
             #    if gradd == 0:
             #        grad_mag[grad] = torch.mean(grad_mag)
             #print(f"Grad_Mag:{grad_mag}")
-            image_grads = 0.1 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
+            image_grads = 0.01 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
            # image_gradients = torch.nan_to_num(image_grads)
             #print(f"Printing image gradients here: {image_gradients}")
             if torch.mean(loss) > 1e-7:
@@ -171,7 +171,7 @@ def main():
         for p in model.parameters():
             p.requires_grad = False
         for run in range(args.total_runs):
-            for epoch in range(1):
+            for epoch in range(7):
                 last_loss, preds, probs = train_image_no_data(args, model=model,
                                                               device=device,
                                                               epoch = epoch,
