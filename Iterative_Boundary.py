@@ -190,7 +190,7 @@ def main():
             p.requires_grad = False
         model.eval()
         par_image_tensors_loaded = torch.load(f"{saved_protos_path}/Final_Saved_Protos_SPLIT_{j}", map_location=device)
-        par_image_tensors = par_image_tensors_loaded.clone()
+        par_image_tensors = [set.clone() for set in par_image_tensors_loaded]
     #
     # for run in range(args.total_runs):
     #     _par_image_copy = par_image_tensors[run].clone().detach().requires_grad_(False).to(device)
