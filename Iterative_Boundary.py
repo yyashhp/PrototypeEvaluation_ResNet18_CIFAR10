@@ -540,11 +540,22 @@ def main():
         final_comb_trained_cs_diffs.append(cum_trained_cs_avg.item())
         final_comb_trained_cols_cs_diffs.append(cum_trained_col_cs.item())
         final_comb_trained_cs_std.append(torch.mean(batch_cum_trained_cs_std).item())
+        std_list = []
+        for row in cos_trained_latent:
+            shortlist = []
+            for val in row:
+                if val>0:
+                    shortlist.append(val)
+            std_list.append(shortlist)
+        std_ave = torch.std(std_list, dim=0)
+        print(f"Length of std_array {len(std_ave)}")
+
+
         final_comb_trained_col_cs_std.append(torch.mean(batch_cum_trained_col_cs_std).item())
         final_ind_trained_col_cs_diffs.append([round(1 - val.item(), 4) for val in batch_cum_trained_col_cs])
         final_ind_trained_cs_col_stds.append([round(val.item(), 4) for val in batch_cum_trained_col_cs_std])
         final_ind_trained_cs_diffs.append([round(1 - val.item(), 4) for val in batch_cum_trained_cs])
-        final_ind_trained_cs_diffs_std.append([round(val.item(), 4) for val in torch.std(cos_trained_latent[mask], dim = 0)])
+        final_ind_trained_cs_diffs_std.append([round(val.item(), 4) for val in std_ave])
 
 
         batch_trained_l2 = torch.mean(torch.stack(stacked_trained_l2, dim=0), dim=0)
