@@ -173,6 +173,7 @@ def main():
     inter_row_image_diff = []
     cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
     cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
+    iterations_needed = torch.zeros(nclass, nclass, dtype=torch.float)
     last_loss_save = torch.zeros(nclass, nclass, dtype=torch.float)
     end_logits =  torch.zeros(nclass, nclass, dtype=torch.float)
     trained_boundary_sets = []
@@ -477,9 +478,10 @@ def main():
                         print(f"Preds after {k} goes to {i}: {preds}\n")
                         if preds != i:
                             mispredictions.append([set, k, i, preds.item()])
-                        with open('{}/Iterative_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time), 'a') as f:
+                        with open('{}/Iterative_Until_Target_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time), 'a') as f:
                             f.write(f"Going from {k} to {i}, probabilities of {probs} \t loss: {last_loss} \t \t Iterations Needed: {iterations}\n\n")
                         f.close()
+                        iterations_needed[i][k] = iterations
                         model.eval()
                         last_loss_save[i][k] = last_loss
                         with torch.no_grad():
@@ -586,7 +588,7 @@ def main():
     # print(f"length of l2s : {len(final_ind_l2_diffs)}")
     # print(f"length of cs's : {len(final_ind_cs_diffs)}")
 
-    with open('{}/Iterative_Until_Low_Loss_BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
+    with open('{}/Iterative_Until_Target_BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
         #for i in range(6, len(data_schedule)):
         # f.write(f"\n Split: {data_schedule[i]} \t Alphas: {final_comb_alphas_avg[i]}  \t cumulative alpha: {final_comb_cum_alphas_avg[i]} \t CS_Line_Diffs:\
             #  {[val.item() for val in final_ind_cs_diffs[i]]} \
@@ -608,7 +610,8 @@ def main():
         #          Mispredictions: {mispredictions}")
         f.write(f" Final Loss Matrix: {last_loss_save} \n \n \
                 Class Diffs: [Class, Based Boundary, Comparator, Image CS Diff, Latent CS Diff] : {class_diffs} \n \n \
-                Diffs Check: {diffs_check} \n \n \
+                Diffs Check: {diffs_check} \n \n \n \n \n \
+                Matrix of Iterations Needed to reach target: {iterations_needed} \n \
                 Matrix of Row-Wise CS diffs: {-(torch.sub(cos_trained_latent, 1))} \n \
                 Matrix of Column-Wise CS diffs: {-(torch.sub(cos_trained_latent_col, 1))} \n \
                    row wise CS diffs: {final_ind_trained_cs_diffs[0]} \n \n \
