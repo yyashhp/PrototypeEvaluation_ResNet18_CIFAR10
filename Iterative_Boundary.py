@@ -90,7 +90,7 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
     print ("training images against one hot encodings")
     model.eval()
 
-    for batch_idx in range(100):
+    for batch_idx in range(1):
         _par_images_opt = par_images.clone().detach().requires_grad_(True).to(device)
 
         _par_images_opt_norm = transformDict['norm'](_par_images_opt)
@@ -465,17 +465,21 @@ def main():
                         trained_boundaries.append((torch.zeros([3, 32, 32], device=device)))
                         latents_boundaries.append(torch.zeros(512, device=device))
                     if i!=k:
+                        iterations = 0
                         epoch = 1
-                        start_proto = torch.unsqueeze(proto_clone[j], dim = 0)
-                        last_loss, preds, probs = train_image_no_data(args, model=model, device=device,
+                        preds = i+1
+                        while preds!=i:
+                            start_proto = torch.unsqueeze(proto_clone[j], dim = 0)
+                            last_loss, preds, probs = train_image_no_data(args, model=model, device=device,
                                                                    epoch=epoch, par_images=start_proto,
                                                                targets=target_proto, transformDict=transformDict)
-                        print(f"Preds after {k} goes to {i}: {preds}\n")
-                        if preds != i:
-                            mispredictions.append([set, k, i, preds.item()])
-                            with open('{}/BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time), 'a') as f:
-                                f.write(f"Going from {k} to {i}, probabilities of {probs} \t loss: {last_loss} \n\n")
-                            f.close()
+                            iterations += 1
+                      #  print(f"Preds after {k} goes to {i}: {preds}\n")
+                       # if preds != i:
+                            #mispredictions.append([set, k, i, preds.item()])
+                        with open('{}/Iterative_Until_Target_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time), 'a') as f:
+                            f.write(f"Going from {k} to {i}, probabilities of {probs} \t loss: {last_loss} \t \t Iterations Needed: {iterations}\n\n")
+                        f.close()
                         model.eval()
                         last_loss_save[i][k] = last_loss
                         with torch.no_grad():
@@ -582,7 +586,7 @@ def main():
     # print(f"length of l2s : {len(final_ind_l2_diffs)}")
     # print(f"length of cs's : {len(final_ind_cs_diffs)}")
 
-    with open('{}/BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
+    with open('{}/Iterative_Until_Target_BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
         #for i in range(6, len(data_schedule)):
         # f.write(f"\n Split: {data_schedule[i]} \t Alphas: {final_comb_alphas_avg[i]}  \t cumulative alpha: {final_comb_cum_alphas_avg[i]} \t CS_Line_Diffs:\
             #  {[val.item() for val in final_ind_cs_diffs[i]]} \
