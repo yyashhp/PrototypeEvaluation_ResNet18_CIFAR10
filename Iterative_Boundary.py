@@ -531,6 +531,8 @@ def main():
       #  batch_diff_col_std.append(batch_trained_col_std)
       #  batch_cum_trained_cs, batch_cum_trained_cs_std = torch.std_mean(batch_trained_cs, dim=0)
         batch_cum_trained_cs, batch_cum_trained_cs_std = torch.std_mean(cos_trained_latent.clone(), dim=0)
+        mask = cos_trained_latent > 0
+        col_mask = cos_trained_latent_col > 0
      #   batch_cum_trained_col_cs, batch_cum_trained_col_cs_std = torch.std_mean(batch_trained_col_cs, dim=1)
         batch_cum_trained_col_cs, batch_cum_trained_col_cs_std = torch.std_mean(cos_trained_latent_col.clone(),dim=1)
         cum_trained_cs_avg = 1 - torch.mean(batch_cum_trained_cs)
@@ -542,7 +544,7 @@ def main():
         final_ind_trained_col_cs_diffs.append([round(1 - val.item(), 4) for val in batch_cum_trained_col_cs])
         final_ind_trained_cs_col_stds.append([round(val.item(), 4) for val in batch_cum_trained_col_cs_std])
         final_ind_trained_cs_diffs.append([round(1 - val.item(), 4) for val in batch_cum_trained_cs])
-        final_ind_trained_cs_diffs_std.append([round(val.item(), 4) for val in batch_cum_trained_cs_std])
+        final_ind_trained_cs_diffs_std.append([round(val.item(), 4) for val in cos_trained_latent[mask].std()])
 
 
         batch_trained_l2 = torch.mean(torch.stack(stacked_trained_l2, dim=0), dim=0)
