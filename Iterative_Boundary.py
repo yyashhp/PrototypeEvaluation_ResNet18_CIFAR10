@@ -486,9 +486,16 @@ def main():
                         print(f"Preds after {k} goes to {i}: {preds}\n")
                         if preds != i:
                             mispredictions.append([set, k, i, preds.item()])
-                        with open('{}/Iterative_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time), 'a') as f:
-                            f.write(f"Going from {k} to {i}, Starting Probabilities: {start_preds_six} \t after training: probabilities of {probs} \t loss: {last_loss} \t \t Iterations Needed: {iterations}\n\n")
-                        f.close()
+                        if i == 6:
+                            with open('{}/Iterative_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
+                                      'a') as f:
+                                f.write(
+                                    f"Going from {k} to {i}, Starting Probabilities: {start_preds_six} \t after training: probabilities of {probs} \t loss: {last_loss} \t \t Iterations Needed: {iterations}\n\n")
+                            f.close()
+                        else:
+                            with open('{}/Iterative_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time), 'a') as f:
+                                f.write(f"Going from {k} to {i}, probabilities of {probs} \t loss: {last_loss} \t \t Iterations Needed: {iterations}\n\n")
+                            f.close()
                         iterations_needed[i][k] = iterations
                         model.eval()
                         last_loss_save[i][k] = last_loss
