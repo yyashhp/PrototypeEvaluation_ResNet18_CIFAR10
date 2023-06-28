@@ -471,12 +471,13 @@ def main():
                         epoch = 1
                         last_loss = 100
                         start_proto = torch.unsqueeze(proto_clone[j].clone(), dim=0).clone()
-                        if i == 6:
-                            start_proto_copy = start_proto.clone()
-                            with torch.no_grad():
-                                normed_start = transformDict['norm'](start_proto_copy)
-                                start_latent, start_logits = model(normed_start)
-                            start_preds_six = F.softmax(start_logits)
+                       # if i == 6:
+                        start_proto_copy = start_proto.clone()
+                        with torch.no_grad():
+                            normed_start = transformDict['norm'](start_proto_copy)
+                            start_latent, start_logits = model(normed_start)
+                        start_preds_six = F.softmax(start_logits)
+                        starts_pred = start_logits.max(1, keepdim=True)[1]
 
                         while last_loss>1e-2:
                             iterations += 1
@@ -486,16 +487,16 @@ def main():
                         print(f"Preds after {k} goes to {i}: {preds}\n")
                         if preds != i:
                             mispredictions.append([set, k, i, preds.item()])
-                        if i == 6:
-                            with open('{}/Iterative_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
-                                      'a') as f:
-                                f.write(
-                                    f"Going from {k} to {i}, Starting Probabilities: {start_preds_six} \t after training: probabilities of {probs} \t loss: {last_loss} \t \t Iterations Needed: {iterations}\n\n")
-                            f.close()
-                        else:
-                            with open('{}/Iterative_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time), 'a') as f:
-                                f.write(f"Going from {k} to {i}, probabilities of {probs} \t loss: {last_loss} \t \t Iterations Needed: {iterations}\n\n")
-                            f.close()
+                        #if i == 6:
+                        with open('{}/Iterative_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
+                                  'a') as f:
+                            f.write(
+                                f"Going from {k} to {i}, Start Pred: {starts_pred}\t Starting Probabilities: {start_preds_six} \t after training: probabilities of {probs} \t loss: {last_loss} \t \t Iterations Needed: {iterations}\n\n")
+                        f.close()
+                        #else:
+                        #    with open('{}/Iterative_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time), 'a') as f:
+                        #        f.write(f"Going from {k} to {i}, probabilities of {probs} \t loss: {last_loss} \t \t Iterations Needed: {iterations}\n\n")
+                       #     f.close()
                         iterations_needed[i][k] = iterations
                         model.eval()
                         last_loss_save[i][k] = last_loss
