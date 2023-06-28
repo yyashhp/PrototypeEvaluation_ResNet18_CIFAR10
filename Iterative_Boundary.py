@@ -468,12 +468,12 @@ def main():
                         iterations = 0
                         epoch = 1
                         last_loss = 100
+                        start_proto = torch.unsqueeze(proto_clone[j].clone(), dim=0).clone()
                         while last_loss>1e-2:
-                            start_proto = torch.unsqueeze(proto_clone[j], dim = 0)
+                            iterations += 1
                             last_loss, preds, probs = train_image_no_data(args, model=model, device=device,
                                                                    epoch=epoch, par_images=start_proto,
                                                                targets=target_proto, transformDict=transformDict)
-                            iterations += 1
                         print(f"Preds after {k} goes to {i}: {preds}\n")
                         if preds != i:
                             mispredictions.append([set, k, i, preds.item()])
