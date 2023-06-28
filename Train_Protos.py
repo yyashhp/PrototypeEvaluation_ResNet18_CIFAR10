@@ -184,7 +184,7 @@ def main():
         with open('{}/LOADED_Predictions_{}.txt'.format(model_dir, date_time), 'a') as f:
             f.write("\n")
             f.write(
-                f"Training split: {j}, \t Predictions: {preds} \n")
+                f"Training split: {j}, \t Predictions: {preds} \t Probs: {probs} \n")
             f.write("\n")
         f.close()
         saved_protos.append(par_image_tensors)
