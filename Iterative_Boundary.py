@@ -544,7 +544,7 @@ def main():
         for row in cos_trained_latent:
             shortlist = []
             for val in row:
-                if val>0:
+                if val!=0.:
                     shortlist.append(1-val)
             std_list.append(torch.stack(shortlist, dim=0))
         std_ave = torch.std(torch.stack(std_list, dim=0), dim=0)
@@ -553,7 +553,7 @@ def main():
         for row in cos_trained_latent_col:
             col_shortlist = []
             for val in row:
-                if val>0:
+                if val!=0.:
                     col_shortlist.append(1-val)
             col_std_list.append(torch.stack(col_shortlist, dim=0))
         col_std_ave = torch.std(torch.stack(col_std_list, dim=0), dim=1)
