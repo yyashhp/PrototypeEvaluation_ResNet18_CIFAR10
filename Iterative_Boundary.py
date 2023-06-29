@@ -648,7 +648,6 @@ def main():
         #          Mispredictions: {mispredictions}")
         f.write(f" Final Loss Matrix: {last_loss_save} \n \n \
                 Class Diffs: [Class, Based Boundary, Comparator, Image CS Diff, Latent CS Diff] : {class_diffs} \n \n \
-                Diffs Check: {diffs_check} \n \n \n \n \n \
                 Matrix of Iterations Needed to reach target: {iterations_needed} \n \n \
                 Matrix of Row-Wise CS diffs: {-(torch.sub(cos_trained_latent, 1))} \n \
                 Matrix of Column-Wise CS diffs: {-(torch.sub(cos_trained_latent_col, 1))} \n \
