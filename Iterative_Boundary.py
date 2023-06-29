@@ -537,8 +537,6 @@ def main():
         batch_cum_trained_col_cs_std, batch_cum_trained_col_cs = torch.std_mean(cos_trained_latent_col.clone(),dim=0)
         cum_trained_cs_avg = 1 - torch.mean(batch_cum_trained_cs)
         cum_trained_col_cs = 1 - torch.mean(batch_cum_trained_col_cs)
-        final_comb_trained_cs_diffs.append(cum_trained_cs_avg.item())
-        final_comb_trained_cols_cs_diffs.append(cum_trained_col_cs.item())
         std_list = []
         col_std_list = []
         for row in cos_trained_latent.clone():
@@ -573,6 +571,8 @@ def main():
         final_ind_trained_cs_col_stds.append([round(val.item(), 4) for val in col_std_ave])
         final_ind_trained_cs_diffs.append([round(1 - ((val.item()* 10)/9), 4) for val in batch_cum_trained_cs])
         final_ind_trained_cs_diffs_std.append([round(val.item(), 4) for val in std_ave])
+        final_comb_trained_cs_diffs.append(torch.mean([round(1 - ((val.item()* 10)/9), 4) for val in batch_cum_trained_cs]).item())
+        final_comb_trained_cols_cs_diffs.append(torch.mean([round(1 - ((val.item()* 10)/9), 4) for val in batch_cum_trained_col_cs]).item())
 
 
         batch_trained_l2 = torch.mean(torch.stack(stacked_trained_l2, dim=0), dim=0)
@@ -654,21 +654,20 @@ def main():
         #        \n \n cumulative column-wise CS diff {final_comb_trained_cols_cs_diffs[0]} \
         #         \t \t cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
         #          Mispredictions: {mispredictions}")
-        f.write(f" Final Loss Matrix: {last_loss_save} \n \n \
-                Class Diffs: [Class, Based Boundary, Comparator, Image CS Diff, Latent CS Diff] : {class_diffs} \n \n \
-                Matrix of Iterations Needed to reach target: {iterations_needed} \n \n \
-                matrix of row wise cs similarities: {cos_trained_latent}\n\n\
-                Matrix of Row-Wise CS diffs: {-(torch.sub(cos_trained_latent, 1))} \n \
-                Matrix of Column-Wise CS diffs: {-(torch.sub(cos_trained_latent_col, 1))} \n \
+        f.write(f" Final Loss Matrix:\n  {last_loss_save} \n \n \
+                Class Diffs: [Class, Based Boundary, Comparator, Image CS Diff, Latent CS Diff] : \n {class_diffs} \n \n \
+                Matrix of Iterations Needed to reach target:\n  {iterations_needed} \n \n \
+                Matrix of Row-Wise CS diffs:\n  {-(torch.sub(cos_trained_latent, 1))} \n \
+                Matrix of Column-Wise CS diffs: \n {-(torch.sub(cos_trained_latent_col, 1))} \n \
                    row wise CS diffs: {final_ind_trained_cs_diffs[0]} \n \n \
                    row wise CS stds: {final_ind_trained_cs_diffs_std[0]} \n   \
-                   column-wise CS diffs: {final_ind_trained_col_cs_diffs[0]} \n  \
-                    column-wise CS stds: {final_ind_trained_cs_col_stds[0]} \n  \
-                    \n \n cumulative row-wise CS diff: {final_comb_trained_cs_diffs[0]} \n  \
-                     cumulative row-wise CS Std; {final_comb_trained_cs_std} \
-                      \n  cumulative column-wise CS diff {final_comb_trained_cols_cs_diffs[0]} \
-                       \n \n cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
-                        Mispredictions: {mispredictions}")
+                   column-wise CS diffs: \n {final_ind_trained_col_cs_diffs[0]} \n  \
+                    column-wise CS stds:\n  {final_ind_trained_cs_col_stds[0]} \n  \
+                    \n \n cumulative row-wise CS diff:\n {final_comb_trained_cs_diffs[0]} \n  \
+                     cumulative row-wise CS Std;\n {final_comb_trained_cs_std} \
+                      \n  cumulative column-wise CS diff: \n {final_comb_trained_cols_cs_diffs[0]} \
+                       \n \n cumulative column-wise CS Std:\n {final_comb_trained_col_cs_std[0]} \n \n \
+                        Mispredictions: \n{mispredictions}")
 
     f.close()
 

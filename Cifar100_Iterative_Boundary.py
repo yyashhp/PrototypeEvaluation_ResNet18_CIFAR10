@@ -16,7 +16,7 @@ from foolbox import PyTorchModel, accuracy, samples
 from foolbox.attacks import L2DeepFoolAttack
 from statistics import mean
 
-parser = argparse.ArgumentParser(description="CIFAR10 Training")
+parser = argparse.ArgumentParser(description="CIFAR100 Training")
 parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed(default: 1')
 parser.add_argument('--model-dir', default='../ProtoRuns')
 parser.add_argument('--no-cuda', action='store_true', default=False,help='disables CUDA training')
@@ -141,7 +141,7 @@ def main():
     transformDict = {}
     transformDict['norm'] = transforms.Compose([transforms.Normalize(MEAN, STD)])
 
-    nclass = 10
+    nclass = 100
     nchannels = 3
     cos_sim = nn.CosineSimilarity(dim=0, eps=1e-6)
    # model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
@@ -184,12 +184,12 @@ def main():
 
     for j in range(6, len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
-        model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_Data_0621_16_53_47", map_location=device)
+        model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_23_49", map_location=device)
         model.load_state_dict(model_saved)
         for p in model.parameters():
             p.requires_grad = False
         model.eval()
-        par_image_tensors_loaded = torch.load(f"{saved_protos_path}/Final_Saved_Protos_SPLIT_{j}", map_location=device)
+        par_image_tensors_loaded = torch.load(f"{saved_protos_path}/CIFAR_100_Final_Saved_Protos_3_SPLIT_{j}", map_location=device)
         par_image_tensors = [set.clone() for set in par_image_tensors_loaded]
     #
     # for run in range(args.total_runs):
@@ -537,8 +537,6 @@ def main():
         batch_cum_trained_col_cs_std, batch_cum_trained_col_cs = torch.std_mean(cos_trained_latent_col.clone(),dim=0)
         cum_trained_cs_avg = 1 - torch.mean(batch_cum_trained_cs)
         cum_trained_col_cs = 1 - torch.mean(batch_cum_trained_col_cs)
-        final_comb_trained_cs_diffs.append(cum_trained_cs_avg.item())
-        final_comb_trained_cols_cs_diffs.append(cum_trained_col_cs.item())
         std_list = []
         col_std_list = []
         for row in cos_trained_latent.clone():
@@ -569,9 +567,9 @@ def main():
 
         final_comb_trained_col_cs_std.append(torch.mean(col_std_ave).item())
         final_comb_trained_cs_std.append(torch.mean(std_ave).item())
-        final_ind_trained_col_cs_diffs.append([round(1 - ((val.item()* 10)/9), 4) for val in batch_cum_trained_col_cs])
+        final_ind_trained_col_cs_diffs.append([round(1 - ((val.item()* 100)/99), 4) for val in batch_cum_trained_col_cs])
         final_ind_trained_cs_col_stds.append([round(val.item(), 4) for val in col_std_ave])
-        final_ind_trained_cs_diffs.append([round(1 - ((val.item()* 10)/9), 4) for val in batch_cum_trained_cs])
+        final_ind_trained_cs_diffs.append([round(1 - ((val.item()* 100)/99), 4) for val in batch_cum_trained_cs])
         final_ind_trained_cs_diffs_std.append([round(val.item(), 4) for val in std_ave])
 
 
@@ -579,6 +577,11 @@ def main():
         batch_cum_trained_l2 = torch.mean(batch_trained_l2, dim=0)
         final_comb_trained_l2_diffs.append(torch.mean(batch_cum_trained_l2))
         final_ind_trained_l2_diffs.append(batch_cum_trained_l2)
+
+        final_comb_trained_cs_diffs.append(
+            torch.mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_cs]).item())
+        final_comb_trained_cols_cs_diffs.append(
+            torch.mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_col_cs]).item())
 
 
         class_diffs = []
