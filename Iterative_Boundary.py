@@ -530,11 +530,11 @@ def main():
        # batch_diff_std.append(batch_trained_std)
       #  batch_diff_col_std.append(batch_trained_col_std)
       #  batch_cum_trained_cs, batch_cum_trained_cs_std = torch.std_mean(batch_trained_cs, dim=0)
-        batch_cum_trained_cs_std, batch_cum_trained_cs = torch.std_mean(cos_trained_latent.clone(), dim=0)
+        batch_cum_trained_cs_std, batch_cum_trained_cs = torch.std_mean(cos_trained_latent.clone(), dim=1)
         mask = cos_trained_latent > 0
         col_mask = cos_trained_latent_col > 0
      #   batch_cum_trained_col_cs, batch_cum_trained_col_cs_std = torch.std_mean(batch_trained_col_cs, dim=1)
-        batch_cum_trained_col_cs_std, batch_cum_trained_col_cs = torch.std_mean(cos_trained_latent_col.clone(),dim=1)
+        batch_cum_trained_col_cs_std, batch_cum_trained_col_cs = torch.std_mean(cos_trained_latent_col.clone(),dim=0)
         cum_trained_cs_avg = 1 - torch.mean(batch_cum_trained_cs)
         cum_trained_col_cs = 1 - torch.mean(batch_cum_trained_col_cs)
         final_comb_trained_cs_diffs.append(cum_trained_cs_avg.item())
@@ -548,19 +548,21 @@ def main():
                     shortlist.append(1-val)
             std_list.append(torch.stack(shortlist, dim=0))
         print(f'Lsize of the std_list: {torch.stack(std_list, dim=0).shape}')
-        std_ave = torch.std(torch.stack(std_list, dim=0), dim=0)
+        std_ave = torch.std(torch.stack(std_list, dim=0), dim=1)
         print(f"std_ave shape: {std_ave.shape}")
-        mean_ave = torch.mean(torch.stack(std_list, dim=0), dim=0)
+        mean_ave = torch.mean(torch.stack(std_list, dim=0), dim=1)
         print(f"Length of std_array {len(std_ave)}")
         for row in cos_trained_latent_col.clone():
             col_shortlist = []
             for val in row:
                 if val>=1e-4:
                     col_shortlist.append(1-val)
+                else:
+                    col_shortlist.append(mean(row))
             col_std_list.append(torch.stack(col_shortlist, dim=0))
-        col_std_ave = torch.std(torch.stack(col_std_list, dim=0), dim=1)
+        col_std_ave = torch.std(torch.stack(col_std_list, dim=0), dim=0)
         print(f"col_std_ave shape: {col_std_ave.shape}")
-        cos_mean_ave = torch.mean(torch.stack(col_std_list, dim=0), dim=1)
+        cos_mean_ave = torch.mean(torch.stack(col_std_list, dim=0), dim=0)
 
         print(f"Length of col_std_array {len(col_std_ave)}")
 
