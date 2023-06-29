@@ -561,9 +561,9 @@ def main():
 
         final_comb_trained_col_cs_std.append(torch.mean(col_std_ave).item())
         final_comb_trained_cs_std.append(torch.mean(std_ave).item())
-        final_ind_trained_col_cs_diffs.append([round(1 - val.item(), 4) for val in batch_cum_trained_col_cs])
+        final_ind_trained_col_cs_diffs.append([round(1 - ((val.item()* 10)/9), 4) for val in batch_cum_trained_col_cs])
         final_ind_trained_cs_col_stds.append([round(val.item(), 4) for val in col_std_ave])
-        final_ind_trained_cs_diffs.append([round(1 - val.item(), 4) for val in batch_cum_trained_cs])
+        final_ind_trained_cs_diffs.append([round(1 - ((val.item()*10)/9), 4) for val in batch_cum_trained_cs])
         final_ind_trained_cs_diffs_std.append([round(val.item(), 4) for val in std_ave])
 
 
