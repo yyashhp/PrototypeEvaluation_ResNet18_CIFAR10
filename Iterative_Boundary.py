@@ -541,6 +541,7 @@ def main():
         final_comb_trained_cols_cs_diffs.append(cum_trained_col_cs.item())
         final_comb_trained_cs_std.append(torch.mean(batch_cum_trained_cs_std).item())
         std_list = []
+        col_std_list = []
         for row in cos_trained_latent:
             shortlist = []
             for val in row:
@@ -549,13 +550,21 @@ def main():
             std_list.append(torch.stack(shortlist, dim=0))
         std_ave = torch.std(torch.stack(std_list, dim=0), dim=0)
         print(f"Length of std_array {len(std_ave)}")
+        for row in cos_trained_latent_col:
+            col_shortlist = []
+            for val in row:
+                if val>0:
+                    col_shortlist.append(val)
+            col_std_list.append(torch.stack(col_shortlist, dim=0))
+        col_std_ave = torch.std(torch.stack(col_std_list, dim=0), dim=0)
+        print(f"Length of col_std_array {len(col_std_ave)}")
 
 
         final_comb_trained_col_cs_std.append(torch.mean(batch_cum_trained_col_cs_std).item())
         final_ind_trained_col_cs_diffs.append([round(1 - val.item(), 4) for val in batch_cum_trained_col_cs])
-        final_ind_trained_cs_col_stds.append([round(val.item(), 4) for val in batch_cum_trained_col_cs_std])
+        final_ind_trained_cs_col_stds.append([round(val.item(), 4) for val in col_std_ave])
         final_ind_trained_cs_diffs.append([round(1 - val.item(), 4) for val in batch_cum_trained_cs])
-        final_ind_trained_cs_diffs_std.append([round(val.item(), 4) for val in batch_cum_trained_cs_std])
+        final_ind_trained_cs_diffs_std.append([round(val.item(), 4) for val in std_ave])
 
 
         batch_trained_l2 = torch.mean(torch.stack(stacked_trained_l2, dim=0), dim=0)
@@ -648,6 +657,7 @@ def main():
                    row wise CS STD_AVES_NO_ZERO: {std_ave} \n \n \
                    column-wise CS diffs: {final_ind_trained_col_cs_diffs[0]} \n  \
                     column-wise CS stds: {final_ind_trained_cs_col_stds[0]} \n  \
+                    column-wise CS STD_AVES_NO_ZERO: {col_std_ave} \n \n \
                     \n \n cumulative row-wise CS diff: {final_comb_trained_cs_diffs[0]} \n  \
                     cumulative row-wise CS diff NO ZERO: {torch.mean(std_ave).item()} \n \
                      cumulative row-wise CS Std; {final_comb_trained_cs_std} \
