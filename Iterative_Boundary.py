@@ -545,7 +545,7 @@ def main():
             shortlist = []
             for val in row:
                 if val>0:
-                    shortlist.append(val)
+                    shortlist.append(1-val)
             std_list.append(torch.stack(shortlist, dim=0))
         std_ave = torch.std(torch.stack(std_list, dim=0), dim=0)
         mean_ave = torch.mean(torch.stack(std_list, dim=0), dim=0)
@@ -554,7 +554,7 @@ def main():
             col_shortlist = []
             for val in row:
                 if val>0:
-                    col_shortlist.append(val)
+                    col_shortlist.append(1-val)
             col_std_list.append(torch.stack(col_shortlist, dim=0))
         col_std_ave = torch.std(torch.stack(col_std_list, dim=0), dim=1)
         cos_mean_ave = torch.mean(torch.stack(col_std_list, dim=0), dim=1)
@@ -652,6 +652,7 @@ def main():
         f.write(f" Final Loss Matrix: {last_loss_save} \n \n \
                 Class Diffs: [Class, Based Boundary, Comparator, Image CS Diff, Latent CS Diff] : {class_diffs} \n \n \
                 Matrix of Iterations Needed to reach target: {iterations_needed} \n \n \
+                matrix of row wise cs similarities: {cos_trained_latent}\n\n\
                 Matrix of Row-Wise CS diffs: {-(torch.sub(cos_trained_latent, 1))} \n \
                 Matrix of Column-Wise CS diffs: {-(torch.sub(cos_trained_latent_col, 1))} \n \
                    row wise CS diffs: {final_ind_trained_cs_diffs[0]} \n \n \
