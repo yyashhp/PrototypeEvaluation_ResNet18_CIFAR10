@@ -541,22 +541,24 @@ def main():
         final_comb_trained_cols_cs_diffs.append(cum_trained_col_cs.item())
         std_list = []
         col_std_list = []
-        for row in cos_trained_latent:
+        for row in cos_trained_latent.clone():
             shortlist = []
             for val in row:
-                if val!=0.:
+                if val>=1e-4:
                     shortlist.append(1-val)
             std_list.append(torch.stack(shortlist, dim=0))
         std_ave = torch.std(torch.stack(std_list, dim=0), dim=0)
+        print(f"std_ave shape: {std_ave.shape}")
         mean_ave = torch.mean(torch.stack(std_list, dim=0), dim=0)
         print(f"Length of std_array {len(std_ave)}")
-        for row in cos_trained_latent_col:
+        for row in cos_trained_latent_col.clone():
             col_shortlist = []
             for val in row:
-                if val!=0.:
+                if val>=1e-4:
                     col_shortlist.append(1-val)
             col_std_list.append(torch.stack(col_shortlist, dim=0))
         col_std_ave = torch.std(torch.stack(col_std_list, dim=0), dim=1)
+        print(f"col_std_ave shape: {col_std_ave.shape}")
         cos_mean_ave = torch.mean(torch.stack(col_std_list, dim=0), dim=1)
 
         print(f"Length of col_std_array {len(col_std_ave)}")
@@ -566,7 +568,7 @@ def main():
         final_comb_trained_cs_std.append(torch.mean(std_ave).item())
         final_ind_trained_col_cs_diffs.append([round(1 - ((val.item()* 10)/9), 4) for val in batch_cum_trained_col_cs])
         final_ind_trained_cs_col_stds.append([round(val.item(), 4) for val in col_std_ave])
-        final_ind_trained_cs_diffs.append([round(1 - ((val.item()*10)/9), 4) for val in batch_cum_trained_cs])
+        final_ind_trained_cs_diffs.append([round(1 - ((val.item()* 10)/9), 4) for val in batch_cum_trained_cs])
         final_ind_trained_cs_diffs_std.append([round(val.item(), 4) for val in std_ave])
 
 
