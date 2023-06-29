@@ -600,7 +600,7 @@ def main():
                     elif k != i:
                         inter_diff = cos_sim(matrix[i][k], matrix[i][based_index])
                         inter_latent = cos_sim(stacked_sets_latent_boundaries[0][i][k], stacked_sets_latent_boundaries[0][i][based_index])
-                        inter_class_diffs.append([i, based_index, k, 1 - round(torch.mean(inter_diff).item(),4), 1 - round(inter_latent.item(), 4) ])
+                        inter_class_diffs.append([int(i), int(based_index), int(k), round(1 - round(torch.mean(inter_diff).item(),4), 4), round(1 - round(inter_latent.item(), 4), 4) ])
                         inter_diffs_check.append(1-round(cos_sim(proto_latent[i], stacked_sets_latent_boundaries[0][i][k]).item(), 4))
                     else:
                         inter_class_diffs.append([0.0,0.0,0.0,0.0,0.0])
@@ -649,7 +649,7 @@ def main():
         f.write(f" Final Loss Matrix: {last_loss_save} \n \n \
                 Class Diffs: [Class, Based Boundary, Comparator, Image CS Diff, Latent CS Diff] : {class_diffs} \n \n \
                 Diffs Check: {diffs_check} \n \n \n \n \n \
-                Matrix of Iterations Needed to reach target: {iterations_needed} \n \
+                Matrix of Iterations Needed to reach target: {iterations_needed} \n \n \
                 Matrix of Row-Wise CS diffs: {-(torch.sub(cos_trained_latent, 1))} \n \
                 Matrix of Column-Wise CS diffs: {-(torch.sub(cos_trained_latent_col, 1))} \n \
                    row wise CS diffs: {final_ind_trained_cs_diffs[0]} \n \n \
@@ -657,7 +657,6 @@ def main():
                    column-wise CS diffs: {final_ind_trained_col_cs_diffs[0]} \n  \
                     column-wise CS stds: {final_ind_trained_cs_col_stds[0]} \n  \
                     \n \n cumulative row-wise CS diff: {final_comb_trained_cs_diffs[0]} \n  \
-                    cumulative row-wise CS diff NO ZERO: {torch.mean(std_ave).item()} \n \
                      cumulative row-wise CS Std; {final_comb_trained_cs_std} \
                       \n  cumulative column-wise CS diff {final_comb_trained_cols_cs_diffs[0]} \
                        \n \n cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
