@@ -547,6 +547,7 @@ def main():
                 if val>=1e-4:
                     shortlist.append(1-val)
             std_list.append(torch.stack(shortlist, dim=0))
+        print(f'Lsize of the std_list: {torch.stack(std_list, dim=0).shape}')
         std_ave = torch.std(torch.stack(std_list, dim=0), dim=0)
         print(f"std_ave shape: {std_ave.shape}")
         mean_ave = torch.mean(torch.stack(std_list, dim=0), dim=0)
