@@ -506,8 +506,8 @@ def main():
                         start_proto_squeezed = torch.squeeze(start_proto.clone(), dim=0)
                         print(f"Boundary  shape: {start_proto_squeezed.shape}")
                         boundary_latent = torch.squeeze(boundary_latent, dim=0)
-                        cos_trained_latent[i][k] = cos_sim(boundary_latent, protos_latent[i].clone())
-                        cos_trained_latent_col[i][k] = cos_sim(boundary_latent, protos_latent[k].clone())
+                        cos_trained_latent[i][k] = 1 - cos_sim(boundary_latent, protos_latent[i].clone())
+                        cos_trained_latent_col[i][k] = 1 - cos_sim(boundary_latent, protos_latent[k].clone())
                         trained_boundaries.append(start_proto_squeezed.clone())
                         l2_trained_diff.append(torch.mean(torch.linalg.norm((boundary_latent.clone() - protos_latent[i].clone()), dim=0)))
                         latents_boundaries.append(boundary_latent.clone())
@@ -539,7 +539,6 @@ def main():
         cum_trained_col_cs = 1 - torch.mean(batch_cum_trained_col_cs)
         final_comb_trained_cs_diffs.append(cum_trained_cs_avg.item())
         final_comb_trained_cols_cs_diffs.append(cum_trained_col_cs.item())
-        final_comb_trained_cs_std.append(torch.mean(batch_cum_trained_cs_std).item())
         std_list = []
         col_std_list = []
         for row in cos_trained_latent:
@@ -560,7 +559,8 @@ def main():
         print(f"Length of col_std_array {len(col_std_ave)}")
 
 
-        final_comb_trained_col_cs_std.append(torch.mean(batch_cum_trained_col_cs_std).item())
+        final_comb_trained_col_cs_std.append(torch.mean(col_std_ave).item())
+        final_comb_trained_cs_std.append(torch.mean(std_ave).item())
         final_ind_trained_col_cs_diffs.append([round(1 - val.item(), 4) for val in batch_cum_trained_col_cs])
         final_ind_trained_cs_col_stds.append([round(val.item(), 4) for val in col_std_ave])
         final_ind_trained_cs_diffs.append([round(1 - val.item(), 4) for val in batch_cum_trained_cs])
@@ -654,10 +654,8 @@ def main():
                 Matrix of Column-Wise CS diffs: {-(torch.sub(cos_trained_latent_col, 1))} \n \
                    row wise CS diffs: {final_ind_trained_cs_diffs[0]} \n \n \
                    row wise CS stds: {final_ind_trained_cs_diffs_std[0]} \n   \
-                   row wise CS STD_AVES_NO_ZERO: {std_ave} \n \n \
                    column-wise CS diffs: {final_ind_trained_col_cs_diffs[0]} \n  \
                     column-wise CS stds: {final_ind_trained_cs_col_stds[0]} \n  \
-                    column-wise CS STD_AVES_NO_ZERO: {col_std_ave} \n \n \
                     \n \n cumulative row-wise CS diff: {final_comb_trained_cs_diffs[0]} \n  \
                     cumulative row-wise CS diff NO ZERO: {torch.mean(std_ave).item()} \n \
                      cumulative row-wise CS Std; {final_comb_trained_cs_std} \
