@@ -579,9 +579,9 @@ def main():
         final_ind_trained_l2_diffs.append(batch_cum_trained_l2)
 
         final_comb_trained_cs_diffs.append(
-            torch.mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_cs]).item())
+            mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_cs]))
         final_comb_trained_cols_cs_diffs.append(
-            torch.mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_col_cs]).item())
+            mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_col_cs]))
 
 
         class_diffs = []
