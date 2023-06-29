@@ -548,6 +548,7 @@ def main():
                     shortlist.append(val)
             std_list.append(torch.stack(shortlist, dim=0))
         std_ave = torch.std(torch.stack(std_list, dim=0), dim=0)
+        mean_ave = torch.mean(torch.stack(std_list, dim=0), dim=0)
         print(f"Length of std_array {len(std_ave)}")
         for row in cos_trained_latent_col:
             col_shortlist = []
@@ -555,7 +556,9 @@ def main():
                 if val>0:
                     col_shortlist.append(val)
             col_std_list.append(torch.stack(col_shortlist, dim=0))
-        col_std_ave = torch.std(torch.stack(col_std_list, dim=0), dim=0)
+        col_std_ave = torch.std(torch.stack(col_std_list, dim=0), dim=1)
+        cos_mean_ave = torch.mean(torch.stack(col_std_list, dim=0), dim=1)
+
         print(f"Length of col_std_array {len(col_std_ave)}")
 
 
@@ -652,8 +655,10 @@ def main():
                 Matrix of Row-Wise CS diffs: {-(torch.sub(cos_trained_latent, 1))} \n \
                 Matrix of Column-Wise CS diffs: {-(torch.sub(cos_trained_latent_col, 1))} \n \
                    row wise CS diffs: {final_ind_trained_cs_diffs[0]} \n \n \
+                   shortist CS diffs: {mean_ave} \n \n \
                    row wise CS stds: {final_ind_trained_cs_diffs_std[0]} \n   \
                    column-wise CS diffs: {final_ind_trained_col_cs_diffs[0]} \n  \
+                   column-wise shortlist cs diffs: {cos_mean_ave}\n \n \
                     column-wise CS stds: {final_ind_trained_cs_col_stds[0]} \n  \
                     \n \n cumulative row-wise CS diff: {final_comb_trained_cs_diffs[0]} \n  \
                      cumulative row-wise CS Std; {final_comb_trained_cs_std} \
