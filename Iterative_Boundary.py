@@ -530,11 +530,11 @@ def main():
        # batch_diff_std.append(batch_trained_std)
       #  batch_diff_col_std.append(batch_trained_col_std)
       #  batch_cum_trained_cs, batch_cum_trained_cs_std = torch.std_mean(batch_trained_cs, dim=0)
-        batch_cum_trained_cs, batch_cum_trained_cs_std = torch.std_mean(cos_trained_latent.clone(), dim=0)
+        batch_cum_trained_cs_std, batch_cum_trained_cs = torch.std_mean(cos_trained_latent.clone(), dim=0)
         mask = cos_trained_latent > 0
         col_mask = cos_trained_latent_col > 0
      #   batch_cum_trained_col_cs, batch_cum_trained_col_cs_std = torch.std_mean(batch_trained_col_cs, dim=1)
-        batch_cum_trained_col_cs, batch_cum_trained_col_cs_std = torch.std_mean(cos_trained_latent_col.clone(),dim=1)
+        batch_cum_trained_col_cs_std, batch_cum_trained_col_cs = torch.std_mean(cos_trained_latent_col.clone(),dim=1)
         cum_trained_cs_avg = 1 - torch.mean(batch_cum_trained_cs)
         cum_trained_col_cs = 1 - torch.mean(batch_cum_trained_col_cs)
         final_comb_trained_cs_diffs.append(cum_trained_cs_avg.item())
