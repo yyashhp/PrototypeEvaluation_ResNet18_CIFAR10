@@ -558,7 +558,7 @@ def main():
                 if val>=1e-4:
                     col_shortlist.append(1-val)
                 else:
-                    col_shortlist.append(mean(row))
+                    col_shortlist.append(torch.mean(row))
             col_std_list.append(torch.stack(col_shortlist, dim=0))
         col_std_ave = torch.std(torch.stack(col_std_list, dim=0), dim=0)
         print(f"col_std_ave shape: {col_std_ave.shape}")
