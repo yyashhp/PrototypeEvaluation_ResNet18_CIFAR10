@@ -660,9 +660,9 @@ def main():
         f.write(f" Final Loss Matrix: {last_loss_save} \n \n \
                 Class Diffs: [Class, Based Boundary, Comparator, Image CS Diff, Latent CS Diff] : {class_diffs} \n \n \
                 Matrix of Iterations Needed to reach target: {iterations_needed} \n \n \
-                matrix of row wise cs similarities: {cos_trained_latent}\n\n\
-                Matrix of Row-Wise CS diffs: {-(torch.sub(cos_trained_latent, 1))} \n \
-                Matrix of Column-Wise CS diffs: {-(torch.sub(cos_trained_latent_col, 1))} \n \
+                matrix of row wise cs similarities: \n {cos_trained_latent}\n\n\
+                Matrix of Row-Wise CS diffs: \n{-(torch.sub(cos_trained_latent, 1)).tolist()} \n \
+                Matrix of Column-Wise CS diffs: \n {-(torch.sub(cos_trained_latent_col, 1)).tolist()} \n \
                    row wise CS diffs: {final_ind_trained_cs_diffs[0]} \n \n \
                    row wise CS stds: {final_ind_trained_cs_diffs_std[0]} \n   \
                    column-wise CS diffs: {final_ind_trained_col_cs_diffs[0]} \n  \
