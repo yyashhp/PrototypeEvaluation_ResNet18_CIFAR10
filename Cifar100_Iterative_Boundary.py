@@ -184,7 +184,7 @@ def main():
 
     for j in range(6, len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
-        model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_23_49", map_location=device)
+        model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
         model.load_state_dict(model_saved)
         for p in model.parameters():
             p.requires_grad = False
@@ -579,9 +579,9 @@ def main():
         final_ind_trained_l2_diffs.append(batch_cum_trained_l2)
 
         final_comb_trained_cs_diffs.append(
-            torch.mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_cs]).item())
+            mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_cs]))
         final_comb_trained_cols_cs_diffs.append(
-            torch.mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_col_cs]).item())
+            mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_col_cs]))
 
 
         class_diffs = []
