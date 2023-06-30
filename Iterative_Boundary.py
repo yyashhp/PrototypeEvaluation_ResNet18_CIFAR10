@@ -562,7 +562,7 @@ def main():
         col_std_ave = torch.std(torch.stack(col_std_list, dim=0), dim=0)
         print(f"col_std_ave shape: {col_std_ave.shape}")
         cos_mean_ave = torch.mean(torch.stack(col_std_list, dim=0), dim=0)
-        iterations_matrix.append(iterations.clone())
+        iterations_matrix.append(iterations)
         print(f"Length of col_std_array {len(col_std_ave)}")
 
 
@@ -657,7 +657,7 @@ def main():
         #          Mispredictions: {mispredictions}")
         for i in range (6,len(data_schedule)):
             f.write(f" Data Split: {data_schedule[i]} \n  \
-                    Matrix of Iterations Needed to reach target:\n  {iterations_matrix[i].tolist()} \n \n \
+                    Matrix of Iterations Needed to reach target:\n  {iterations_matrix[i]} \n \n \
                     \n \n cumulative row-wise CS diff:\n {final_comb_trained_cs_diffs[i]} \n  \
                      cumulative row-wise CS Std;\n {final_comb_trained_cs_std[i]} \
                       \n  cumulative column-wise CS diff: \n {final_comb_trained_cols_cs_diffs[i]} \
