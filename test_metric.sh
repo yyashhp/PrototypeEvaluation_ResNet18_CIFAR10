@@ -9,7 +9,7 @@ for n in CIFAR10
 do
 for j in 0.05 
 do
-    python Loaded_Tester.py  --seed 42 --model-scale 1.0  --total-runs 5
+    python Cifar100_Iterative_Boundary.py  --seed 42 --model-scale 1.0  --total-runs 5
 
 done
 done
