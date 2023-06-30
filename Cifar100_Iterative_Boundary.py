@@ -15,6 +15,8 @@ from ResNet18Model import ResNet18
 from foolbox import PyTorchModel, accuracy, samples
 from foolbox.attacks import L2DeepFoolAttack
 from statistics import mean
+import matplotlib
+import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser(description="CIFAR100 Training")
 parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed(default: 1')
