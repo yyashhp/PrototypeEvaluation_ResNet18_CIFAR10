@@ -670,6 +670,7 @@ def main():
         plt.plot(data_schedule, final_comb_trained_col_cs_std, label="column-wise std")
         plt.plot(data_schedule, final_comb_trained_cs_std, label="row-wise std")
         plt.legend()
+        plt.savefig(f"{model_dir}/'Saved_Cifar10_Plots.png")
         plt.show()
 
     f.close()
