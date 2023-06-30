@@ -171,18 +171,17 @@ def main():
     batch_diff_col_std = []
     mispredictions = []
     inter_row_image_diff = []
-    cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
-    cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
-    iterations_needed = torch.zeros(nclass, nclass, dtype=torch.float)
-    last_loss_save = torch.zeros(nclass, nclass, dtype=torch.float)
+
     end_logits =  torch.zeros(nclass, nclass, dtype=torch.float)
     trained_boundary_sets = []
     stacked_sets_latent_boundaries = []
 
     stacked_trained_l2 = []
     stacked_sets_trained_boundaries = []
-
-    for j in range(6, len(data_schedule)):
+    iterations_matrix = []
+    col_quartiles_saved = []
+    row_quartiles_saved = []
+    for j in range(len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
         model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
         model.load_state_dict(model_saved)
@@ -191,6 +190,12 @@ def main():
         model.eval()
         par_image_tensors_loaded = torch.load(f"{saved_protos_path}/CIFAR_100_Final_Saved_Protos_3_SPLIT_{j}", map_location=device)
         par_image_tensors = [set.clone() for set in par_image_tensors_loaded]
+        cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
+        cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
+        iterations_needed = torch.zeros(nclass, nclass, dtype=torch.float)
+        last_loss_save = torch.zeros(nclass, nclass, dtype=torch.float)
+        col_quartiles = torch.zeros(nclass, 7, dtype=torch.float)
+        row_quartiles = torch.zeros(nclass, 7, dtype = torch.float)
     #
     # for run in range(args.total_runs):
     #     _par_image_copy = par_image_tensors[run].clone().detach().requires_grad_(False).to(device)
@@ -582,6 +587,32 @@ def main():
             mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_cs]))
         final_comb_trained_cols_cs_diffs.append(
             mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_col_cs]))
+        iterations_matrix.append(iterations_needed)
+
+        for num, line in enumerate(cos_trained_latent.clone()):
+            sorted_line = torch.sort(line)
+            print(f"length of line of row is {len(sorted_line)}")
+            row_quartiles[num][0] = sorted_line[0]
+            row_quartiles[num][1] = sorted_line[19]
+            row_quartiles[num][2] = sorted_line[39]
+            row_quartiles[num][3] = sorted_line[59]
+            row_quartiles[num][4] = sorted_line[79]
+            row_quartiles[num][5] = sorted_line[99]
+            row_quartiles[num][6] = torch.mean(sorted_line)
+        row_quartiles_saved.append(row_quartiles.clone())
+
+        for num, line in enumerate(cos_trained_latent_col.clone()):
+            sorted_line = torch.sort(line)
+            print(f"length of line of row is {len(sorted_line)}")
+            col_quartiles[num][0] = sorted_line[0]
+            col_quartiles[num][1] = sorted_line[19]
+            col_quartiles[num][2] = sorted_line[39]
+            col_quartiles[num][3] = sorted_line[59]
+            col_quartiles[num][4] = sorted_line[79]
+            col_quartiles[num][5] = sorted_line[99]
+            col_quartiles[num][6] = torch.mean(sorted_line)
+        col_quartiles_saved.append(col_quartiles.clone())
+
 
 
         class_diffs = []
@@ -589,35 +620,35 @@ def main():
 
 
 
-        for t in range(1):
-            matrix = stacked_sets_trained_boundaries[0].clone()
-            protos_copy = par_image_tensors[0].clone()
-            with torch.no_grad():
-                norm_protos = transformDict['norm'](protos_copy)
-                proto_latent, proto_logits = model(norm_protos)
-            print(f"Length of matrix: {len(matrix)}")
-            for i in range(len(matrix)):
-                basefound = False
-                inter_class_diffs = []
-                inter_diffs_check = []
-                base = 0
-                for k in range(len(matrix)):
-                    if basefound is False and k != i:
-                        base = matrix[i][k].clone()
-                        basefound = True
-                        based_index = k
-                        inter_diffs_check.append(
-                            1 - round(cos_sim(proto_latent[i], stacked_sets_latent_boundaries[0][i][k]).item(), 4))
-                    elif k != i:
-                        inter_diff = cos_sim(matrix[i][k], matrix[i][based_index])
-                        inter_latent = cos_sim(stacked_sets_latent_boundaries[0][i][k], stacked_sets_latent_boundaries[0][i][based_index])
-                        inter_class_diffs.append([int(i), int(based_index), int(k), round(1 - round(torch.mean(inter_diff).item(),4), 4), round(1 - round(inter_latent.item(), 4), 4) ])
-                        inter_diffs_check.append(1-round(cos_sim(proto_latent[i], stacked_sets_latent_boundaries[0][i][k]).item(), 4))
-                    else:
-                        inter_class_diffs.append([0.0,0.0,0.0,0.0,0.0])
-                        inter_diffs_check.append(0)
-                class_diffs.append(inter_class_diffs)
-                diffs_check.append(inter_diffs_check)
+        # for t in range(1):
+        #     matrix = stacked_sets_trained_boundaries[0].clone()
+        #     protos_copy = par_image_tensors[0].clone()
+        #     with torch.no_grad():
+        #         norm_protos = transformDict['norm'](protos_copy)
+        #         proto_latent, proto_logits = model(norm_protos)
+        #     print(f"Length of matrix: {len(matrix)}")
+        #     for i in range(len(matrix)):
+        #         basefound = False
+        #         inter_class_diffs = []
+        #         inter_diffs_check = []
+        #         base = 0
+        #         for k in range(len(matrix)):
+        #             if basefound is False and k != i:
+        #                 base = matrix[i][k].clone()
+        #                 basefound = True
+        #                 based_index = k
+        #                 inter_diffs_check.append(
+        #                     1 - round(cos_sim(proto_latent[i], stacked_sets_latent_boundaries[0][i][k]).item(), 4))
+        #             elif k != i:
+        #                 inter_diff = cos_sim(matrix[i][k], matrix[i][based_index])
+        #                 inter_latent = cos_sim(stacked_sets_latent_boundaries[0][i][k], stacked_sets_latent_boundaries[0][i][based_index])
+        #                 inter_class_diffs.append([int(i), int(based_index), int(k), round(1 - round(torch.mean(inter_diff).item(),4), 4), round(1 - round(inter_latent.item(), 4), 4) ])
+        #                 inter_diffs_check.append(1-round(cos_sim(proto_latent[i], stacked_sets_latent_boundaries[0][i][k]).item(), 4))
+        #             else:
+        #                 inter_class_diffs.append([0.0,0.0,0.0,0.0,0.0])
+        #                 inter_diffs_check.append(0)
+        #         class_diffs.append(inter_class_diffs)
+        #         diffs_check.append(inter_diffs_check)
 
 
 
@@ -657,23 +688,25 @@ def main():
         #        \n \n cumulative column-wise CS diff {final_comb_trained_cols_cs_diffs[0]} \
         #         \t \t cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
         #          Mispredictions: {mispredictions}")
-        f.write(f" Final Loss Matrix: {last_loss_save} \n \n \
-                Class Diffs: [Class, Based Boundary, Comparator, Image CS Diff, Latent CS Diff] : {class_diffs} \n \n \
-                Matrix of Iterations Needed to reach target: {iterations_needed} \n \n \
-                matrix of row wise cs similarities: \n {cos_trained_latent}\n\n\
-                Matrix of Row-Wise CS diffs: \n{-(torch.sub(cos_trained_latent, 1)).tolist()} \n \
-                Matrix of Column-Wise CS diffs: \n {-(torch.sub(cos_trained_latent_col, 1)).tolist()} \n \
-                   row wise CS diffs: {final_ind_trained_cs_diffs[0]} \n \n \
-                   row wise CS stds: {final_ind_trained_cs_diffs_std[0]} \n   \
-                   column-wise CS diffs: {final_ind_trained_col_cs_diffs[0]} \n  \
-                    column-wise CS stds: {final_ind_trained_cs_col_stds[0]} \n  \
-                    \n \n cumulative row-wise CS diff: {final_comb_trained_cs_diffs[0]} \n  \
-                     cumulative row-wise CS Std; {final_comb_trained_cs_std} \
-                      \n  cumulative column-wise CS diff {final_comb_trained_cols_cs_diffs[0]} \
-                       \n \n cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
+        for i in range(len(data_schedule)):
+            f.write(f" Split : \t  {date_schedule[i]} \n \
+            Matrix of Iterations Needed to reach target: {iterations_matrix[i]} \n \n \
+                Quartiles of row data [min, 20%, 40%, 60%, 80%, max, average] \n {row_quartiles_saved[i]} \n \n \
+            Quartiles of column data [min, 20%, 40%, 60%, 80%, max, average] \n {col_quartiles_saved[i]} \n \n \
+                    \n \n cumulative row-wise CS diff: {final_comb_trained_cs_diffs[i]} \n  \
+                     cumulative row-wise CS Std; {final_comb_trained_cs_std[i]} \
+                      \n  cumulative column-wise CS diff {final_comb_trained_cols_cs_diffs[i]} \
+                       \n \n cumulative column-wise CS Std: {final_comb_trained_col_cs_std[i]} \n \n \
                         Mispredictions: {mispredictions}")
 
     f.close()
+    plt.plot(data_schedule, final_comb_trained_cols_cs_diffs, label="column-wise cs diff")
+    plt.plot(data_schedule, final_comb_trained_cs_diffs, label="row-wise cs diff")
+    plt.plot(data_schedule, final_comb_trained_col_cs_std, label="column-wise std")
+    plt.plot(data_schedule, final_comb_trained_cs_std, label="row-wise std")
+    plt.legend()
+    plt.savefig(f"{model_dir}/../CIFAR100_Saved_Plots_{date_time}.png")
+    plt.show()
 
 
 if __name__ == '__main__':
