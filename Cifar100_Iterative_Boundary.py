@@ -108,7 +108,7 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
             #    if gradd == 0:
             #        grad_mag[grad] = torch.mean(grad_mag)
             #print(f"Grad_Mag:{grad_mag}")
-            image_grads = 0.01 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
+            image_grads = 0.1 * gradients_unscaled / grad_mag.view(-1, 1, 1, 1)
            # image_gradients = torch.nan_to_num(image_grads)
             #print(f"Printing image gradients here: {image_gradients}")
             if torch.mean(loss) > 1e-7:
@@ -184,7 +184,7 @@ def main():
 
     for j in range(6, len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
-        model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_23_49", map_location=device)
+        model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
         model.load_state_dict(model_saved)
         for p in model.parameters():
             p.requires_grad = False
