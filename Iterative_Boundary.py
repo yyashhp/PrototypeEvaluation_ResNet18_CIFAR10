@@ -665,15 +665,15 @@ def main():
                       \n  cumulative column-wise CS diff: \t {final_comb_trained_cols_cs_diffs[i]} \
                        \n \n cumulative column-wise CS Std:\t {final_comb_trained_col_cs_std[i]} \n \n \
                         Mispredictions: \n{mispredictions} \n \n")
-        plt.plot(data_schedule, final_comb_trained_cols_cs_diffs, label = "column-wise cs diff")
-        plt.plot(data_schedule, final_comb_trained_cs_diffs, label="row-wise cs diff")
-        plt.plot(data_schedule, final_comb_trained_col_cs_std, label="column-wise std")
-        plt.plot(data_schedule, final_comb_trained_cs_std, label="row-wise std")
-        plt.legend()
-        plt.savefig(f"{model_dir}/'Saved_Cifar10_Plots.png")
-        plt.show()
 
     f.close()
+    plt.plot(data_schedule, final_comb_trained_cols_cs_diffs, label="column-wise cs diff")
+    plt.plot(data_schedule, final_comb_trained_cs_diffs, label="row-wise cs diff")
+    plt.plot(data_schedule, final_comb_trained_col_cs_std, label="column-wise std")
+    plt.plot(data_schedule, final_comb_trained_cs_std, label="row-wise std")
+    plt.legend()
+    plt.savefig(f"{model_dir}/../Saved_Cifar10_Plots.png")
+    plt.show()
 
 
 if __name__ == '__main__':
