@@ -591,20 +591,24 @@ def main():
             mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_col_cs]))
         iterations_matrix.append(iterations_needed)
 
-        for num, line in enumerate(cos_trained_latent.clone()):
-            sorted_line = torch.sort(line)
+        line_index = 0
+        for line in cos_trained_latent.clone():
+            sorted_line = torch.sort(line.clone().detach())
             print(f"length of line of row is {len(sorted_line)}")
-            row_quartiles[num][0] = sorted_line[0]
-            row_quartiles[num][1] = sorted_line[19]
-            row_quartiles[num][2] = sorted_line[39]
-            row_quartiles[num][3] = sorted_line[59]
-            row_quartiles[num][4] = sorted_line[79]
-            row_quartiles[num][5] = sorted_line[99]
-            row_quartiles[num][6] = torch.mean(sorted_line)
+            row_quartiles[line_index][0] = sorted_line[0]
+            row_quartiles[line_index][1] = sorted_line[19]
+            row_quartiles[line_index][2] = sorted_line[39]
+            row_quartiles[line_index][3] = sorted_line[59]
+            row_quartiles[line_index][4] = sorted_line[79]
+            row_quartiles[line_index][5] = sorted_line[99]
+            row_quartiles[line_index][6] = torch.mean(sorted_line)
+            line_index+=1
         row_quartiles_saved.append(row_quartiles.clone())
 
-        for num, line in enumerate(cos_trained_latent_col.clone()):
-            sorted_line = torch.sort(line)
+        line_index = 0
+
+        for line in cos_trained_latent_col.clone():
+            sorted_line = torch.sort(line.clone().detach())
             print(f"length of line of row is {len(sorted_line)}")
             col_quartiles[num][0] = sorted_line[0]
             col_quartiles[num][1] = sorted_line[19]
@@ -613,7 +617,9 @@ def main():
             col_quartiles[num][4] = sorted_line[79]
             col_quartiles[num][5] = sorted_line[99]
             col_quartiles[num][6] = torch.mean(sorted_line)
+            line_index+=1
         col_quartiles_saved.append(col_quartiles.clone())
+        line_index = 0
 
 
 
