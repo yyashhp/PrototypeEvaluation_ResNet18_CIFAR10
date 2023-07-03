@@ -593,7 +593,7 @@ def main():
 
         line_index = 0
         for line in cos_trained_latent.clone():
-            sorted_line = torch.sort(line.clone().detach())
+            sorted_line = torch.sort(line.clone().detach())[0]
             print(f"length of line of row is {len(sorted_line)}")
             row_quartiles[line_index][0] = sorted_line[0]
             row_quartiles[line_index][1] = sorted_line[19]
@@ -608,7 +608,7 @@ def main():
         line_index = 0
 
         for line in cos_trained_latent_col.clone():
-            sorted_line = torch.sort(line.clone().detach())
+            sorted_line = torch.sort(line.clone().detach())[0]
             print(f"length of line of row is {len(sorted_line)}")
             col_quartiles[num][0] = sorted_line[0]
             col_quartiles[num][1] = sorted_line[19]
