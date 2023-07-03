@@ -679,10 +679,10 @@ def main():
         plt.cla()
         plt.clf()
 
-    overall_row_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cs_diffs, device=device).clone(), dim=0)
-    overall_col_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cols_cs_diffs, device=device).clone(), dim=0)
-    overall_row_cs_stds = torch.mean(torch.Tensor(final_comb_trained_cs_std, device=device).clone(), dim=0)
-    overall_col_cs_stds = torch.mean(torch.Tensor(final_comb_trained_col_cs_std, device=device).clone(), dim=0)
+    overall_row_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cs_diffs).clone(), dim=0)
+    overall_col_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cols_cs_diffs).clone(), dim=0)
+    overall_row_cs_stds = torch.mean(torch.Tensor(final_comb_trained_cs_std).clone(), dim=0)
+    overall_col_cs_stds = torch.mean(torch.Tensor(final_comb_trained_col_cs_std).clone(), dim=0)
 
     plt.plot(data_schedule, overall_col_cs_diffs.tolist(), label="column-wise cs diff")
     plt.plot(data_schedule, overall_row_cs_diffs.tolist(), label="row-wise cs diff")
