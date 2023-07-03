@@ -672,7 +672,7 @@ def main():
         plt.plot(data_schedule, final_comb_trained_col_cs_std[t], label="column-wise std")
         plt.plot(data_schedule, final_comb_trained_cs_std[t], label="row-wise std")
         plt.legend()
-        plt.savefig(f"{model_dir}/../Saved_Cifar10_Plots/{date_time}_batch{t}.png")
+        plt.savefig(f"{model_dir}/../Saved_Plots/{date_time}_CIFAR10_batch{t}.png")
         plt.show()
         plt.figure().clear()
         plt.close()
@@ -689,7 +689,7 @@ def main():
     plt.plot(data_schedule, overall_col_cs_stds.tolist(), label="column-wise std")
     plt.plot(data_schedule, overall_row_cs_stds.tolist(), label="row-wise std")
     plt.legend()
-    plt.savefig(f"{model_dir}/../Saved_Cifar10_Plots/{date_time}_OVERALL.png")
+    plt.savefig(f"{model_dir}/../Saved_Plots/{date_time}_CIFAR10_OVERALL.png")
     plt.show()
 
 

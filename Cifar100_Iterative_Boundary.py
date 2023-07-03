@@ -610,13 +610,13 @@ def main():
         for line in cos_trained_latent_col.clone():
             sorted_line = torch.sort(line.clone().detach())[0]
             print(f"length of line of row is {len(sorted_line)}")
-            col_quartiles[num][0] = sorted_line[0]
-            col_quartiles[num][1] = sorted_line[19]
-            col_quartiles[num][2] = sorted_line[39]
-            col_quartiles[num][3] = sorted_line[59]
-            col_quartiles[num][4] = sorted_line[79]
-            col_quartiles[num][5] = sorted_line[99]
-            col_quartiles[num][6] = torch.mean(sorted_line)
+            col_quartiles[line_index][0] = sorted_line[0]
+            col_quartiles[line_index][1] = sorted_line[19]
+            col_quartiles[line_index][2] = sorted_line[39]
+            col_quartiles[line_index][3] = sorted_line[59]
+            col_quartiles[line_index][4] = sorted_line[79]
+            col_quartiles[line_index][5] = sorted_line[99]
+            col_quartiles[line_index][6] = torch.mean(sorted_line)
             line_index+=1
         col_quartiles_saved.append(col_quartiles.clone())
         line_index = 0
@@ -713,7 +713,7 @@ def main():
     plt.plot(data_schedule, final_comb_trained_col_cs_std, label="column-wise std")
     plt.plot(data_schedule, final_comb_trained_cs_std, label="row-wise std")
     plt.legend()
-    plt.savefig(f"{model_dir}/../CIFAR100_Saved_Plots_{date_time}.png")
+    plt.savefig(f"{model_dir}/../Saved_Plots/CIFAR100_Saved_Plots_{date_time}.png")
     plt.show()
 
 
