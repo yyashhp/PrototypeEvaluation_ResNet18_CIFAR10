@@ -538,7 +538,7 @@ def main():
             cum_trained_col_cs = 1 - torch.mean(batch_cum_trained_col_cs)
             std_list = []
             col_std_list = []
-            for row in torch.stack(cos_trained_latent_col[t], dim=0).clone():
+            for row in cos_trained_latent_col[t].clone():
                 shortlist = []
                 for val in row:
                     if val>=1e-4:
@@ -549,7 +549,7 @@ def main():
             print(f"std_ave shape: {std_ave.shape}")
             mean_ave = torch.mean(torch.stack(std_list, dim=0), dim=1)
             print(f"Length of std_array {len(std_ave)}")
-            for row in torch.stack(cos_trained_latent_col[t], dim=0).clone():
+            for row in cos_trained_latent_col[t].clone():
                 col_shortlist = []
                 for val in row:
                     if val>=1e-4:
