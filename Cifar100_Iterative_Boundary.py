@@ -449,7 +449,7 @@ def main():
         # cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
         # cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
       #  for proto in par_image_tensors:
-        for t in range(len(args.total_runs)):
+        for t in range(args.total_runs):
             proto = par_image_tensors[0].clone()
             set+=1
             cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
