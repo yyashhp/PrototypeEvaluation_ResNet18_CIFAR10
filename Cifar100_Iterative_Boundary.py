@@ -558,8 +558,8 @@ def main():
                 col_shortlist = []
                 for val in row:
                     if val>=1e-4:
-                       col_shortlist.append(1-val)
-                   else:
+                        col_shortlist.append(1-val)
+                    else:
                         col_shortlist.append(torch.mean(row))
                 col_std_list.append(torch.stack(col_shortlist, dim=0))
             col_std_ave = torch.std(torch.stack(col_std_list, dim=0), dim=0)
