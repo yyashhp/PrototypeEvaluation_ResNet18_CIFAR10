@@ -146,6 +146,7 @@ def binary_boundary(args, model, nclass, prev, curr, starter, target, transformD
             preds_tester = logits_tester.max(1, keepdim=True)[1]
             probs = F.softmax(logits_tester).squeeze(dim=0)
             print(f"Preds:Tester!: {preds_tester}")
+            print(f"Probs:Tester!: {probs}")
         if probs[starter] > 0.503 or probs[target] < 0.497:
             prev = tester.clone()
         elif probs[starter] < 0.497 or probs[target] > 0.503:
