@@ -182,7 +182,7 @@ def main():
     iterations_matrix = [[] for _ in range(args.total_runs)]
     col_quartiles_saved = [[] for _ in range(args.total_runs)]
     row_quartiles_saved = [[] for _ in range(args.total_runs)]
-    for j in range(len(data_schedule)):
+    for j in range(6,len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
         model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
         model.load_state_dict(model_saved)
@@ -449,8 +449,8 @@ def main():
         # cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
         # cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
       #  for proto in par_image_tensors:
-        for t in range(args.total_runs):
-            proto = par_image_tensors[0].clone()
+        for t in range(2):
+            proto = par_image_tensors[t].clone()
             set+=1
             cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
             cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
@@ -693,8 +693,8 @@ def main():
         #        \n \n cumulative column-wise CS diff {final_comb_trained_cols_cs_diffs[0]} \
         #         \t \t cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
         #          Mispredictions: {mispredictions}")
-        for i in range(len(data_schedule)):
-            for t in range(args.total_runs):
+        for i in range(6, len(data_schedule)):
+            for t in range(2):
                 f.write(f" Data Split: {data_schedule[i]} \n  \
                     Batch {t} \n \
                     Matrix of Iterations Needed to reach target:\n  {iterations_matrix[t][i]} \n \n \
@@ -707,7 +707,7 @@ def main():
                              Batches Quartile Measures: Column-Wise: [min, 20, 40, 60, 80, max, average]: \n {col_quartiles_saved[t][i]}")
 
     f.close()
-    for t in range(args.total_runs):
+    for t in range(2):
 
         plt.plot(data_schedule, final_comb_trained_cols_cs_diffs[t], label="column-wise cs diff")
         plt.plot(data_schedule, final_comb_trained_cs_diffs[t], label="row-wise cs diff")
@@ -721,18 +721,18 @@ def main():
         plt.cla()
         plt.clf()
 
-    overall_row_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cs_diffs).clone(), dim=0)
-    overall_col_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cols_cs_diffs).clone(), dim=0)
-    overall_row_cs_stds = torch.mean(torch.Tensor(final_comb_trained_cs_std).clone(), dim=0)
-    overall_col_cs_stds = torch.mean(torch.Tensor(final_comb_trained_col_cs_std).clone(), dim=0)
-
-    plt.plot(data_schedule, overall_col_cs_diffs.tolist(), label="column-wise cs diff")
-    plt.plot(data_schedule, overall_row_cs_diffs.tolist(), label="row-wise cs diff")
-    plt.plot(data_schedule, overall_col_cs_stds.tolist(), label="column-wise std")
-    plt.plot(data_schedule, overall_row_cs_stds.tolist(), label="row-wise std")
-    plt.legend()
-    plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_OVERALL.png")
-    plt.show()
+    # overall_row_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cs_diffs).clone(), dim=0)
+    # overall_col_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cols_cs_diffs).clone(), dim=0)
+    # overall_row_cs_stds = torch.mean(torch.Tensor(final_comb_trained_cs_std).clone(), dim=0)
+    # overall_col_cs_stds = torch.mean(torch.Tensor(final_comb_trained_col_cs_std).clone(), dim=0)
+    #
+    # plt.plot(data_schedule, overall_col_cs_diffs.tolist(), label="column-wise cs diff")
+    # plt.plot(data_schedule, overall_row_cs_diffs.tolist(), label="row-wise cs diff")
+    # plt.plot(data_schedule, overall_col_cs_stds.tolist(), label="column-wise std")
+    # plt.plot(data_schedule, overall_row_cs_stds.tolist(), label="row-wise std")
+    # plt.legend()
+    # plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_OVERALL.png")
+    # plt.show()
 
 
 if __name__ == '__main__':
