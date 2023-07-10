@@ -745,7 +745,7 @@ def main():
 
     f.close()
  #   for t in range(args.total_runs):
-    for t in range(1)
+    for t in range(1):
 
         plt.plot(data_schedule, final_comb_trained_cols_cs_diffs[t], label="column-wise cs diff")
         plt.plot(data_schedule, final_comb_trained_cs_diffs[t], label="row-wise cs diff")
