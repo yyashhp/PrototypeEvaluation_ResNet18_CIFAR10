@@ -130,7 +130,7 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
 
     return loss, pred, probs
 
-def binary_boundary(args, prev, curr, starter, target, transformDict):
+def binary_boundary(args, nclass, prev, curr, starter, target, transformDict):
     prev = prev.clone()
     curr = curr.clone()
     probs = torch.zeros(nclass, device = device)
@@ -522,7 +522,7 @@ def main():
                                                                targets=target_proto, transformDict=transformDict)
                             if preds == i and shallow_found is False:
                                 shallow_found = True
-                                shallow_proto, shallow_latent = binary_boundary(args, prev.clone(),start_proto.clone(), k, i, transformDict )
+                                shallow_proto, shallow_latent = binary_boundary(args, nclass, prev.clone(),start_proto.clone(), k, i, transformDict )
 
 
 
