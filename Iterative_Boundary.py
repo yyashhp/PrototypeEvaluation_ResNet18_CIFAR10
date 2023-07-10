@@ -130,7 +130,27 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
 
     return loss, pred, probs
 
-
+def binary_boundary(args, prev, curr, starter, target, transformDict):
+    prev = prev.clone()
+    curr = curr.clone()
+    probs = torch.zeros(nclass, device = device)
+    while probs[starter] > 0.503 or probs[starter] < 0.497 or probs[target] > 0.503 or probs[target] < 0.497:
+        tester = torch.zeros(*(list(prev.shape)), device=device)
+        tester = torch.add(tester, curr, alpha=0.5)
+        tester = torch.add(tester, prev, alpha=0.5)
+        #                         #print(f"Tester Tensor: {tester_shaped}")
+        with torch.no_grad():
+            tester_norm = transformDict['norm'](tester.clone())
+            print(f"Tester shape {tester.shape}")
+            latent_tester, logits_tester = model(tester_norm)
+            preds_tester = logits_tester.max(1, keepdim=True)[1]
+            probs = F.softmax(logits_tester)
+            print(f"Preds:Tester!: {preds_tester}")
+        if probs[starter] > 0.503 or probs[target] < 0.497:
+            prev = tester.clone()
+        elif probs[starter] < 0.497 or probs[target] > 0.503:
+            curr = tester.clone()
+    return tester.clone().squeeze(dim=0), latent_tester
 
 
 def main():
@@ -169,6 +189,15 @@ def main():
     final_comb_trained_col_cs_std = [[] for _ in range(args.total_runs)]
     final_ind_trained_col_cs_diffs = [[] for _ in range(args.total_runs)]
     final_ind_trained_cs_col_stds = [[] for _ in range(args.total_runs)]
+    final_ind_trained_shallow_cs_std = [[] for _ in range(args.total_runs)]
+    final_comb_trained_shallow_cs_diff = [[] for _ in range(args.total_runs)]
+    final_comb_trained_shallow_cs_std = [[] for _ in range(args.total_runs)]
+    final_ind_trained_shallow_cs_diff = [[] for _ in range(args.total_runs)]
+    final_ind_trained_shallow_col_cs_std = [[] for _ in range(args.total_runs)]
+    final_comb_trained_shallow_col_cs_diff = [[] for _ in range(args.total_runs)]
+    final_comb_trained_shallow_col_cs_std = [[] for _ in range(args.total_runs)]
+    final_ind_trained_shallow_col_cs_diff = [[] for _ in range(args.total_runs)]
+
     batch_diff_std = []
     batch_diff_col_std = []
     mispredictions = []
@@ -181,7 +210,7 @@ def main():
     stacked_sets_trained_boundaries = []
     iterations_matrix = [[] for _ in range(args.total_runs)]
 
-    for j in range(len(data_schedule)):
+    for j in range(6, len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
         model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_Data_0621_16_53_47", map_location=device)
         model.load_state_dict(model_saved)
@@ -440,15 +469,20 @@ def main():
      #   stacked_sets_trained_boundaries = []
     #    stacked_sets_latent_boundaries = []
         cos_trained_latent_matrices = []
+        cos_trained_latent_shallow_matrices = []
+        cos_trained_latent_shallow_col_matrices = []
         cos_trained_latent_col_matrices = []
         #stacked_trained_l2 = []
         set = -1
       #  for proto in par_image_tensors:
-        for t in range(args.total_runs):
-            proto = par_image_tensors[t].clone()
+  ###      for t in range(args.total_runs):
+        for t in range(1):
+            proto = par_image_tensors[0].clone()
             set+=1
             cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
             cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
+            cos_trained_latent_shallow = torch.zeros(nclass, nclass, dtype=torch.float)
+            cos_trained_latent_shallow_col = torch.zeros(nclass, nclass, dtype = torch.float)
             proto_clone = proto.clone()
             set_trained_boundaries = []
             batch_l2_trained_diff = []
@@ -478,11 +512,20 @@ def main():
                         start_preds_six = F.softmax(start_logits)
                         starts_pred = start_logits.max(1, keepdim=True)[1]
 
+                        shallow_found = False
+
                         while last_loss>1e-2:
+                            prev = start_proto.clone()
                             iterations += 1
                             last_loss, preds, probs = train_image_no_data(args, model=model, device=device,
                                                                    epoch=epoch, par_images=start_proto,
                                                                targets=target_proto, transformDict=transformDict)
+                            if preds == i and shallow_found is False:
+                                shallow_found = True
+                                shallow_proto, shallow_latent = binary_boundary(args, prev.clone(),start_proto.clone(), k, i, transformDict )
+
+
+
                         print(f"Preds after {k} goes to {i}: {preds}\n")
                         if preds != i:
                             mispredictions.append([set, k, i, preds.item()])
@@ -507,6 +550,8 @@ def main():
                         boundary_latent = torch.squeeze(boundary_latent, dim=0)
                         cos_trained_latent[i][k] = cos_sim(boundary_latent, protos_latent[i].clone())
                         cos_trained_latent_col[i][k] = cos_sim(boundary_latent, protos_latent[k].clone())
+                        cos_trained_latent_shallow[i][k] = cos_sim(shallow_latent, protos_latent[i].clone())
+                        cos_trained_latent_shallow_col[i][k] = cos_sim(shallow_latent, protos_latent[k].clone())
                     #    trained_boundaries.append(start_proto_squeezed.clone())
                      #   l2_trained_diff.append(torch.mean(torch.linalg.norm((boundary_latent.clone() - protos_latent[i].clone()), dim=0)))
                     #    latents_boundaries.append(boundary_latent.clone())
@@ -516,6 +561,8 @@ def main():
           #      batch_l2_trained_diff.append(torch.stack(l2_trained_diff, dim=0))
             cos_trained_latent_matrices.append(cos_trained_latent.clone())
             cos_trained_latent_col_matrices.append(cos_trained_latent_col.clone())
+            cos_trained_latent_shallow_matrices.append(cos_trained_latent_shallow.clone())
+            cos_trained_latent_shallow_col_matrices.append(cos_trained_latent_shallow_col.clone())
           #  stacked_sets_trained_boundaries.append(torch.stack(set_trained_boundaries, dim=0))
           #  stacked_trained_l2.append(torch.stack(batch_l2_trained_diff, dim=0))
 
@@ -534,10 +581,15 @@ def main():
             col_mask = cos_trained_latent_col > 0
      #   batch_cum_trained_col_cs, batch_cum_trained_col_cs_std = torch.std_mean(batch_trained_col_cs, dim=1)
             batch_cum_trained_col_cs_std, batch_cum_trained_col_cs = torch.std_mean(cos_trained_latent_col_matrices[t].clone(), dim=0)
+            batch_cum_trained_shallow_cs_std, batch_cum_trained_shallow_cs = torch.std_mean(cos_trained_latent_shallow_matrices[t].clone(), dim=1)
+            batch_cum_trained_shallow_col_cs_std, batch_cum_trained_shallow_col_cs = torch.std_mean(cos_trained_latent_shallow_col_matrices[t].clone(), dim=0)
+
             cum_trained_cs_avg = 1 - torch.mean(batch_cum_trained_cs)
             cum_trained_col_cs = 1 - torch.mean(batch_cum_trained_col_cs)
             std_list = []
             col_std_list = []
+            shallow_std_list = []
+            shallow_col_std_list = []
             for row in cos_trained_latent_matrices[t].clone():
                 shortlist = []
                 for val in row:
@@ -549,6 +601,13 @@ def main():
             print(f"std_ave shape: {std_ave.shape}")
             mean_ave = torch.mean(torch.stack(std_list, dim=0), dim=1)
             print(f"Length of std_array {len(std_ave)}")
+            for row in cos_trained_latent_shallow_matrices[t].clone():
+                shortlist = []
+                for val in row:
+                    if val>=1e-4:
+                        shortlist.append(1-val)
+                shallow_std_list.append(torch.stack(shortlist, dim=0))
+            shallow_std_ave = torch.std(torch.stack(shallow_std_list, dim=0), dim=1)
             for row in cos_trained_latent_col_matrices[t].clone():
                 col_shortlist = []
                 for val in row:
@@ -558,6 +617,15 @@ def main():
                         col_shortlist.append(torch.mean(row))
                 col_std_list.append(torch.stack(col_shortlist, dim=0))
             col_std_ave = torch.std(torch.stack(col_std_list, dim=0), dim=0)
+            for row in cos_trained_latent_shallow_col_matrices[t].clone():
+                col_shortlist = []
+                for val in row:
+                    if val>=1e-4:
+                        shallow_col_shortlist.append(1-val)
+                    else:
+                        shallow_col_shortlist.append(torch.mean(row))
+                col_std_list.append(torch.stack(col_shortlist, dim=0))
+            shallow_col_std_ave = torch.std(torch.stack(col_std_list, dim=0), dim=0)
             print(f"col_std_ave shape: {col_std_ave.shape}")
             cos_mean_ave = torch.mean(torch.stack(col_std_list, dim=0), dim=0)
             iterations_matrix[t].append(iterations_needed)
@@ -572,6 +640,16 @@ def main():
             final_ind_trained_cs_diffs_std[t].append([round(val.item(), 4) for val in std_ave])
             final_comb_trained_cs_diffs[t].append(mean([round(1 - ((val.item()* 10)/9), 4) for val in batch_cum_trained_cs]))
             final_comb_trained_cols_cs_diffs[t].append(mean([round(1 - ((val.item()* 10)/9), 4) for val in batch_cum_trained_col_cs]))
+
+
+            final_comb_trained_shallow_col_cs_std[t].append(torch.mean(shallow_col_std_ave).item())
+            final_comb_trained_shallow_cs_std[t].append(torch.mean(shallow_std_ave).item())
+            final_ind_trained_shallow_col_cs_diffs[t].append([round(1 - ((val.item()* 10)/9), 4) for val in batch_cum_trained_shallow_col_cs])
+            final_ind_trained_shallow_cs_col_stds[t].append([round(val.item(), 4) for val in shallow_col_std_ave])
+            final_ind_trained_shallow_cs_diffs[t].append([round(1 - ((val.item()* 10)/9), 4) for val in batch_cum_trained_shallow_cs])
+            final_ind_trained_shallow_cs_diffs_std[t].append([round(val.item(), 4) for val in shallow_std_ave])
+            final_comb_trained_shallow_cs_diffs[t].append(mean([round(1 - ((val.item()* 10)/9), 4) for val in batch_cum_trained_shallow_cs]))
+            final_comb_trained_shallow_col_cs_diffs[t].append(mean([round(1 - ((val.item()* 10)/9), 4) for val in batch_cum_trained_shallow_col_cs]))
 
 
             # batch_trained_l2 = torch.mean(torch.stack(stacked_trained_l2, dim=0), dim=0)
@@ -653,44 +731,46 @@ def main():
         #        \n \n cumulative column-wise CS diff {final_comb_trained_cols_cs_diffs[0]} \
         #         \t \t cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
         #          Mispredictions: {mispredictions}")
-        for i in range (len(data_schedule)):
-            for t in range(args.total_runs):
+        for i in range (6, len(data_schedule)):
+          #  for t in range(args.total_runs):
+            for t in range(1):
                 f.write(f" Data Split: {data_schedule[i]} \n  \
                     Batch {t} \n \
-                    Matrix of Iterations Needed to reach target:\n  {iterations_matrix[t][i]} \n \n \
-                    \n \n cumulative row-wise CS diff: \t {final_comb_trained_cs_diffs[t][i]} \n  \
-                     cumulative row-wise CS Std;\t {final_comb_trained_cs_std[t][i]} \
-                      \n  cumulative column-wise CS diff: \t {final_comb_trained_cols_cs_diffs[t][i]} \
-                       \n \n cumulative column-wise CS Std:\t {final_comb_trained_col_cs_std[t][i]} \n \n \
+                    Matrix of Iterations Needed to reach target:\n  {iterations_matrix[t][0]} \n \n \
+                    \n \n cumulative row-wise CS diff: \t {final_comb_trained_cs_diffs[t][0]} \n  \
+                     cumulative row-wise CS Std;\t {final_comb_trained_cs_std[t][0]} \
+                      \n  cumulative column-wise CS diff: \t {final_comb_trained_cols_cs_diffs[t][0]} \
+                       \n \n cumulative column-wise CS Std:\t {final_comb_trained_col_cs_std[t][0]} \n \n \
                         Mispredictions: \n{mispredictions} \n \n")
 
     f.close()
-    for t in range(args.total_runs):
+ #   for t in range(args.total_runs):
+    for t in range(1)
 
         plt.plot(data_schedule, final_comb_trained_cols_cs_diffs[t], label="column-wise cs diff")
         plt.plot(data_schedule, final_comb_trained_cs_diffs[t], label="row-wise cs diff")
         plt.plot(data_schedule, final_comb_trained_col_cs_std[t], label="column-wise std")
         plt.plot(data_schedule, final_comb_trained_cs_std[t], label="row-wise std")
         plt.legend()
-        plt.savefig(f"{model_dir}/../Saved_Plots/{date_time}_CIFAR10_batch{t}.png")
+        plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR10_batch_{t}.png")
         plt.show()
         plt.figure().clear()
         plt.close()
         plt.cla()
         plt.clf()
 
-    overall_row_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cs_diffs).clone(), dim=0)
-    overall_col_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cols_cs_diffs).clone(), dim=0)
-    overall_row_cs_stds = torch.mean(torch.Tensor(final_comb_trained_cs_std).clone(), dim=0)
-    overall_col_cs_stds = torch.mean(torch.Tensor(final_comb_trained_col_cs_std).clone(), dim=0)
-
-    plt.plot(data_schedule, overall_col_cs_diffs.tolist(), label="column-wise cs diff")
-    plt.plot(data_schedule, overall_row_cs_diffs.tolist(), label="row-wise cs diff")
-    plt.plot(data_schedule, overall_col_cs_stds.tolist(), label="column-wise std")
-    plt.plot(data_schedule, overall_row_cs_stds.tolist(), label="row-wise std")
-    plt.legend()
-    plt.savefig(f"{model_dir}/../Saved_Plots/{date_time}_CIFAR10_OVERALL.png")
-    plt.show()
+    # overall_row_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cs_diffs).clone(), dim=0)
+    # overall_col_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cols_cs_diffs).clone(), dim=0)
+    # overall_row_cs_stds = torch.mean(torch.Tensor(final_comb_trained_cs_std).clone(), dim=0)
+    # overall_col_cs_stds = torch.mean(torch.Tensor(final_comb_trained_col_cs_std).clone(), dim=0)
+    #
+    # plt.plot(data_schedule, overall_col_cs_diffs.tolist(), label="column-wise cs diff")
+    # plt.plot(data_schedule, overall_row_cs_diffs.tolist(), label="row-wise cs diff")
+    # plt.plot(data_schedule, overall_col_cs_stds.tolist(), label="column-wise std")
+    # plt.plot(data_schedule, overall_row_cs_stds.tolist(), label="row-wise std")
+    # plt.legend()
+    # plt.savefig(f"{model_dir}/../Saved_Plots/{date_time}_CIFAR10_OVERALL.png")
+    # plt.show()
 
 
 if __name__ == '__main__':
