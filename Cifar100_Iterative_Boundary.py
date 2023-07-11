@@ -495,7 +495,7 @@ def main():
                         with open('{}/Iterative_CIFAR100_split6and7_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
                                   'a') as f:
                             f.write(
-                                f"Going from {k} to {i}, batch {t}, Start Pred: {starts_pred}\t Starting Probabilities: {start_preds_six} \t after training: probabilities of {probs} \t loss: {last_loss} \t \t Iterations Needed: {iterations}\n\n")
+                                f"Going from {k} to {i}, batch {t},\t Iterations Needed: {iterations}\n\n")
                         f.close()
                         #else:
                         #    with open('{}/Iterative_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time), 'a') as f:
