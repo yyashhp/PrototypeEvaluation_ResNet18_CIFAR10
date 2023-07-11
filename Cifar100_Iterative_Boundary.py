@@ -72,7 +72,7 @@ print ("cuda: ", use_cuda)
 
 MEAN = [0.5] * 3
 STD = [0.5] * 3
-data_schedule = [0.9,1.0]
+data_schedule = [0.6,0.7,0.8]
 train_transform = transforms.Compose([transforms.ToTensor(),
                                       transforms.RandomHorizontalFlip(),
                                       transforms.RandomCrop(32, padding=4)])
@@ -492,7 +492,7 @@ def main():
                         if preds != i:
                             mispredictions.append([set, k, i, preds.item()])
                         #if i == 6:
-                        with open('{}/Iterative_CIFAR100_split6and7_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
+                        with open('{}/Iterative_CIFAR100_split3and4and5_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
                                   'a') as f:
                             f.write(
                                 f"Going from {k} to {i}, batch {t},\t Iterations Needed: {iterations}\n\n")
@@ -714,7 +714,7 @@ def main():
         plt.plot(data_schedule, final_comb_trained_col_cs_std[t], label="column-wise std")
         plt.plot(data_schedule, final_comb_trained_cs_std[t], label="row-wise std")
         plt.legend()
-        plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_splits6and7batch{t}.png")
+        plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_splits3and4and5batch{t}.png")
         plt.show()
         plt.figure().clear()
         plt.close()
@@ -731,7 +731,7 @@ def main():
     plt.plot(data_schedule, overall_col_cs_stds.tolist(), label="column-wise std")
     plt.plot(data_schedule, overall_row_cs_stds.tolist(), label="row-wise std")
     plt.legend()
-    plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_Splits6and7_OVERALL.png")
+    plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_Splits3and4and5_OVERALL.png")
     plt.show()
 
 
