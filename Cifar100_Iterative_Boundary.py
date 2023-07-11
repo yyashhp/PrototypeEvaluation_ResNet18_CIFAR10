@@ -159,16 +159,16 @@ def main():
     final_comb_boundaries_avg = []
     final_comb_alphas_avg = []
     final_comb_cum_alphas_avg = []
-    final_comb_trained_cs_diffs = [[] for _ in range(args.total_runs)]
-    final_ind_trained_cs_diffs = [[] for _ in range(args.total_runs)]
+    final_comb_trained_cs_diffs = [[] for _ in range(1)]
+    final_ind_trained_cs_diffs = [[] for _ in range(1)]
     final_comb_trained_l2_diffs = []
     final_ind_trained_l2_diffs = []
-    final_ind_trained_cs_diffs_std = [[] for _ in range(args.total_runs)]
-    final_comb_trained_cols_cs_diffs = [[] for _ in range(args.total_runs)]
-    final_comb_trained_cs_std = [[] for _ in range(args.total_runs)]
-    final_comb_trained_col_cs_std = [[] for _ in range(args.total_runs)]
-    final_ind_trained_col_cs_diffs = [[] for _ in range(args.total_runs)]
-    final_ind_trained_cs_col_stds = [[] for _ in range(args.total_runs)]
+    final_ind_trained_cs_diffs_std = [[] for _ in range(1)]
+    final_comb_trained_cols_cs_diffs = [[] for _ in range(1)]
+    final_comb_trained_cs_std = [[] for _ in range(1)]
+    final_comb_trained_col_cs_std = [[] for _ in range(1)]
+    final_ind_trained_col_cs_diffs = [[] for _ in range(1)]
+    final_ind_trained_cs_col_stds = [[] for _ in range(1)]
     batch_diff_std = []
     batch_diff_col_std = []
     mispredictions = []
@@ -179,9 +179,9 @@ def main():
 
     stacked_trained_l2 = []
     stacked_sets_trained_boundaries = []
-    iterations_matrix = [[] for _ in range(args.total_runs)]
-    col_quartiles_saved = [[] for _ in range(args.total_runs)]
-    row_quartiles_saved = [[] for _ in range(args.total_runs)]
+    iterations_matrix = [[] for _ in range(1)]
+    col_quartiles_saved = [[] for _ in range(1)]
+    row_quartiles_saved = [[] for _ in range(1)]
     for j in range(len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
         model_saved = torch.load(f"{saved_model_path}/{j+2}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
@@ -449,7 +449,7 @@ def main():
         # cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
         # cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
       #  for proto in par_image_tensors:
-        for t in range(args.total_runs):
+        for t in range(1):
             proto = par_image_tensors[t].clone()
             set+=1
             cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
@@ -694,7 +694,7 @@ def main():
         #         \t \t cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
         #          Mispredictions: {mispredictions}")
         for i in range(len(data_schedule)):
-            for t in range(args.total_runs):
+            for t in range(1):
                 f.write(f" Data Split: {data_schedule[i]} \n  \
                     Batch {t} \n \
                     Matrix of Iterations Needed to reach target:\n  {iterations_matrix[t][i]} \n \n \
@@ -707,7 +707,7 @@ def main():
                              Batches Quartile Measures: Column-Wise: [min, 20, 40, 60, 80, max, average]: \n {col_quartiles_saved[t][i]}")
 
     f.close()
-    for t in range(args.total_runs):
+    for t in range(1):
 
         plt.plot(data_schedule, final_comb_trained_cols_cs_diffs[t], label="column-wise cs diff")
         plt.plot(data_schedule, final_comb_trained_cs_diffs[t], label="row-wise cs diff")
