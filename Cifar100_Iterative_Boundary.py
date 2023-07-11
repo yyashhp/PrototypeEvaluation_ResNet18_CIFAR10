@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser(description="CIFAR100 Training")
 parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed(default: 1')
-parser.add_argument('--model-dir', default='../ProtoRuns')
+parser.add_argument('--model-dir', default='../BoundaryRuns')
 parser.add_argument('--no-cuda', action='store_true', default=False,help='disables CUDA training')
 parser.add_argument('--model-scale', default=1.0, type=float, help='width scale of network off of baseline resnet18')
 parser.add_argument('--total-runs', default=5, type=int, help='proto instantiations')
