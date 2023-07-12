@@ -72,7 +72,7 @@ print ("cuda: ", use_cuda)
 
 MEAN = [0.5] * 3
 STD = [0.5] * 3
-data_schedule = [0.6,0.7,0.8]
+data_schedule = [0.7,0.8]
 train_transform = transforms.Compose([transforms.ToTensor(),
                                       transforms.RandomHorizontalFlip(),
                                       transforms.RandomCrop(32, padding=4)])
@@ -181,10 +181,10 @@ def main():
     stacked_sets_trained_boundaries = []
     iterations_matrix = [[] for _ in range(1)]
     col_quartiles_saved = [[] for _ in range(1)]
-    row_quartiles_saved = [[] for _ in range(1)]
+    row_quartiles_saved = [[] for _ in range(1)]\
     for j in range(len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
-        model_saved = torch.load(f"{saved_model_path}/{j+2}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
+        model_saved = torch.load(f"{saved_model_path}/{j+3}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
         model.load_state_dict(model_saved)
         for p in model.parameters():
             p.requires_grad = False
@@ -492,7 +492,7 @@ def main():
                         if preds != i:
                             mispredictions.append([set, k, i, preds.item()])
                         #if i == 6:
-                        with open('{}/Iterative_CIFAR100_split3and4and5_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
+                        with open('{}/Iterative_CIFAR100_split4and5_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
                                   'a') as f:
                             f.write(
                                 f"Going from {k} to {i}, batch {t},\t Iterations Needed: {iterations}\n\n")
@@ -673,7 +673,7 @@ def main():
     # print(f"length of l2s : {len(final_ind_l2_diffs)}")
     # print(f"length of cs's : {len(final_ind_cs_diffs)}")
 
-    with open('{}/Iterative_CIFAR100_splits6and7_Until_Low_Loss_BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
+    with open('{}/Iterative_CIFAR100_splits4and5_Until_Low_Loss_BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
         #for i in range(6, len(data_schedule)):
         # f.write(f"\n Split: {data_schedule[i]} \t Alphas: {final_comb_alphas_avg[i]}  \t cumulative alpha: {final_comb_cum_alphas_avg[i]} \t CS_Line_Diffs:\
             #  {[val.item() for val in final_ind_cs_diffs[i]]} \
@@ -714,7 +714,7 @@ def main():
         plt.plot(data_schedule, final_comb_trained_col_cs_std[t], label="column-wise std")
         plt.plot(data_schedule, final_comb_trained_cs_std[t], label="row-wise std")
         plt.legend()
-        plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_splits3and4and5batch{t}.png")
+        plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_splits4and5batch{t}.png")
         plt.show()
         plt.figure().clear()
         plt.close()
@@ -731,7 +731,7 @@ def main():
     plt.plot(data_schedule, overall_col_cs_stds.tolist(), label="column-wise std")
     plt.plot(data_schedule, overall_row_cs_stds.tolist(), label="row-wise std")
     plt.legend()
-    plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_Splits3and4and5_OVERALL.png")
+    plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_Splits4and5_OVERALL.png")
     plt.show()
 
 
