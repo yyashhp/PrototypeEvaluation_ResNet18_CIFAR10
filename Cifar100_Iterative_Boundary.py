@@ -181,7 +181,7 @@ def main():
     stacked_sets_trained_boundaries = []
     iterations_matrix = [[] for _ in range(1)]
     col_quartiles_saved = [[] for _ in range(1)]
-    row_quartiles_saved = [[] for _ in range(1)]\
+    row_quartiles_saved = [[] for _ in range(1)]
     for j in range(len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
         model_saved = torch.load(f"{saved_model_path}/{j+3}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
