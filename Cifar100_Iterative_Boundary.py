@@ -182,6 +182,7 @@ def main():
     iterations_matrix = [[] for _ in range(1)]
     col_quartiles_saved = [[] for _ in range(1)]
     row_quartiles_saved = [[] for _ in range(1)]
+    iterations_max = 0
     for j in range(len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
         model_saved = torch.load(f"{saved_model_path}/{j+2}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
@@ -489,7 +490,9 @@ def main():
                                                                    epoch=epoch, par_images=start_proto,
                                                                targets=target_proto, transformDict=transformDict)
                             if iterations > 12500:
-                                break;
+                                break
+                        if iterations_max < iterations < 12500:
+                            iterations_max = iterations
                         print(f"Preds after {k} goes to {i}: {preds}\n")
                         if preds != i:
                             mispredictions.append([set, k, i, preds.item()])
@@ -705,7 +708,7 @@ def main():
                         Mispredictions: \n{mispredictions} \n \n \
                            Batches Quartile Measures: Row-Wise: [min, 20, 40, 60, 80, max, average]: \n {row_quartiles_saved[t][i]} \
                              Batches Quartile Measures: Column-Wise: [min, 20, 40, 60, 80, max, average]: \n {col_quartiles_saved[t][i]}")
-
+            f.write(f"Iterations max: {iterations_max}\n\n")
     f.close()
     for t in range(1):
 
