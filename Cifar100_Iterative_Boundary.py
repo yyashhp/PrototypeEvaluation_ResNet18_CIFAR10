@@ -72,7 +72,7 @@ print ("cuda: ", use_cuda)
 
 MEAN = [0.5] * 3
 STD = [0.5] * 3
-data_schedule = [0.7,0.8]
+data_schedule = [0.4]
 train_transform = transforms.Compose([transforms.ToTensor(),
                                       transforms.RandomHorizontalFlip(),
                                       transforms.RandomCrop(32, padding=4)])
@@ -184,7 +184,7 @@ def main():
     row_quartiles_saved = [[] for _ in range(1)]
     for j in range(len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
-        model_saved = torch.load(f"{saved_model_path}/{j+3}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
+        model_saved = torch.load(f"{saved_model_path}/{j+2}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
         model.load_state_dict(model_saved)
         for p in model.parameters():
             p.requires_grad = False
@@ -488,19 +488,19 @@ def main():
                             last_loss, preds, probs = train_image_no_data(args, model=model, device=device,
                                                                    epoch=epoch, par_images=start_proto,
                                                                targets=target_proto, transformDict=transformDict)
+                            if iterations > 12500:
+                                break;
                         print(f"Preds after {k} goes to {i}: {preds}\n")
                         if preds != i:
                             mispredictions.append([set, k, i, preds.item()])
                         #if i == 6:
-                        with open('{}/Iterative_CIFAR100_split4and5_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
+                        with open('{}/Iterative_CIFAR100_split3_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
                                   'a') as f:
                             f.write(
                                 f"Going from {k} to {i}, batch {t},\t Iterations Needed: {iterations}\n\n")
+                            if iterations > 12500:
+                                f.write(f"Iterations went over limit\n\n")
                         f.close()
-                        #else:
-                        #    with open('{}/Iterative_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time), 'a') as f:
-                        #        f.write(f"Going from {k} to {i}, probabilities of {probs} \t loss: {last_loss} \t \t Iterations Needed: {iterations}\n\n")
-                       #     f.close()
                         iterations_needed[i][k] = iterations
                         model.eval()
                         last_loss_save[i][k] = last_loss
@@ -592,7 +592,7 @@ def main():
             for line in cos_trained_latent_matrices[t].clone():
                 sorted_line = torch.sort(line.clone().detach())[0]
                 print(f"length of line of row is {len(sorted_line)}")
-                row_quartiles[line_index][0] = sorted_line[0]
+                row_quartiles[line_index][0] = sorted_line[1]
                 row_quartiles[line_index][1] = sorted_line[19]
                 row_quartiles[line_index][2] = sorted_line[39]
                 row_quartiles[line_index][3] = sorted_line[59]
@@ -607,7 +607,7 @@ def main():
             for line in cos_trained_latent_col_matrices[t].clone():
                 sorted_line = torch.sort(line.clone().detach())[0]
                 print(f"length of line of row is {len(sorted_line)}")
-                col_quartiles[line_index][0] = sorted_line[0]
+                col_quartiles[line_index][0] = sorted_line[1]
                 col_quartiles[line_index][1] = sorted_line[19]
                 col_quartiles[line_index][2] = sorted_line[39]
                 col_quartiles[line_index][3] = sorted_line[59]
@@ -673,7 +673,7 @@ def main():
     # print(f"length of l2s : {len(final_ind_l2_diffs)}")
     # print(f"length of cs's : {len(final_ind_cs_diffs)}")
 
-    with open('{}/Iterative_CIFAR100_splits4and5_Until_Low_Loss_BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
+    with open('{}/Iterative_CIFAR100_splits3_Until_Low_Loss_BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
         #for i in range(6, len(data_schedule)):
         # f.write(f"\n Split: {data_schedule[i]} \t Alphas: {final_comb_alphas_avg[i]}  \t cumulative alpha: {final_comb_cum_alphas_avg[i]} \t CS_Line_Diffs:\
             #  {[val.item() for val in final_ind_cs_diffs[i]]} \
@@ -714,25 +714,25 @@ def main():
         plt.plot(data_schedule, final_comb_trained_col_cs_std[t], label="column-wise std")
         plt.plot(data_schedule, final_comb_trained_cs_std[t], label="row-wise std")
         plt.legend()
-        plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_splits4and5batch{t}.png")
+        plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_split3batch{t}.png")
         plt.show()
         plt.figure().clear()
         plt.close()
         plt.cla()
         plt.clf()
 
-    overall_row_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cs_diffs).clone(), dim=0)
-    overall_col_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cols_cs_diffs).clone(), dim=0)
-    overall_row_cs_stds = torch.mean(torch.Tensor(final_comb_trained_cs_std).clone(), dim=0)
-    overall_col_cs_stds = torch.mean(torch.Tensor(final_comb_trained_col_cs_std).clone(), dim=0)
-
-    plt.plot(data_schedule, overall_col_cs_diffs.tolist(), label="column-wise cs diff")
-    plt.plot(data_schedule, overall_row_cs_diffs.tolist(), label="row-wise cs diff")
-    plt.plot(data_schedule, overall_col_cs_stds.tolist(), label="column-wise std")
-    plt.plot(data_schedule, overall_row_cs_stds.tolist(), label="row-wise std")
-    plt.legend()
-    plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_Splits4and5_OVERALL.png")
-    plt.show()
+    # overall_row_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cs_diffs).clone(), dim=0)
+    # overall_col_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cols_cs_diffs).clone(), dim=0)
+    # overall_row_cs_stds = torch.mean(torch.Tensor(final_comb_trained_cs_std).clone(), dim=0)
+    # overall_col_cs_stds = torch.mean(torch.Tensor(final_comb_trained_col_cs_std).clone(), dim=0)
+    #
+    # plt.plot(data_schedule, overall_col_cs_diffs.tolist(), label="column-wise cs diff")
+    # plt.plot(data_schedule, overall_row_cs_diffs.tolist(), label="row-wise cs diff")
+    # plt.plot(data_schedule, overall_col_cs_stds.tolist(), label="column-wise std")
+    # plt.plot(data_schedule, overall_row_cs_stds.tolist(), label="row-wise std")
+    # plt.legend()
+    # plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_Splits4and5_OVERALL.png")
+    # plt.show()
 
 
 if __name__ == '__main__':
