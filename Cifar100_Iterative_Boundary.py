@@ -72,7 +72,7 @@ print ("cuda: ", use_cuda)
 
 MEAN = [0.5] * 3
 STD = [0.5] * 3
-data_schedule = [1.0]
+data_schedule = [0.25, 0.4]
 train_transform = transforms.Compose([transforms.ToTensor(),
                                       transforms.RandomHorizontalFlip(),
                                       transforms.RandomCrop(32, padding=4)])
@@ -186,7 +186,7 @@ def main():
     preds_matrix = torch.zeros(nclass, nclass, dtype=torch.float)
     for j in range(len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
-        model_saved = torch.load(f"{saved_model_path}/{j+6}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
+        model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
         model.load_state_dict(model_saved)
         for p in model.parameters():
             p.requires_grad = False
@@ -501,7 +501,7 @@ def main():
                             mispredictions.append([set, k, i, preds.item()])
                         #if i == 6:
                         preds_matrix[i][k] = preds
-                        with open('{}/Iterative_CIFAR100_split7_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
+                        with open('{}/Iterative_CIFAR100_split1_2_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
                                   'a') as f:
                             f.write(
                                 f"Going from {k} to {i}, batch {t},\t Iterations Needed: {iterations}\n\n")
@@ -519,17 +519,22 @@ def main():
                         boundary_latent = torch.squeeze(boundary_latent, dim=0)
                         cos_trained_latent[i][k] = cos_sim(boundary_latent, protos_latent[i].clone())
                         cos_trained_latent_col[i][k] = cos_sim(boundary_latent, protos_latent[k].clone())
-                        # trained_boundaries.append(start_proto_squeezed.clone())
+                        trained_boundaries.append(start_proto_squeezed.clone())
                         # l2_trained_diff.append(torch.mean(torch.linalg.norm((boundary_latent.clone() - protos_latent[i].clone()), dim=0)))
-                        # latents_boundaries.append(boundary_latent.clone())
+                        latents_boundaries.append(boundary_latent.clone())
 
                 set_trained_boundaries.append(torch.stack(trained_boundaries, dim=0))
                 set_latent_boundaries.append(torch.stack(latents_boundaries, dim=0))
+
             #    batch_l2_trained_diff.append(torch.stack(l2_trained_diff, dim=0))
             cos_trained_latent_matrices.append(cos_trained_latent.clone())
             cos_trained_latent_col_matrices.append(cos_trained_latent_col.clone())
-        #   stacked_sets_trained_boundaries.append(torch.stack(set_trained_boundaries, dim=0))
-        #   stacked_trained_l2.append(torch.stack(batch_l2_trained_diff, dim=0))
+            stacked_sets_trained_boundaries.append(torch.stack(set_trained_boundaries, dim=0))
+
+            stacked_trained_l2.append(torch.stack(batch_l2_trained_diff, dim=0))
+
+            torch.save(torch.stack(set_latent_boundaries, dim = 0), f"{saved_boundaries_path}/Final_1_2_Boundaries_Latents_{date_time}.pt")
+            torch.save(torch.stack(set_trained_boundaries, dim=0), f"{saved_boundaries_path}/Final_1_2_Boundaries_Images_{date_time}.pt")
 
          #   stacked_sets_latent_boundaries.append(torch.stack(set_latent_boundaries, dim=0))
       # combined_boundary_images = torch.mean(torch.stack(stacked_sets_trained_boundaries,dim=0), dim=0)
@@ -680,7 +685,7 @@ def main():
     # print(f"length of l2s : {len(final_ind_l2_diffs)}")
     # print(f"length of cs's : {len(final_ind_cs_diffs)}")
 
-    with open('{}/Iterative_CIFAR100_split7_Until_Low_Loss_BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
+    with open('{}/Iterative_CIFAR100_split1_2_Until_Low_Loss_BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
         #for i in range(6, len(data_schedule)):
         # f.write(f"\n Split: {data_schedule[i]} \t Alphas: {final_comb_alphas_avg[i]}  \t cumulative alpha: {final_comb_cum_alphas_avg[i]} \t CS_Line_Diffs:\
             #  {[val.item() for val in final_ind_cs_diffs[i]]} \
@@ -722,7 +727,7 @@ def main():
         plt.plot(data_schedule, final_comb_trained_col_cs_std[t], label="column-wise std")
         plt.plot(data_schedule, final_comb_trained_cs_std[t], label="row-wise std")
         plt.legend()
-        plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_split7batch{t}.png")
+        plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_split1_2Batch{t}.png")
         plt.show()
         plt.figure().clear()
         plt.close()
