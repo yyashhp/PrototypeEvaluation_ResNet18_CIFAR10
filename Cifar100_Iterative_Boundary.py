@@ -531,12 +531,12 @@ def main():
             cos_trained_latent_col_matrices.append(cos_trained_latent_col.clone())
             stacked_sets_trained_boundaries.append(torch.stack(set_trained_boundaries, dim=0))
 
-            stacked_trained_l2.append(torch.stack(batch_l2_trained_diff, dim=0))
+          #  stacked_trained_l2.append(torch.stack(batch_l2_trained_diff, dim=0))
 
-            torch.save(torch.stack(set_latent_boundaries, dim = 0), f"{saved_boundaries_path}/Final6_7_Boundaries_Latents_{date_time}.pt")
-            torch.save(torch.stack(set_trained_boundaries, dim=0), f"{saved_boundaries_path}/Final6_7_Boundaries_Images_{date_time}.pt")
+            torch.save(torch.stack(set_latent_boundaries, dim = 0), f"{saved_boundaries_path}/Final6_{data_schedule[j]}7_Boundaries_Latents_{date_time}.pt")
+            torch.save(torch.stack(set_trained_boundaries, dim=0), f"{saved_boundaries_path}/Final6_{data_schedule[j]}7_Boundaries_Images_{date_time}.pt")
 
-         #   stacked_sets_latent_boundaries.append(torch.stack(set_latent_boundaries, dim=0))
+            stacked_sets_latent_boundaries.append(torch.stack(set_latent_boundaries, dim=0))
       # combined_boundary_images = torch.mean(torch.stack(stacked_sets_trained_boundaries,dim=0), dim=0)
        # trained_boundary_sets.append(torch.stack(stacked_sets_trained_boundaries, dim=0))
        # print(len(trained_boundary_sets))
@@ -685,7 +685,14 @@ def main():
     # print(f"length of l2s : {len(final_ind_l2_diffs)}")
     # print(f"length of cs's : {len(final_ind_cs_diffs)}")
 
-    with open('{}/Iterative_CIFAR100_split6_7_Until_Low_Loss_BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
+    for j in range(len(data_schedule)):
+        torch.save(stacked_sets_latent_boundaries[j],
+                   f"{saved_boundaries_path}/Final_{data_schedule[j]}_Boundaries_Latents_{date_time}.pt")
+        torch.save(stacked_sets_trained_boundaries[j],
+                   f"{saved_boundaries_path}/Final_{data_schedule[j]}_Boundaries_TrainedIms_{date_time}.pt")
+
+    with open('{}/Iterative_CIFAR100_split6_7'
+              '_Until_Low_Loss_BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
         #for i in range(6, len(data_schedule)):
         # f.write(f"\n Split: {data_schedule[i]} \t Alphas: {final_comb_alphas_avg[i]}  \t cumulative alpha: {final_comb_cum_alphas_avg[i]} \t CS_Line_Diffs:\
             #  {[val.item() for val in final_ind_cs_diffs[i]]} \
