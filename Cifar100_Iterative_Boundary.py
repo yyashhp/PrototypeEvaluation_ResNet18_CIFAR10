@@ -197,7 +197,7 @@ def main():
         col_quartiles = torch.zeros(nclass, 7, dtype=torch.float)
         row_quartiles = torch.zeros(nclass, 7, dtype = torch.float)
         boundary_images = torch.load(f"{saved_boundaries_path}/{data_schedule[j]}_Boundary_Images")
-        boundary_latent = torch.load(f"{saved_boundaries_path}/{data_schedule[j]}_Boundary_Latent")
+        boundary_latents = torch.load(f"{saved_boundaries_path}/{data_schedule[j]}_Boundary_Latent")
         print(f"Sizes of boundary images loaded: {boundary_images.shape}")
         print(f"Sizes of boundary latent loaded: {boundary_latent.shape}")
 
@@ -482,7 +482,7 @@ def main():
                    #     trained_boundaries.append((torch.zeros([3, 32, 32], device=device)))
                    #     latents_boundaries.append(torch.zeros(512, device=device))
                     if i!=k:
-                        trained_boundary = trained_boundary_sets[i][k].clone()
+                        trained_boundary = boundary_images[i][k].clone()
                         # iterations = 0
                         # epoch = 1
                         # last_loss = 100
@@ -514,13 +514,13 @@ def main():
                             mispredictions.append([set, k, i, preds.item()])
                         #if i == 6:
                         preds_matrix[i][k] = preds
-                        with open('{}/Iterative_CIFAR100_split1_2_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
-                                  'a') as f:
-                            f.write(
-                                f"Going from {k} to {i}, batch {t},\t Iterations Needed: {iterations}\n\n")
-                            # if iterations > 12500:
-                            #     f.write(f"Iterations went over limit\n\n")
-                        f.close()
+                        # with open('{}/Iterative_CIFAR100_split1_2_Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
+                        #           'a') as f:
+                        #     f.write(
+                        #         f"Going from {k} to {i}, batch {t},\t Iterations Needed: {iterations}\n\n")
+                        #     # if iterations > 12500:
+                        #     #     f.write(f"Iterations went over limit\n\n")
+                        # f.close()
                         # iterations_needed[i][k] = iterations
                         model.eval()
                         # last_loss_save[i][k] = last_loss
@@ -529,7 +529,7 @@ def main():
                         #     boundary_latent, boundary_logits = model(norm_trained_boundary)
                         start_proto_squeezed = torch.squeeze(start_proto.clone(), dim=0)
                         print(f"Boundary  shape: {start_proto_squeezed.shape}")
-                        boundary_latent = torch.squeeze(boundary_latent, dim=0)
+                        boundary_latent = boundary_latents[i][k].clone()
                         cos_trained_latent[i][k] = cos_sim(boundary_latent, protos_latent[i].clone())
                         cos_trained_latent_col[i][k] = cos_sim(boundary_latent, protos_latent[k].clone())
                        # trained_boundaries.append(start_proto_squeezed.clone())
