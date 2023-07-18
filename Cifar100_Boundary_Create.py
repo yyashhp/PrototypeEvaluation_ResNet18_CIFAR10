@@ -461,7 +461,7 @@ def main():
 
 
         for t in range(1):
-            proto = par_image_tensors[t].clone()
+            proto = par_image_tensors[t+1].clone()
             set+=1
             cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
             cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
@@ -504,7 +504,7 @@ def main():
                             mispredictions.append([set, k, i, preds.item()])
                         #if i == 6:
                         preds_matrix[i][k] = preds
-                        with open('{}/Iterative_CIFAR100_BATCH1split6_7Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
+                        with open('{}/CIFAR100_BATCH1split6_7Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
                                   'a') as f:
                             f.write(
                                 f"Going from {k} to {i}, batch {t},\t Iterations Needed: {iterations}\n\n")
@@ -696,7 +696,7 @@ def main():
         torch.save(stacked_sets_trained_boundaries[j],
                     f"{saved_boundaries_path}/Final_Batch1_{data_schedule[j]}_Boundaries_TrainedIms_{date_time}.pt")
 
-    with open('{}/Iterative_CIFAR100_Batch1_Splits6_7{}.txt'.format(model_dir, date_time), 'a') as f:
+    with open('{}/CIFAR100_Batch1_Splits6_7{}.txt'.format(model_dir, date_time), 'a') as f:
         #for i in range(6, len(data_schedule)):
         # f.write(f"\n Split: {data_schedule[i]} \t Alphas: {final_comb_alphas_avg[i]}  \t cumulative alpha: {final_comb_cum_alphas_avg[i]} \t CS_Line_Diffs:\
             #  {[val.item() for val in final_ind_cs_diffs[i]]} \
