@@ -551,6 +551,10 @@ def main():
                             else:
                                 interrow_values[i][k][b] = cos_sim(boundary_latent, boundary_latents[i][b].clone())
                                 interrow_values[i][k][b] = cos_sim(boundary_latent, boundary_latents[k][b].clone())
+                        with open('{}/Batch0InterValsCalc_{}.txt'.format(model_dir, date_time),'a') as f:
+                                f.write(
+                                    f"Going from {k} to {i}, batch {t} \n\n")
+                        f.close()
 
                        # trained_boundaries.append(start_proto_squeezed.clone())
                         # l2_trained_diff.append(torch.mean(torch.linalg.norm((boundary_latent.clone() - protos_latent[i].clone()), dim=0)))
