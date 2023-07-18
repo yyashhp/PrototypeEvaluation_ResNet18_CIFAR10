@@ -736,8 +736,7 @@ def main():
                        \n \n cumulative column-wise CS Std:\t {final_comb_trained_col_cs_std[t][i]} \n \n \
                         Mispredictions: \n{mispredictions} \n \n \
                            Batches Quartile Measures: Row-Wise: [min, 20, 40, 60, 80, max, average]: \n {row_quartiles_saved[t][i]} \
-                             Batches Quartile Measures: Column-Wise: [min, 20, 40, 60, 80, max, average]: \n {col_quartiles_saved[t][i]} \n \n \n \n \n \
-                                Predicitions Matrix: {saved_preds[t][i]}")
+                             Batches Quartile Measures: Column-Wise: [min, 20, 40, 60, 80, max, average]: \n {col_quartiles_saved[t][i]} \n \n \n \n \n ")
             f.write(f"Iterations max: {iterations_max}\n\n")
 
             torch.set_printoptions(threshold=10000)
