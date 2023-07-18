@@ -199,7 +199,7 @@ def main():
         boundary_images = torch.load(f"{saved_boundaries_path}/{data_schedule[j]}_Boundary_Images")
         boundary_latents = torch.load(f"{saved_boundaries_path}/{data_schedule[j]}_Boundary_Latent")
         print(f"Sizes of boundary images loaded: {boundary_images.shape}")
-        print(f"Sizes of boundary latent loaded: {boundary_latent.shape}")
+        print(f"Sizes of boundary latent loaded: {boundary_latents.shape}")
 
 
     #
@@ -491,7 +491,7 @@ def main():
                         start_proto_copy = start_proto.clone()
                         with torch.no_grad():
                             norm_trained_boundary = transformDict['norm'](torch.unsqueeze(trained_boundary, dim=0))
-                            boundary_latent, boundary_logits = model(norm_trained_boundary)
+                            boundary_latent_dupe, boundary_logits = model(norm_trained_boundary)
                         preds = boundary_logits.max(1, keepdim=True)[1]
                         probs = F.softmax(boundary_logits)
 
