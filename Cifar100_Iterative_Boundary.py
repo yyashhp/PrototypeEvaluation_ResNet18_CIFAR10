@@ -72,7 +72,7 @@ print ("cuda: ", use_cuda)
 
 MEAN = [0.5] * 3
 STD = [0.5] * 3
-data_schedule = [0.25, 0.4]
+data_schedule = [0.25, 0.4, 0.6, 0.7, 0.8, 0.9, 1.0]
 train_transform = transforms.Compose([transforms.ToTensor(),
                                       transforms.RandomHorizontalFlip(),
                                       transforms.RandomCrop(32, padding=4)])
