@@ -182,6 +182,7 @@ def main():
     iterations_matrix = [[] for _ in range(1)]
     col_quartiles_saved = [[] for _ in range(1)]
     row_quartiles_saved = [[] for _ in range(1)]
+    saved_preds = [[] for _ in range(1)]
     iterations_max = 0
     for j in range(len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
@@ -450,7 +451,7 @@ def main():
      #   stacked_sets_trained_boundaries = []
     #    stacked_sets_latent_boundaries = []
         cos_trained_latent_matrices = []
-        saved_preds = []
+
         cos_trained_latent_col_matrices = []
         #stacked_trained_l2 = []d
         set = -1
@@ -543,7 +544,7 @@ def main():
             cos_trained_latent_matrices.append(cos_trained_latent.clone())
             cos_trained_latent_col_matrices.append(cos_trained_latent_col.clone())
         #    stacked_sets_trained_boundaries.append(torch.stack(set_trained_boundaries, dim=0))
-            saved_preds.append(preds_matrix.clone())
+            saved_preds[t].append(preds_matrix.clone())
 
           #  stacked_trained_l2.append(torch.stack(batch_l2_trained_diff, dim=0))
 
@@ -740,7 +741,7 @@ def main():
             f.write(f"Iterations max: {iterations_max}\n\n")
 
             torch.set_printoptions(threshold=10000)
-            print(f"Predictions matrix: {saved_preds[i]}\n\n", file = f)
+            print(f"Predictions matrix: {saved_preds[t][i]}\n\n", file = f)
             torch.set_printoptions(threshold=1000)
 
 
