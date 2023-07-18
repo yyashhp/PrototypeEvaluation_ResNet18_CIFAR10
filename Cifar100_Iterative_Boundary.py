@@ -183,7 +183,6 @@ def main():
     col_quartiles_saved = [[] for _ in range(1)]
     row_quartiles_saved = [[] for _ in range(1)]
     iterations_max = 0
-    preds_matrix = torch.zeros(nclass, nclass, dtype=torch.float)
     for j in range(len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
         model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
@@ -197,6 +196,12 @@ def main():
         last_loss_save = torch.zeros(nclass, nclass, dtype=torch.float)
         col_quartiles = torch.zeros(nclass, 7, dtype=torch.float)
         row_quartiles = torch.zeros(nclass, 7, dtype = torch.float)
+        boundary_images = torch.load(f"{saved_boundaries_path}/{data_schedule[j]}_Boundary_Images")
+        boundary_latent = torch.load(f"{saved_boundaries_path}/{data_schedule[j]}_Boundary_Latent")
+        print(f"Sizes of boundary images loaded: {boundary_images.shape}")
+        print(f"Sizes of boundary latent loaded: {boundary_latent.shape}")
+
+
     #
     # for run in range(args.total_runs):
     #     _par_image_copy = par_image_tensors[run].clone().detach().requires_grad_(False).to(device)
@@ -445,8 +450,9 @@ def main():
      #   stacked_sets_trained_boundaries = []
     #    stacked_sets_latent_boundaries = []
         cos_trained_latent_matrices = []
+        saved_preds = []
         cos_trained_latent_col_matrices = []
-        #stacked_trained_l2 = []
+        #stacked_trained_l2 = []d
         set = -1
         # cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
         # cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
@@ -458,6 +464,7 @@ def main():
             set+=1
             cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
             cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
+            preds_matrix = torch.zeros(nclass, nclass, dtype=torch.float)
             proto_clone = proto.clone()
             set_trained_boundaries = []
             batch_l2_trained_diff = []
@@ -466,36 +473,42 @@ def main():
                 normed_protos = transformDict['norm'](proto_clone.clone())
                 protos_latent, protos_logits = model(normed_protos)
             for i in range(nclass):
-                trained_boundaries = []
-                latents_boundaries = []
+              #  trained_boundaries = []
+              #  latents_boundaries = []
                 target_proto = torch.tensor([i], device= device)
-                l2_trained_diff = []
+          #      l2_trained_diff = []
                 for k in range(nclass):
-                    if i == k:
-                        trained_boundaries.append((torch.zeros([3, 32, 32], device=device)))
-                        latents_boundaries.append(torch.zeros(512, device=device))
+                   # if i == k:
+                   #     trained_boundaries.append((torch.zeros([3, 32, 32], device=device)))
+                   #     latents_boundaries.append(torch.zeros(512, device=device))
                     if i!=k:
-                        iterations = 0
-                        epoch = 1
-                        last_loss = 100
+                        trained_boundary = trained_boundary_sets[i][k].clone()
+                        # iterations = 0
+                        # epoch = 1
+                        # last_loss = 100
                         start_proto = torch.unsqueeze(proto_clone[k].clone(), dim=0).clone()
                        # if i == 6:
                         start_proto_copy = start_proto.clone()
                         with torch.no_grad():
-                            normed_start = transformDict['norm'](start_proto_copy)
-                            start_latent, start_logits = model(normed_start)
-                        start_preds_six = F.softmax(start_logits)
-                        starts_pred = start_logits.max(1, keepdim=True)[1]
+                            norm_trained_boundary = transformDict['norm'](torch.unsqueeze(trained_boundary, dim=0))
+                            boundary_latent, boundary_logits = model(norm_trained_boundary)
+                        preds = boundary_logits.max(1, keepdim=True)[1]
+                        probs = F.softmax(boundary_logits)
 
-                        while last_loss>1e-2:
-                            iterations += 1
-                            last_loss, preds, probs = train_image_no_data(args, model=model, device=device,
-                                                                   epoch=epoch, par_images=start_proto,
-                                                               targets=target_proto, transformDict=transformDict)
-                            if iterations > 12500:
-                                break
-                        if iterations_max < iterations < 12500:
-                            iterations_max = iterations
+                        #     normed_start = transformDict['norm'](start_proto_copy)
+                        #     start_latent, start_logits = model(normed_start)
+                        # start_preds_six = F.softmax(start_logits)
+                        # starts_pred = start_logits.max(1, keepdim=True)[1]
+
+                        # while last_loss>1e-2:
+                        #     iterations += 1
+                        #     last_loss, preds, probs = train_image_no_data(args, model=model, device=device,
+                        #                                            epoch=epoch, par_images=start_proto,
+                        #                                        targets=target_proto, transformDict=transformDict)
+                        #     if iterations > 12500:
+                        #         break
+                        # if iterations_max < iterations < 12500:
+                        #     iterations_max = iterations
                         print(f"Preds after {k} goes to {i}: {preds}\n")
                         if preds != i:
                             mispredictions.append([set, k, i, preds.item()])
@@ -505,38 +518,39 @@ def main():
                                   'a') as f:
                             f.write(
                                 f"Going from {k} to {i}, batch {t},\t Iterations Needed: {iterations}\n\n")
-                            if iterations > 12500:
-                                f.write(f"Iterations went over limit\n\n")
+                            # if iterations > 12500:
+                            #     f.write(f"Iterations went over limit\n\n")
                         f.close()
-                        iterations_needed[i][k] = iterations
+                        # iterations_needed[i][k] = iterations
                         model.eval()
-                        last_loss_save[i][k] = last_loss
-                        with torch.no_grad():
-                            norm_trained_boundary = transformDict['norm'](start_proto.clone())
-                            boundary_latent, boundary_logits = model(norm_trained_boundary)
+                        # last_loss_save[i][k] = last_loss
+                        # with torch.no_grad():
+                        #     norm_trained_boundary = transformDict['norm'](start_proto.clone())
+                        #     boundary_latent, boundary_logits = model(norm_trained_boundary)
                         start_proto_squeezed = torch.squeeze(start_proto.clone(), dim=0)
                         print(f"Boundary  shape: {start_proto_squeezed.shape}")
                         boundary_latent = torch.squeeze(boundary_latent, dim=0)
                         cos_trained_latent[i][k] = cos_sim(boundary_latent, protos_latent[i].clone())
                         cos_trained_latent_col[i][k] = cos_sim(boundary_latent, protos_latent[k].clone())
-                        trained_boundaries.append(start_proto_squeezed.clone())
+                       # trained_boundaries.append(start_proto_squeezed.clone())
                         # l2_trained_diff.append(torch.mean(torch.linalg.norm((boundary_latent.clone() - protos_latent[i].clone()), dim=0)))
-                        latents_boundaries.append(boundary_latent.clone())
+                       # latents_boundaries.append(boundary_latent.clone())
 
-                set_trained_boundaries.append(torch.stack(trained_boundaries, dim=0))
-                set_latent_boundaries.append(torch.stack(latents_boundaries, dim=0))
+            #    set_trained_boundaries.append(torch.stack(trained_boundaries, dim=0))
+           #     set_latent_boundaries.append(torch.stack(latents_boundaries, dim=0))
 
             #    batch_l2_trained_diff.append(torch.stack(l2_trained_diff, dim=0))
             cos_trained_latent_matrices.append(cos_trained_latent.clone())
             cos_trained_latent_col_matrices.append(cos_trained_latent_col.clone())
-            stacked_sets_trained_boundaries.append(torch.stack(set_trained_boundaries, dim=0))
+        #    stacked_sets_trained_boundaries.append(torch.stack(set_trained_boundaries, dim=0))
+            saved_preds.append(preds_matrix.clone())
 
           #  stacked_trained_l2.append(torch.stack(batch_l2_trained_diff, dim=0))
 
-            torch.save(torch.stack(set_latent_boundaries, dim = 0), f"{saved_boundaries_path}/Final3_{data_schedule[j]}1_Boundaries_Latents_{date_time}.pt")
-            torch.save(torch.stack(set_trained_boundaries, dim=0), f"{saved_boundaries_path}/Final3_{data_schedule[j]}1_Boundaries_Images_{date_time}.pt")
+       #     torch.save(torch.stack(set_latent_boundaries, dim = 0), f"{saved_boundaries_path}/Final3_{data_schedule[j]}1_Boundaries_Latents_{date_time}.pt")
+       #     torch.save(torch.stack(set_trained_boundaries, dim=0), f"{saved_boundaries_path}/Final3_{data_schedule[j]}1_Boundaries_Images_{date_time}.pt")
 
-            stacked_sets_latent_boundaries.append(torch.stack(set_latent_boundaries, dim=0))
+      #      stacked_sets_latent_boundaries.append(torch.stack(set_latent_boundaries, dim=0))
       # combined_boundary_images = torch.mean(torch.stack(stacked_sets_trained_boundaries,dim=0), dim=0)
        # trained_boundary_sets.append(torch.stack(stacked_sets_trained_boundaries, dim=0))
        # print(len(trained_boundary_sets))
@@ -598,7 +612,7 @@ def main():
             mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_cs]))
             final_comb_trained_cols_cs_diffs[t].append(
             mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_col_cs]))
-            iterations_matrix[t].append(iterations_needed)
+        #    iterations_matrix[t].append(iterations_needed)
 
             line_index = 0
             for line in cos_trained_latent_matrices[t].clone():
@@ -685,13 +699,13 @@ def main():
     # print(f"length of l2s : {len(final_ind_l2_diffs)}")
     # print(f"length of cs's : {len(final_ind_cs_diffs)}")
 
-    for j in range(len(data_schedule)):
-        torch.save(stacked_sets_latent_boundaries[j],
-                   f"{saved_boundaries_path}/Final_{data_schedule[j]}_Boundaries_Latents_{date_time}.pt")
-        torch.save(stacked_sets_trained_boundaries[j],
-                   f"{saved_boundaries_path}/Final_{data_schedule[j]}_Boundaries_TrainedIms_{date_time}.pt")
+    # for j in range(len(data_schedule)):
+    #     torch.save(stacked_sets_latent_boundaries[j],
+    #                f"{saved_boundaries_path}/Final_{data_schedule[j]}_Boundaries_Latents_{date_time}.pt")
+    #     torch.save(stacked_sets_trained_boundaries[j],
+    #                f"{saved_boundaries_path}/Final_{data_schedule[j]}_Boundaries_TrainedIms_{date_time}.pt")
 
-    with open('{}/Iterative_CIFAR100_split1_2_Until_Low_Loss_BOUNDARY_{}.txt'.format(model_dir, date_time), 'a') as f:
+    with open('{}/Iterative_CIFAR100_Data_Collect_{}.txt'.format(model_dir, date_time), 'a') as f:
         #for i in range(6, len(data_schedule)):
         # f.write(f"\n Split: {data_schedule[i]} \t Alphas: {final_comb_alphas_avg[i]}  \t cumulative alpha: {final_comb_cum_alphas_avg[i]} \t CS_Line_Diffs:\
             #  {[val.item() for val in final_ind_cs_diffs[i]]} \
@@ -715,7 +729,6 @@ def main():
             for t in range(1):
                 f.write(f" Data Split: {data_schedule[i]} \n  \
                     Batch {t} \n \
-                    Matrix of Iterations Needed to reach target:\n  {iterations_matrix[t][i]} \n \n \
                     \n \n cumulative row-wise CS diff: \t {final_comb_trained_cs_diffs[t][i]} \n  \
                      cumulative row-wise CS Std;\t {final_comb_trained_cs_std[t][i]} \
                       \n  cumulative column-wise CS diff: \t {final_comb_trained_cols_cs_diffs[t][i]} \
@@ -723,8 +736,14 @@ def main():
                         Mispredictions: \n{mispredictions} \n \n \
                            Batches Quartile Measures: Row-Wise: [min, 20, 40, 60, 80, max, average]: \n {row_quartiles_saved[t][i]} \
                              Batches Quartile Measures: Column-Wise: [min, 20, 40, 60, 80, max, average]: \n {col_quartiles_saved[t][i]} \n \n \n \n \n \
-                                Predicitions Matrix: {preds_matrix}")
+                                Predicitions Matrix: {saved_preds[i]}")
             f.write(f"Iterations max: {iterations_max}\n\n")
+
+            torch.set_printoptions(threshold=10000)
+            print(f"Predictions matrix: {saved_preds[i]}\n\n", file = f)
+            torch.set_printoptions(threshold=1000)
+
+
     f.close()
     for t in range(1):
 
@@ -733,7 +752,7 @@ def main():
         plt.plot(data_schedule, final_comb_trained_col_cs_std[t], label="column-wise std")
         plt.plot(data_schedule, final_comb_trained_cs_std[t], label="row-wise std")
         plt.legend()
-        plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_split1_2Batch{t}.png")
+        plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_Saved_Data{t}.png")
         plt.show()
         plt.figure().clear()
         plt.close()
