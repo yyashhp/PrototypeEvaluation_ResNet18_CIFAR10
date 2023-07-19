@@ -550,7 +550,7 @@ def main():
                                 intercol_values[i][k][b] = 0
                             else:
                                 interrow_values[i][k][b] = cos_sim(boundary_latent, boundary_latents[i][b].clone())
-                                interrow_values[i][k][b] = cos_sim(boundary_latent, boundary_latents[k][b].clone())
+                                intercol_values[i][k][b] = cos_sim(boundary_latent, boundary_latents[k][b].clone())
                         with open('{}/Batch0InterValsCalc_{}.txt'.format(model_dir, date_time),'a') as f:
                                 f.write(
                                     f"Going from {k} to {i}, batch {t} \n\n")
@@ -619,6 +619,8 @@ def main():
             for row in interrow_values_matrices[t].clone():
                 interrow_shortlist = []
                 for deep in row:
+                    if deep[0] < 1e-8 and deep[1]< 1e-8 and torch.max(deep)[0] < 1e-8:
+                        continue
                     interrow_shorterlist = []
                     for val in range(len(deep)):
                         print(f"Length of the deep: {len(deep)}")
@@ -650,6 +652,8 @@ def main():
             for row in intercol_values_matrices[t].clone():
                 intercol_shortlist = []
                 for deep in row:
+                    if deep[0] < 1e-8 and deep[1]< 1e-8 and torch.max(deep)[0] < 1e-8:
+                        continue
                     intercol_shorterlist = []
                     for val in range(len(deep)):
                         print(f"Length of the deep: {len(deep)}")
