@@ -461,7 +461,7 @@ def main():
 
 
         for t in range(1):
-            proto = par_image_tensors[t+1].clone()
+            proto = par_image_tensors[t+2].clone()
             set+=1
             cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
             cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
@@ -504,7 +504,7 @@ def main():
                             mispredictions.append([set, k, i, preds.item()])
                         #if i == 6:
                         preds_matrix[i][k] = preds
-                        with open('{}/CIFAR100_BATCH1split7Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
+                        with open('{}/CIFAR100_BATCH2split7Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
                                   'a') as f:
                             f.write(
                                 f"Going from {k} to {i}, batch {t},\t Iterations Needed: {iterations}\n\n")
@@ -522,6 +522,7 @@ def main():
                         print(f"Boundary  shape: {start_proto_squeezed.shape}")
                         #boundary_latent = boundary_latents[i][k].clone()
                         boundary_latent = torch.squeeze(boundary_latent, dim=0)
+                        print(f"Boundary latent shape: {boundary_latent.shape}")
                         cos_trained_latent[i][k] = cos_sim(boundary_latent, protos_latent[i].clone())
                         cos_trained_latent_col[i][k] = cos_sim(boundary_latent, protos_latent[k].clone())
                         trained_boundaries.append(start_proto_squeezed.clone())
@@ -693,11 +694,11 @@ def main():
 
     for j in range(len(data_schedule)):
         torch.save(stacked_sets_latent_boundaries[j],
-                    f"{saved_boundaries_path}/Batch1_{data_schedule[j]}_Boundaries_Latents_{date_time}.pt")
+                    f"{saved_boundaries_path}/Batch2_{data_schedule[j]}_Boundaries_Latents_{date_time}.pt")
         torch.save(stacked_sets_trained_boundaries[j],
-                    f"{saved_boundaries_path}/Batch1_{data_schedule[j]}_Boundaries_TrainedIms_{date_time}.pt")
+                    f"{saved_boundaries_path}/Batch2_{data_schedule[j]}_Boundaries_TrainedIms_{date_time}.pt")
 
-    with open('{}/CIFAR100_Batch1_Split7{}.txt'.format(model_dir, date_time), 'a') as f:
+    with open('{}/CIFAR100_Batch2_Split7{}.txt'.format(model_dir, date_time), 'a') as f:
         #for i in range(6, len(data_schedule)):
         # f.write(f"\n Split: {data_schedule[i]} \t Alphas: {final_comb_alphas_avg[i]}  \t cumulative alpha: {final_comb_cum_alphas_avg[i]} \t CS_Line_Diffs:\
             #  {[val.item() for val in final_ind_cs_diffs[i]]} \
@@ -743,7 +744,7 @@ def main():
         plt.plot(data_schedule, final_comb_trained_col_cs_std[t], label="column-wise std")
         plt.plot(data_schedule, final_comb_trained_cs_std[t], label="row-wise std")
         plt.legend()
-        plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_Batch1_Splits7Data{t}.png")
+        plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_Batch2_Splits7Data{t}.png")
         plt.show()
         plt.figure().clear()
         plt.close()
