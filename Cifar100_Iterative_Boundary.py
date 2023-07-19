@@ -650,6 +650,8 @@ def main():
                 for deep in row:
                     intercol_shorterlist = []
                     for val in deep:
+                        print(f"Length of the deep: {len(deep)}")
+
                         if val>=1e-4:
                             intercol_shorterlist.append(1-val)
                         else:
