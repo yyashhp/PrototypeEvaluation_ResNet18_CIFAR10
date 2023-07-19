@@ -490,10 +490,17 @@ def main():
                 target_proto = torch.tensor([i], device= device)
           #      l2_trained_diff = []
                 for k in range(nclass):
-                   # if i == k:
+                    if i == k:
+                        for b in range(nclass):
+                            if b == i:
+                                interrow_values[i][k][b] = 0
+                                intercol_values[i][k][b] = 0
+                            else:
+                                interrow_values[i][k][b] = cos_sim(protos_latent[i].clone(), boundary_latents[k][b].clone())
+                                interrow_values[i][k][b] = cos_sim(protos_latent[i].clone(), boundary_latents[i][b].clone())
                    #     trained_boundaries.append((torch.zeros([3, 32, 32], device=device)))
                    #     latents_boundaries.append(torch.zeros(512, device=device))
-                    if i!=k:
+                    elif i!=k:
                         trained_boundary = boundary_images[i][k].clone()
                         # iterations = 0
                         # epoch = 1
@@ -545,9 +552,12 @@ def main():
                         cos_trained_latent[i][k] = cos_sim(boundary_latent, protos_latent[i].clone())
                         cos_trained_latent_col[i][k] = cos_sim(boundary_latent, protos_latent[k].clone())
                         for b in range(nclass):
-                            if b == i or b == k:
+                            if b == k:
                                 interrow_values[i][k][b] = 0
+                                intercol_values[i][k][b] = cos_sim(boundary_latent, protos_latent[k].clone())
+                            elif b == i:
                                 intercol_values[i][k][b] = 0
+                                interrow_values[i][k][b] = cos_sim(boundary_latent, protos_latent[i].clone())
                             else:
                                 interrow_values[i][k][b] = cos_sim(boundary_latent, boundary_latents[i][b].clone())
                                 intercol_values[i][k][b] = cos_sim(boundary_latent, boundary_latents[k][b].clone())
@@ -619,8 +629,8 @@ def main():
             for row in interrow_values_matrices[t].clone():
                 interrow_shortlist = []
                 for deep in row:
-                    if deep[0].item() < 1e-8 and deep[1].item()< 1e-8 and torch.max(deep)[0].item() < 1e-8:
-                        continue
+                    #if deep[0].item() < 1e-8 and deep[1].item()< 1e-8 and torch.max(deep)[0].item() < 1e-8:
+                    #    continue
                     interrow_shorterlist = []
                     for val in range(len(deep)):
                         print(f"Length of the deep: {len(deep)}")
@@ -652,8 +662,8 @@ def main():
             for row in intercol_values_matrices[t].clone():
                 intercol_shortlist = []
                 for deep in row:
-                    if deep[0].item() < 1e-8 and deep[1].item()< 1e-8 and torch.max(deep)[0].item() < 1e-8:
-                        continue
+                    # if deep[0].item() < 1e-8 and deep[1].item()< 1e-8 and torch.max(deep)[0].item() < 1e-8:
+                    #     continue
                     intercol_shorterlist = []
                     for val in range(len(deep)):
                         print(f"Length of the deep: {len(deep)}")
