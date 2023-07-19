@@ -615,13 +615,15 @@ def main():
             mean_ave = torch.mean(torch.stack(std_list, dim=0), dim=1)
             print(f"Length of std_array {len(std_ave)}")
             inter_std_list = []
+            intercol_std_list = []
             for row in interrow_values_matrices[t].clone():
                 interrow_shortlist = []
                 for deep in row:
                     interrow_shorterlist = []
-                    for val in deep:
-                        if val>=1e-4:
-                            interrow_shorterlist.append(1-val)
+                    for val in range(len(deep)):
+                        print(f"Length of the deep: {len(deep)}")
+                        if deep[val]>=1e-4:
+                            interrow_shorterlist.append(1-deep[val])
                     interrow_shortlist.append(torch.stack(interrow_shorterlist, dim=0))
                 inter_std_list.append(torch.stack(interrow_shortlist, dim=0))
             print(f'Lsize of the interrow_std_list: {torch.stack(inter_std_list, dim=0).shape}')
@@ -649,15 +651,15 @@ def main():
                 intercol_shortlist = []
                 for deep in row:
                     intercol_shorterlist = []
-                    for val in deep:
+                    for val in range(len(deep)):
                         print(f"Length of the deep: {len(deep)}")
 
-                        if val>=1e-4:
-                            intercol_shorterlist.append(1-val)
+                        if deep[val]>=1e-4:
+                            intercol_shorterlist.append(1-deep[val])
                         else:
                             intercol_shorterlist.append(torch.mean(deep))
                     intercol_shortlist.append(torch.stack(intercol_shorterlist, dim=0))
-                col_std_list.append(torch.stack(intercol_shortlist, dim=0))
+                intercol_std_list.append(torch.stack(intercol_shortlist, dim=0))
             intercol_std_ave = torch.std(torch.stack(col_std_list, dim=0), dim=2)
             intercol_std_ave = torch.mean(intercol_std_ave, dim=0)
             print(f"intercol_std_ave shape: {intercol_std_ave.shape}")
