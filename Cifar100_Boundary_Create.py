@@ -744,7 +744,7 @@ def main():
         plt.plot(data_schedule, final_comb_trained_col_cs_std[t], label="column-wise std")
         plt.plot(data_schedule, final_comb_trained_cs_std[t], label="row-wise std")
         plt.legend()
-        plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_Batch3_Splits7ssh Data{t}.png")
+        plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_Batch3_Splits7sssh Data{t}.png")
         plt.show()
         plt.figure().clear()
         plt.close()

@@ -631,16 +631,14 @@ def main():
                 for deep in row:
                     #if deep[0].item() < 1e-8 and deep[1].item()< 1e-8 and torch.max(deep)[0].item() < 1e-8:
                     #    continue
-                    interrow_shorterlist = []
                     for val in range(len(deep)):
                         print(f"Length of the deep: {len(deep)}")
                         if deep[val]>=1e-4:
-                            interrow_shorterlist.append(1-deep[val])
-                    interrow_shortlist.append(torch.stack(interrow_shorterlist, dim=0))
+                            interrow_shortlist.append(1-deep[val])
                 inter_std_list.append(torch.stack(interrow_shortlist, dim=0))
             print(f'Lsize of the interrow_std_list: {torch.stack(inter_std_list, dim=0).shape}')
-            interrow_std_ave = torch.std(torch.tensor(inter_std_list, device=device), dim=2)
-            interrow_std_ave = torch.mean(interrow_std_ave, dim=1)
+            interrow_std_ave = torch.std(torch.stack(inter_std_list, dim=0), dim=1)
+       #     interrow_std_ave = torch.mean(interrow_std_ave, dim=1)
             print(f"interrow_std_ave full shape: {inter_std_list.shape}")
 
             print(f"interrow_std_ave shape: {inter_std_list.shape}")
@@ -664,18 +662,16 @@ def main():
                 for deep in row:
                     # if deep[0].item() < 1e-8 and deep[1].item()< 1e-8 and torch.max(deep)[0].item() < 1e-8:
                     #     continue
-                    intercol_shorterlist = []
                     for val in range(len(deep)):
                         print(f"Length of the deep: {len(deep)}")
 
                         if deep[val]>=1e-4:
-                            intercol_shorterlist.append(1-deep[val])
+                            intercol_shortlist.append(1-deep[val])
                         else:
-                            intercol_shorterlist.append(torch.mean(deep))
-                    intercol_shortlist.append(torch.stack(intercol_shorterlist, dim=0))
+                            intercol_shortlist.append(torch.mean(deep))
                 intercol_std_list.append(torch.stack(intercol_shortlist, dim=0))
-            intercol_std_ave = torch.std(torch.tensor(col_std_list, device=device), dim=2)
-            intercol_std_ave = torch.mean(intercol_std_ave, dim=0)
+            intercol_std_ave = torch.std(torch.tensor(col_std_list, device=device), dim=0)
+          #  intercol_std_ave = torch.mean(intercol_std_ave, dim=0)
             print(f"intercol_std_ave shape: {intercol_std_ave.shape}")
         #    cos_mean_ave = torch.mean(torch.stack(col_std_list, dim=0), dim=0)
 
