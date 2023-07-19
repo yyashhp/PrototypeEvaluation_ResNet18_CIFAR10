@@ -118,8 +118,8 @@ def train_image_no_data(args, model, device, epoch, par_images, targets, transfo
             par_images.clamp_(0.0, 1.0)
 
             _par_images_opt.grad.zero_()
-    if batch_idx % 20 == 0:
-        print('Train Epoch: {}\t BatchID: {}\t Loss {:.6f}'.format(epoch, batch_idx, torch.mean(loss).item()))
+  #  if batch_idx % 20 == 0:
+  #      print('Train Epoch: {}\t BatchID: {}\t Loss {:.6f}'.format(epoch, batch_idx, torch.mean(loss).item()))
 
     with torch.no_grad():
         _par_images_final = par_images.clone().detach().requires_grad_(False).to(device)
@@ -511,6 +511,7 @@ def main():
                             if iterations > 12500:
                                 f.write(f"Iterations went over limit\n\n")
                         f.close()
+                        print(f"Finished {k} to {i}")
                         iterations_needed[i][k] = iterations
                         model.eval()
                         # last_loss_save[i][k] = last_loss
