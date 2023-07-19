@@ -504,7 +504,7 @@ def main():
                             mispredictions.append([set, k, i, preds.item()])
                         #if i == 6:
                         preds_matrix[i][k] = preds
-                        with open('{}/CIFAR100_BATCH2split1_2Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
+                        with open('{}/CIFAR100_BATCH3split1_2Until_Low_Loss_BOUNDARY_PROBS_{}.txt'.format(model_dir, date_time),
                                   'a') as f:
                             f.write(
                                 f"Going from {k} to {i}, batch {t},\t Iterations Needed: {iterations}\n\n")
@@ -694,11 +694,11 @@ def main():
 
     for j in range(len(data_schedule)):
         torch.save(stacked_sets_latent_boundaries[j],
-                    f"{saved_boundaries_path}/Batch2_{data_schedule[j]}_Boundaries_Latents_{date_time}.pt")
+                    f"{saved_boundaries_path}/Batch3_{data_schedule[j]}_Boundaries_Latents_{date_time}.pt")
         torch.save(stacked_sets_trained_boundaries[j],
-                    f"{saved_boundaries_path}/Batch2_{data_schedule[j]}_Boundaries_TrainedIms_{date_time}.pt")
+                    f"{saved_boundaries_path}/Batch3_{data_schedule[j]}_Boundaries_TrainedIms_{date_time}.pt")
 
-    with open('{}/CIFAR100_Batch2_Split1_2{}.txt'.format(model_dir, date_time), 'a') as f:
+    with open('{}/CIFAR100_Batch3_Split1_2{}.txt'.format(model_dir, date_time), 'a') as f:
         #for i in range(6, len(data_schedule)):
         # f.write(f"\n Split: {data_schedule[i]} \t Alphas: {final_comb_alphas_avg[i]}  \t cumulative alpha: {final_comb_cum_alphas_avg[i]} \t CS_Line_Diffs:\
             #  {[val.item() for val in final_ind_cs_diffs[i]]} \
@@ -744,7 +744,7 @@ def main():
         plt.plot(data_schedule, final_comb_trained_col_cs_std[t], label="column-wise std")
         plt.plot(data_schedule, final_comb_trained_cs_std[t], label="row-wise std")
         plt.legend()
-        plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_Batch2_Splits1_2Data{t}.png")
+        plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_Batch3_Splits1_2Data{t}.png")
         plt.show()
         plt.figure().clear()
         plt.close()
