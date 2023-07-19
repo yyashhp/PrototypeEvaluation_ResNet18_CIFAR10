@@ -619,7 +619,7 @@ def main():
             for row in interrow_values_matrices[t].clone():
                 interrow_shortlist = []
                 for deep in row:
-                    if deep[0] < 1e-8 and deep[1]< 1e-8 and torch.max(deep)[0] < 1e-8:
+                    if deep[0].item() < 1e-8 and deep[1].item()< 1e-8 and torch.max(deep)[0].item() < 1e-8:
                         continue
                     interrow_shorterlist = []
                     for val in range(len(deep)):
