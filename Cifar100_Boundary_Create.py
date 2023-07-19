@@ -448,8 +448,8 @@ def main():
     #     f.close()
     #
         model.multi_out = 1
-        stacked_sets_trained_boundaries = []
-        stacked_sets_latent_boundaries = []
+      #  stacked_sets_trained_boundaries = []
+      #  stacked_sets_latent_boundaries = []
         cos_trained_latent_matrices = []
 
         cos_trained_latent_col_matrices = []
@@ -692,9 +692,9 @@ def main():
 
     for j in range(len(data_schedule)):
         torch.save(stacked_sets_latent_boundaries[j],
-                    f"{saved_boundaries_path}/Final_Batch1_{data_schedule[j]}_Boundaries_Latents_{date_time}.pt")
+                    f"{saved_boundaries_path}/Batch1_{data_schedule[j]}_Boundaries_Latents_{date_time}.pt")
         torch.save(stacked_sets_trained_boundaries[j],
-                    f"{saved_boundaries_path}/Final_Batch1_{data_schedule[j]}_Boundaries_TrainedIms_{date_time}.pt")
+                    f"{saved_boundaries_path}/Batch1_{data_schedule[j]}_Boundaries_TrainedIms_{date_time}.pt")
 
     with open('{}/CIFAR100_Batch1_Split1_2{}.txt'.format(model_dir, date_time), 'a') as f:
         #for i in range(6, len(data_schedule)):
