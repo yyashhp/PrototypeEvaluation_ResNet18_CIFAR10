@@ -639,7 +639,7 @@ def main():
                     interrow_shortlist.append(torch.stack(interrow_shorterlist, dim=0))
                 inter_std_list.append(torch.stack(interrow_shortlist, dim=0))
             print(f'Lsize of the interrow_std_list: {torch.stack(inter_std_list, dim=0).shape}')
-            interrow_std_ave = torch.std(inter_std_list, dim=2)
+            interrow_std_ave = torch.std(torch.tensor(inter_std_list, device=device), dim=2)
             interrow_std_ave = torch.mean(interrow_std_ave, dim=1)
             print(f"interrow_std_ave full shape: {inter_std_list.shape}")
 
@@ -674,7 +674,7 @@ def main():
                             intercol_shorterlist.append(torch.mean(deep))
                     intercol_shortlist.append(torch.stack(intercol_shorterlist, dim=0))
                 intercol_std_list.append(torch.stack(intercol_shortlist, dim=0))
-            intercol_std_ave = torch.std(col_std_list, dim=2)
+            intercol_std_ave = torch.std(torch.tensor(col_std_list, device=device), dim=2)
             intercol_std_ave = torch.mean(intercol_std_ave, dim=0)
             print(f"intercol_std_ave shape: {intercol_std_ave.shape}")
         #    cos_mean_ave = torch.mean(torch.stack(col_std_list, dim=0), dim=0)
