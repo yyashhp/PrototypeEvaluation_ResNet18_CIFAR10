@@ -738,7 +738,7 @@ def main():
             line_index = 0
 
             for line in interrow_values_matrices[t].clone():
-                sorted_line = torch.sort(line.clone().detach())[0]
+                sorted_line = torch.sort(torch.flatten(line.clone().detach()))[0]
                 print(f"length of line of row is {len(sorted_line)}")
                 interrow_quartiles[line_index][0] = sorted_line[1]
                 interrow_quartiles[line_index][1] = sorted_line[1999]
@@ -752,7 +752,7 @@ def main():
             line_index = 0
 
             for line in intercol_values_matrices[t].clone():
-                sorted_line = torch.sort(line.clone().detach())[0]
+                sorted_line = torch.sort(torch.flatten(line.clone().detach()))[0]
                 #     print(f"length of line of row is {len(sorted_line)}")
                 intercol_quartiles[line_index][0] = sorted_line[1]
                 intercol_quartiles[line_index][1] = sorted_line[1999]
