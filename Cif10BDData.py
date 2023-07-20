@@ -143,7 +143,7 @@ def main():
     transformDict = {}
     transformDict['norm'] = transforms.Compose([transforms.Normalize(MEAN, STD)])
 
-    nclass = 100
+    nclass = 10
     nchannels = 3
     cos_sim = nn.CosineSimilarity(dim=0, eps=1e-6)
    # model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
@@ -197,12 +197,12 @@ def main():
     iterations_max = 0
     for j in range(len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
-        model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
+        model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_Data_0621_16_53_47", map_location=device)
         model.load_state_dict(model_saved)
         for p in model.parameters():
             p.requires_grad = False
         model.eval()
-        par_image_tensors_loaded = torch.load(f"{saved_protos_path}/CIFAR_100_Final_Saved_Protos_3_SPLIT_{j}", map_location=device)
+        par_image_tensors_loaded = torch.load(f"{saved_protos_path}/_Final_Saved_Protos_SPLIT_{j}", map_location=device)
         par_image_tensors = [set.clone() for set in par_image_tensors_loaded]
         iterations_needed = torch.zeros(nclass, nclass, dtype=torch.float)
         last_loss_save = torch.zeros(nclass, nclass, dtype=torch.float)
