@@ -189,6 +189,8 @@ def main():
     iterations_matrix = [[] for _ in range(1)]
     col_quartiles_saved = [[] for _ in range(1)]
     row_quartiles_saved = [[] for _ in range(1)]
+    interrow_quartiles_saved = [[] for _ in range(1)]
+    intercol_quartiles_saved = [[] for _ in range(1)]
     saved_preds = [[] for _ in range(1)]
     iterations_max = 0
     for j in range(len(data_schedule)):
@@ -204,6 +206,8 @@ def main():
         last_loss_save = torch.zeros(nclass, nclass, dtype=torch.float)
         col_quartiles = torch.zeros(nclass, 7, dtype=torch.float)
         row_quartiles = torch.zeros(nclass, 7, dtype = torch.float)
+        intercol_quartiles = torch.zeros(nclass, 7, dtype=torch.float)
+        interrow_quartiles = torch.zeros(nclass, 7, dtype=torch.float)
         boundary_images = torch.load(f"{saved_boundaries_path}/{data_schedule[j]}_Boundary_Images")
         boundary_latents = torch.load(f"{saved_boundaries_path}/{data_schedule[j]}_Boundary_Latent")
         print(f"Sizes of boundary images loaded: {boundary_images.shape}")
@@ -639,9 +643,9 @@ def main():
             print(f'Lsize of the interrow_std_list: {torch.stack(inter_std_list, dim=0).shape}')
             interrow_std_ave = torch.std(torch.stack(inter_std_list, dim=0), dim=1)
        #     interrow_std_ave = torch.mean(interrow_std_ave, dim=1)
-            print(f"interrow_std_ave full shape: {inter_std_list.shape}")
+        #    print(f"interrow_std_ave full shape: {inter_std_list.shape}")
 
-            print(f"interrow_std_ave shape: {inter_std_list.shape}")
+        #    print(f"interrow_std_ave shape: {inter_std_list.shape}")
 
             for row in cos_trained_latent_col_matrices[t].clone():
                 col_shortlist = []
@@ -672,7 +676,7 @@ def main():
                 intercol_std_list.append(torch.stack(intercol_shortlist, dim=0))
             intercol_std_ave = torch.std(torch.tensor(col_std_list, device=device), dim=0)
           #  intercol_std_ave = torch.mean(intercol_std_ave, dim=0)
-            print(f"intercol_std_ave shape: {intercol_std_ave.shape}")
+       #     print(f"intercol_std_ave shape: {intercol_std_ave.shape}")
         #    cos_mean_ave = torch.mean(torch.stack(col_std_list, dim=0), dim=0)
 
        #     print(f"Length of intercol_std_array {len(intercol_std_ave)}")
@@ -731,6 +735,34 @@ def main():
                 col_quartiles[line_index][6] = torch.mean(sorted_line)
                 line_index+=1
             col_quartiles_saved[t].append(col_quartiles.clone())
+            line_index = 0
+
+            for line in interrow_values_matrices[t].clone():
+                sorted_line = torch.sort(line.clone().detach())[0]
+                print(f"length of line of row is {len(sorted_line)}")
+                interrow_quartiles[line_index][0] = sorted_line[1]
+                interrow_quartiles[line_index][1] = sorted_line[1999]
+                interrow_quartiles[line_index][2] = sorted_line[3999]
+                interrow_quartiles[line_index][3] = sorted_line[5999]
+                interrow_quartiles[line_index][4] = sorted_line[7999]
+                interrow_quartiles[line_index][5] = sorted_line[9999]
+                interrow_quartiles[line_index][6] = torch.mean(sorted_line)
+                line_index += 1
+            interrow_quartiles_saved[t].append(interrow_quartiles.clone())
+            line_index = 0
+
+            for line in intercol_values_matrices[t].clone():
+                sorted_line = torch.sort(line.clone().detach())[0]
+                #     print(f"length of line of row is {len(sorted_line)}")
+                intercol_quartiles[line_index][0] = sorted_line[1]
+                intercol_quartiles[line_index][1] = sorted_line[1999]
+                intercol_quartiles[line_index][2] = sorted_line[3999]
+                intercol_quartiles[line_index][3] = sorted_line[5999]
+                intercol_quartiles[line_index][4] = sorted_line[7999]
+                intercol_quartiles[line_index][5] = sorted_line[9999]
+                intercol_quartiles[line_index][6] = torch.mean(sorted_line)
+                line_index += 1
+            intercol_quartiles_saved[t].append(intercol_quartiles.clone())
             line_index = 0
 
 
@@ -826,7 +858,9 @@ def main():
                            Batches Quartile Measures: Row-Wise: [min, 20, 40, 60, 80, max, average]: \n {row_quartiles_saved[t][i]} \
                              Batches Quartile Measures: Column-Wise: [min, 20, 40, 60, 80, max, average]: \n {col_quartiles_saved[t][i]} \n \n \n \n \n \
                                 Interrow Cs diffs: {final_ind_interrow_diffs[t][i]} \t \t \n \
-                                  InterCol Cs diffs: {final_ind_intercol_diffs[t][t]} \n \n  ")
+                                  InterCol Cs diffs: {final_ind_intercol_diffs[t][i]} \n \n  \
+                                     InterRow Quartiles: Row-Wise: [min, 20, 40, 60, 80, max, average]: \n {interrow_quartiles_saved[t][i]} \
+                                        InterCol Quartiles: Column-Wise: [min, 20, 40, 60, 80, max, average]: \n {intercol_quartiles_saved[t][i]} ")
             f.write(f"Iterations max: {iterations_max}\n\n")
 
             #torch.set_printoptions(threshold=10000)
