@@ -746,12 +746,12 @@ def main():
             for line in interrow_values_matrices[t].clone():
                 sorted_line = torch.sort(torch.flatten(line.clone().detach()), descending=True)[0]
                 print(f"length of line of row is {len(sorted_line)}")
-                interrow_quartiles[line_index][0] = 1 - sorted_line[1]
+                interrow_quartiles[line_index][0] = 1 - sorted_line[0]
                 interrow_quartiles[line_index][1] = 1 - sorted_line[1999]
                 interrow_quartiles[line_index][2] = 1 - sorted_line[3999]
                 interrow_quartiles[line_index][3] = 1 - sorted_line[5999]
                 interrow_quartiles[line_index][4] = 1 - sorted_line[7999]
-                interrow_quartiles[line_index][5] = 1 - sorted_line[9999]
+                interrow_quartiles[line_index][5] = 1 - sorted_line[9898]
                 interrow_quartiles[line_index][6] = torch.mean([1-val for val in sorted_line])
                 line_index += 1
             interrow_quartiles_saved[t].append(interrow_quartiles.clone())
@@ -760,12 +760,12 @@ def main():
             for line in intercol_values_matrices[t].clone():
                 sorted_line = torch.sort(torch.flatten(line.clone().detach()), descending=True)[0]
                 #     print(f"length of line of row is {len(sorted_line)}")
-                intercol_quartiles[line_index][0] = 1 - sorted_line[1]
+                intercol_quartiles[line_index][0] = 1 - sorted_line[0]
                 intercol_quartiles[line_index][1] = 1 - sorted_line[1999]
                 intercol_quartiles[line_index][2] = 1 - sorted_line[3999]
                 intercol_quartiles[line_index][3] = 1 - sorted_line[5999]
                 intercol_quartiles[line_index][4] = 1 - sorted_line[7999]
-                intercol_quartiles[line_index][5] = 1 - sorted_line[9999]
+                intercol_quartiles[line_index][5] = 1 - sorted_line[9898]
                 intercol_quartiles[line_index][6] = torch.mean([1-val for val in sorted_line])
                 line_index += 1
             intercol_quartiles_saved[t].append(intercol_quartiles.clone())
