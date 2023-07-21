@@ -202,7 +202,7 @@ def main():
         for p in model.parameters():
             p.requires_grad = False
         model.eval()
-        par_image_tensors_loaded = torch.load(f"{saved_protos_path}/_Final_Saved_Protos_SPLIT_{j}", map_location=device)
+        par_image_tensors_loaded = torch.load(f"{saved_protos_path}/Final_Saved_Protos_SPLIT_{j}", map_location=device)
         par_image_tensors = [set.clone() for set in par_image_tensors_loaded]
         iterations_needed = torch.zeros(nclass, nclass, dtype=torch.float)
         last_loss_save = torch.zeros(nclass, nclass, dtype=torch.float)
