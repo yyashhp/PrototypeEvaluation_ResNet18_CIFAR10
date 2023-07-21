@@ -669,7 +669,7 @@ def main():
 
             print(f"Length of col_std_array {len(col_std_ave)}")
 
-            for row in intercol_values_matrices[t].clone():
+            for row in torch.transpose(intercol_values_matrices[t].clone(), 0, 1).clone():
                 intercol_shortlist = []
                 for deep in row:
                     # if deep[0].item() < 1e-8 and deep[1].item()< 1e-8 and torch.max(deep)[0].item() < 1e-8:
