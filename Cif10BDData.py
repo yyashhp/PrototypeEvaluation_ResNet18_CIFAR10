@@ -646,6 +646,7 @@ def main():
                         if deep[val]>=1e-4:
                             interrow_shortlist.append(1-deep[val])
                 inter_std_list.append(torch.stack(interrow_shortlist, dim=0))
+                print(f"Size of colstack: {torch.stack(intercol_shortlist, dim=0).size}")
             print(f'Lsize of the interrow_std_list: {torch.stack(inter_std_list, dim=0).shape}')
             interrow_std_ave = torch.std(torch.stack(inter_std_list, dim=0), dim=1)
        #     interrow_std_ave = torch.mean(interrow_std_ave, dim=1)
@@ -679,6 +680,7 @@ def main():
                             intercol_shortlist.append(1-deep[val])
                         else:
                             intercol_shortlist.append(torch.mean(deep))
+                print(f"Size of colstack: {torch.stack(intercol_shortlist, dim=0).size}")
                 intercol_std_list.append(torch.stack(intercol_shortlist, dim=0))
             intercol_std_ave = torch.std(torch.stack(intercol_std_list, dim=0), dim=0)
           #  intercol_std_ave = torch.mean(intercol_std_ave, dim=0)
@@ -840,6 +842,8 @@ def main():
 
     overall_row_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cs_diffs).clone(), dim=0)
     overall_col_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cols_cs_diffs).clone(), dim=0)
+    overall_row_cs_diffs = torch.mean(torch.Tensor(final_interrow_diffs).clone(), dim=0)
+    overall_col_cs_diffs = torch.mean(torch.Tensor(final_intercol_diffs).clone(), dim=0)
     overall_row_cs_stds = torch.mean(torch.Tensor(final_comb_trained_cs_std).clone(), dim=0)
     overall_col_cs_stds = torch.mean(torch.Tensor(final_comb_trained_col_cs_std).clone(), dim=0)
 
@@ -847,6 +851,8 @@ def main():
     plt.plot(data_schedule, overall_row_cs_diffs.tolist(), label="row-wise cs diff")
     plt.plot(data_schedule, overall_col_cs_stds.tolist(), label="column-wise std")
     plt.plot(data_schedule, overall_row_cs_stds.tolist(), label="row-wise std")
+    plt.plot(data_schedule, final_interrow_diffs[t], label="inter-row-wise diff")
+    plt.plot(data_schedule, final_intercol_diffs[t], label="inter-col-wise diff")
     plt.legend()
     plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Overall_Cif10_OVERALL.png")
     plt.show()
