@@ -210,10 +210,10 @@ def main():
         row_quartiles = torch.zeros(nclass, 7, dtype = torch.float)
         intercol_quartiles = torch.zeros(nclass, 7, dtype=torch.float)
         interrow_quartiles = torch.zeros(nclass, 7, dtype=torch.float)
-        boundary_images = torch.load(f"{saved_boundaries_path}/{data_schedule[j]}_Boundary_Images")
-        boundary_latents = torch.load(f"{saved_boundaries_path}/{data_schedule[j]}_Boundary_Latent")
-        print(f"Sizes of boundary images loaded: {boundary_images.shape}")
-        print(f"Sizes of boundary latent loaded: {boundary_latents.shape}")
+        #boundary_images = torch.load(f"{saved_boundaries_path}/{data_schedule[j]}_Boundary_Images")
+        #boundary_latents = torch.load(f"{saved_boundaries_path}/{data_schedule[j]}_Boundary_Latent")
+        #print(f"Sizes of boundary images loaded: {boundary_images.shape}")
+        #print(f"Sizes of boundary latent loaded: {boundary_latents.shape}")
 
 
     #
@@ -475,8 +475,12 @@ def main():
       #  for proto in par_image_tensors:
 
 
-        for t in range(1):
+        for t in range(args.total_runs):
             proto = par_image_tensors[t].clone()
+            boundary_images = torch.load(f"{saved_boundaries_path}/Cifar10ImagesBatch_{t}_0720_14_45_35.pt")
+            boundary_latents = torch.load(f"{saved_boundaries_path}/Cifar10LatentsBatch_{t}_0720_14_45_35.pt")
+            print(f"Sizes of boundary images loaded: {boundary_images.shape}")
+            print(f"Sizes of boundary latent loaded: {boundary_latents.shape}")
             set+=1
             cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
             cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
@@ -484,9 +488,9 @@ def main():
             intercol_values = torch.zeros([nclass, nclass, nclass], dtype=torch.float)
             preds_matrix = torch.zeros(nclass, nclass, dtype=torch.float)
             proto_clone = proto.clone()
-            set_trained_boundaries = []
-            batch_l2_trained_diff = []
-            set_latent_boundaries = []
+     #       set_trained_boundaries = []
+       #     batch_l2_trained_diff = []
+       #     set_latent_boundaries = []
             with torch.no_grad():
                 normed_protos = transformDict['norm'](proto_clone.clone())
                 protos_latent, protos_logits = model(normed_protos)
@@ -502,12 +506,12 @@ def main():
                                 interrow_values[i][k][b] = 0
                                 intercol_values[i][k][b] = 0
                             else:
-                                interrow_values[i][k][b] = cos_sim(protos_latent[i].clone(), boundary_latents[k][b].clone())
-                                interrow_values[i][k][b] = cos_sim(protos_latent[i].clone(), boundary_latents[i][b].clone())
+                                interrow_values[i][k][b] = cos_sim(protos_latent[i].clone(), boundary_latents[j][k][b].clone())
+                                interrow_values[i][k][b] = cos_sim(protos_latent[i].clone(), boundary_latents[j][i][b].clone())
                    #     trained_boundaries.append((torch.zeros([3, 32, 32], device=device)))
                    #     latents_boundaries.append(torch.zeros(512, device=device))
                     elif i!=k:
-                        trained_boundary = boundary_images[i][k].clone()
+                        trained_boundary = boundary_images[j][i][k].clone()
                         # iterations = 0
                         # epoch = 1
                         # last_loss = 100
@@ -554,7 +558,7 @@ def main():
                         #     boundary_latent, boundary_logits = model(norm_trained_boundary)
                         start_proto_squeezed = torch.squeeze(start_proto.clone(), dim=0)
                         print(f"Boundary  shape: {start_proto_squeezed.shape}")
-                        boundary_latent = boundary_latents[i][k].clone()
+                        boundary_latent = boundary_latents[j][i][k].clone()
                         cos_trained_latent[i][k] = cos_sim(boundary_latent, protos_latent[i].clone())
                         cos_trained_latent_col[i][k] = cos_sim(boundary_latent, protos_latent[k].clone())
                         for b in range(nclass):
@@ -565,8 +569,8 @@ def main():
                                 intercol_values[i][k][b] = 0
                                 interrow_values[i][k][b] = cos_sim(boundary_latent, protos_latent[i].clone())
                             else:
-                                interrow_values[i][k][b] = cos_sim(boundary_latent, boundary_latents[i][b].clone())
-                                intercol_values[i][k][b] = cos_sim(boundary_latent, boundary_latents[k][b].clone())
+                                interrow_values[i][k][b] = cos_sim(boundary_latent, boundary_latents[j][i][b].clone())
+                                intercol_values[i][k][b] = cos_sim(boundary_latent, boundary_latents[j][k][b].clone())
                         with open('{}/Batch0InterValsCalc_{}.txt'.format(model_dir, date_time),'a') as f:
                                 f.write(
                                     f"Going from {k} to {i}, batch {t} \n\n")
@@ -603,16 +607,16 @@ def main():
       #  batch_diff_col_std.append(batch_trained_col_std)
       #  batch_cum_trained_cs, batch_cum_trained_cs_std = torch.std_mean(batch_trained_cs, dim=0)
             batch_cum_trained_cs_std, batch_cum_trained_cs = torch.std_mean(cos_trained_latent.clone(), dim=1)
-            mask = cos_trained_latent > 0
-            col_mask = cos_trained_latent_col > 0
+      #      mask = cos_trained_latent > 0
+      #      col_mask = cos_trained_latent_col > 0
      #   batch_cum_trained_col_cs, batch_cum_trained_col_cs_std = torch.std_mean(batch_trained_col_cs, dim=1)
             batch_cum_trained_col_cs_std, batch_cum_trained_col_cs = torch.std_mean(cos_trained_latent_col.clone(),dim=0)
             batch_cum_trained_interrow_cs_std, batch_cum_trained_interrow_cs = torch.std_mean(interrow_values.clone(), dim=2)
             batch_cum_trained_intercol_cs_std, batch_cum_trained_intercol_cs = torch.std_mean(intercol_values.clone(), dim=2)
 
             print(f"Size of first means: {batch_cum_trained_intercol_cs.shape} \t {batch_cum_trained_interrow_cs.shape}")
-            batch_cum_trained_interrow_cs = torch.mean(batch_cum_trained_interrow_cs, dim=1)
-            batch_cum_trained_intercol_cs = torch.mean(batch_cum_trained_intercol_cs, dim=0)
+         #   batch_cum_trained_interrow_cs = torch.mean(batch_cum_trained_interrow_cs, dim=1)
+         #   batch_cum_trained_intercol_cs = torch.mean(batch_cum_trained_intercol_cs, dim=0)
 
 
             cum_trained_cs_avg = 1 - torch.mean(batch_cum_trained_cs)
@@ -708,68 +712,11 @@ def main():
         # final_ind_trained_l2_diffs.append(batch_cum_trained_l2)
 
             final_comb_trained_cs_diffs[t].append(
-            mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_cs]))
+            mean([round(1 - ((val.item() * 10) / 9), 4) for val in batch_cum_trained_cs]))
             final_comb_trained_cols_cs_diffs[t].append(
-            mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_col_cs]))
+            mean([round(1 - ((val.item() * 10) / 9), 4) for val in batch_cum_trained_col_cs]))
         #    iterations_matrix[t].append(iterations_needed)
 
-            line_index = 0
-            for line in cos_trained_latent_matrices[t].clone():
-                sorted_line = torch.sort(line.clone().detach(), descending=True)[0]
-            #    print(f"length of line of row is {len(sorted_line)}")
-                row_quartiles[line_index][0] = 1 - sorted_line[1]
-                row_quartiles[line_index][1] = 1 - sorted_line[19]
-                row_quartiles[line_index][2] = 1 - sorted_line[39]
-                row_quartiles[line_index][3] = 1 - sorted_line[59]
-                row_quartiles[line_index][4] = 1 - sorted_line[79]
-                row_quartiles[line_index][5] = 1 - sorted_line[99]
-                row_quartiles[line_index][6] = 1 - torch.mean(sorted_line)
-                line_index+=1
-            row_quartiles_saved[t].append(row_quartiles.clone())
-
-            line_index = 0
-
-            for line in cos_trained_latent_col_matrices[t].clone():
-                sorted_line = torch.sort(line.clone().detach(), descending=True)[0]
-           #     print(f"length of line of row is {len(sorted_line)}")
-                col_quartiles[line_index][0] = 1 - sorted_line[1]
-                col_quartiles[line_index][1] = 1 - sorted_line[19]
-                col_quartiles[line_index][2] = 1 - sorted_line[39]
-                col_quartiles[line_index][3] = 1 - sorted_line[59]
-                col_quartiles[line_index][4] = 1 - sorted_line[79]
-                col_quartiles[line_index][5] = 1 - sorted_line[99]
-                col_quartiles[line_index][6] = 1 - torch.mean(sorted_line)
-                line_index+=1
-            col_quartiles_saved[t].append(col_quartiles.clone())
-            line_index = 0
-
-            for line in interrow_values_matrices[t].clone():
-                sorted_line = torch.sort(torch.flatten(line.clone().detach()), descending=True)[0]
-                print(f"length of line of row is {len(sorted_line)}")
-                interrow_quartiles[line_index][0] = 1 - sorted_line[0]
-                interrow_quartiles[line_index][1] = 1 - sorted_line[1999]
-                interrow_quartiles[line_index][2] = 1 - sorted_line[3999]
-                interrow_quartiles[line_index][3] = 1 - sorted_line[5999]
-                interrow_quartiles[line_index][4] = 1 - sorted_line[7999]
-                interrow_quartiles[line_index][5] = 1 - sorted_line[9898]
-                interrow_quartiles[line_index][6] = torch.mean([1-val for val in sorted_line])
-                line_index += 1
-            interrow_quartiles_saved[t].append(interrow_quartiles.clone())
-            line_index = 0
-
-            for line in intercol_values_matrices[t].clone():
-                sorted_line = torch.sort(torch.flatten(line.clone().detach()), descending=True)[0]
-                #     print(f"length of line of row is {len(sorted_line)}")
-                intercol_quartiles[line_index][0] = 1 - sorted_line[0]
-                intercol_quartiles[line_index][1] = 1 - sorted_line[1999]
-                intercol_quartiles[line_index][2] = 1 - sorted_line[3999]
-                intercol_quartiles[line_index][3] = 1 - sorted_line[5999]
-                intercol_quartiles[line_index][4] = 1 - sorted_line[7999]
-                intercol_quartiles[line_index][5] = 1 - sorted_line[9898]
-                intercol_quartiles[line_index][6] = torch.mean([1-val for val in sorted_line])
-                line_index += 1
-            intercol_quartiles_saved[t].append(intercol_quartiles.clone())
-            line_index = 0
 
 
 
@@ -895,18 +842,18 @@ def main():
         plt.cla()
         plt.clf()
 
-    # overall_row_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cs_diffs).clone(), dim=0)
-    # overall_col_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cols_cs_diffs).clone(), dim=0)
-    # overall_row_cs_stds = torch.mean(torch.Tensor(final_comb_trained_cs_std).clone(), dim=0)
-    # overall_col_cs_stds = torch.mean(torch.Tensor(final_comb_trained_col_cs_std).clone(), dim=0)
-    #
-    # plt.plot(data_schedule, overall_col_cs_diffs.tolist(), label="column-wise cs diff")
-    # plt.plot(data_schedule, overall_row_cs_diffs.tolist(), label="row-wise cs diff")
-    # plt.plot(data_schedule, overall_col_cs_stds.tolist(), label="column-wise std")
-    # plt.plot(data_schedule, overall_row_cs_stds.tolist(), label="row-wise std")
-    # plt.legend()
-    # plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_Splits4and5_OVERALL.png")
-    # plt.show()
+    overall_row_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cs_diffs).clone(), dim=0)
+    overall_col_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cols_cs_diffs).clone(), dim=0)
+    overall_row_cs_stds = torch.mean(torch.Tensor(final_comb_trained_cs_std).clone(), dim=0)
+    overall_col_cs_stds = torch.mean(torch.Tensor(final_comb_trained_col_cs_std).clone(), dim=0)
+
+    plt.plot(data_schedule, overall_col_cs_diffs.tolist(), label="column-wise cs diff")
+    plt.plot(data_schedule, overall_row_cs_diffs.tolist(), label="row-wise cs diff")
+    plt.plot(data_schedule, overall_col_cs_stds.tolist(), label="column-wise std")
+    plt.plot(data_schedule, overall_row_cs_stds.tolist(), label="row-wise std")
+    plt.legend()
+    plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Overall_Cif10_OVERALL.png")
+    plt.show()
 
 
 if __name__ == '__main__':
