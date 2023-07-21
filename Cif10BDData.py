@@ -698,12 +698,12 @@ def main():
             final_ind_trained_cs_diffs[t].append([round(1 - ((val.item() * 10)/9), 4) for val in batch_cum_trained_cs])
             final_ind_trained_cs_diffs_std[t].append([round(val.item(), 4) for val in std_ave])
 
-            final_ind_interrow_diffs[t].append([round(1 - ((val.item()* 100)/99), 4) for val in batch_cum_trained_interrow_cs])
-            final_ind_intercol_diffs[t].append([round(1 - ((val.item()* 100)/99), 4) for val in batch_cum_trained_intercol_cs])
+            final_ind_interrow_diffs[t].append([round(1 - ((val.item()* 10)/9), 4) for val in batch_cum_trained_interrow_cs])
+            final_ind_intercol_diffs[t].append([round(1 - ((val.item()* 10)/9), 4) for val in batch_cum_trained_intercol_cs])
             final_ind_interrow_std[t].append([round(val.item(), 4) for val in interrow_std_ave])
             final_ind_intercol_std[t].append([round(val.item(), 4) for val in intercol_std_ave])
-            final_interrow_diffs[t].append(mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_interrow_cs]))
-            final_intercol_diffs[t].append(mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_intercol_cs]))
+            final_interrow_diffs[t].append(mean([round(1 - ((val.item() * 10) / 9), 4) for val in batch_cum_trained_interrow_cs]))
+            final_intercol_diffs[t].append(mean([round(1 - ((val.item() * 10) / 9), 4) for val in batch_cum_trained_intercol_cs]))
             final_interrow_std[t].append(torch.mean(interrow_std_ave).item())
             final_intercol_std[t].append(torch.mean(intercol_std_ave).item())
 
