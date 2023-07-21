@@ -479,8 +479,8 @@ def main():
             proto = par_image_tensors[t].clone()
             boundary_images = torch.load(f"{saved_boundaries_path}/Cifar10ImagesBatch_{t}_0720_14_45_35.pt")
             boundary_latents = torch.load(f"{saved_boundaries_path}/Cifar10LatentsBatch_{t}_0720_14_45_35.pt")
-            print(f"Sizes of boundary images loaded: {len(boundary_images[0])}")
-            print(f"Sizes of boundary latent loaded: {len(boundary_latents[0])}")
+            print(f"Sizes of boundary images loaded: {len(boundary_images[0][0])}")
+            print(f"Sizes of boundary latent loaded: {len(boundary_latents[0][0])}")
             set+=1
             cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
             cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
@@ -822,7 +822,7 @@ def main():
 
 
     f.close()
-    for t in range(1):
+    for t in range(args.total_runs):
 
         plt.plot(data_schedule, final_comb_trained_cols_cs_diffs[t], label="column-wise cs diff")
         plt.plot(data_schedule, final_comb_trained_cs_diffs[t], label="row-wise cs diff")
