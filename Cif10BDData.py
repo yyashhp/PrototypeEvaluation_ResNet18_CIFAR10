@@ -683,7 +683,7 @@ def main():
                             intercol_shortlist.append(torch.mean(deep))
                 print(f"Size of colstack: {len(intercol_shortlist)}")
                 intercol_std_list.append(torch.stack(intercol_shortlist, dim=0))
-            intercol_std_ave = torch.std(torch.stack(intercol_std_list, dim=0), dim=0)
+            intercol_std_ave = torch.std(torch.stack(intercol_std_list, dim=0), dim=1)
         #    intercol_std_ave = torch.mean(intercol_std_ave, dim=0)
             print(f"intercol_std_ave shape: {intercol_std_ave.shape}")
         #    cos_mean_ave = torch.mean(torch.stack(col_std_list, dim=0), dim=0)
