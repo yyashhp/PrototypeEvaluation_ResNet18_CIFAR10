@@ -159,24 +159,24 @@ def main():
     final_comb_boundaries_avg = []
     final_comb_alphas_avg = []
     final_comb_cum_alphas_avg = []
-    final_comb_trained_cs_diffs = [[] for _ in range(1)]
-    final_ind_trained_cs_diffs = [[] for _ in range(1)]
+    final_comb_trained_cs_diffs = [[] for _ in range(args.total_runs)]
+    final_ind_trained_cs_diffs = [[] for _ in range(args.total_runs)]
     final_comb_trained_l2_diffs = []
     final_ind_trained_l2_diffs = []
-    final_ind_trained_cs_diffs_std = [[] for _ in range(1)]
-    final_comb_trained_cols_cs_diffs = [[] for _ in range(1)]
-    final_comb_trained_cs_std = [[] for _ in range(1)]
-    final_comb_trained_col_cs_std = [[] for _ in range(1)]
-    final_ind_trained_col_cs_diffs = [[] for _ in range(1)]
-    final_ind_trained_cs_col_stds = [[] for _ in range(1)]
-    final_ind_interrow_diffs  = [[] for _ in range(1)]
-    final_ind_intercol_diffs= [[] for _ in range(1)]
-    final_ind_interrow_std= [[] for _ in range(1)]
-    final_ind_intercol_std= [[] for _ in range(1)]
-    final_interrow_diffs = [[] for _ in range(1)]
-    final_intercol_diffs = [[] for _ in range(1)]
-    final_interrow_std = [[] for _ in range(1)]
-    final_intercol_std = [[] for _ in range(1)]
+    final_ind_trained_cs_diffs_std = [[] for _ in range(args.total_runs)]
+    final_comb_trained_cols_cs_diffs = [[] for _ in range(args.total_runs)]
+    final_comb_trained_cs_std = [[] for _ in range(args.total_runs)]
+    final_comb_trained_col_cs_std = [[] for _ in range(args.total_runs)]
+    final_ind_trained_col_cs_diffs = [[] for _ in range(args.total_runs)]
+    final_ind_trained_cs_col_stds = [[] for _ in range(args.total_runs)]
+    final_ind_interrow_diffs  = [[] for _ in range(args.total_runs)]
+    final_ind_intercol_diffs= [[] for _ in range(args.total_runs)]
+    final_ind_interrow_std= [[] for _ in range(args.total_runs)]
+    final_ind_intercol_std= [[] for _ in range(args.total_runs)]
+    final_interrow_diffs = [[] for _ in range(args.total_runs)]
+    final_intercol_diffs = [[] for _ in range(args.total_runs)]
+    final_interrow_std = [[] for _ in range(args.total_runs)]
+    final_intercol_std = [[] for _ in range(args.total_runs)]
 
     batch_diff_std = []
     batch_diff_col_std = []
@@ -188,12 +188,12 @@ def main():
 
     stacked_trained_l2 = []
     stacked_sets_trained_boundaries = []
-    iterations_matrix = [[] for _ in range(1)]
-    col_quartiles_saved = [[] for _ in range(1)]
-    row_quartiles_saved = [[] for _ in range(1)]
-    interrow_quartiles_saved = [[] for _ in range(1)]
-    intercol_quartiles_saved = [[] for _ in range(1)]
-    saved_preds = [[] for _ in range(1)]
+    iterations_matrix = [[] for _ in range(args.total_runs)]
+    col_quartiles_saved = [[] for _ in range(args.total_runs)]
+    row_quartiles_saved = [[] for _ in range(args.total_runs)]
+    interrow_quartiles_saved = [[] for _ in range(args.total_runs)]
+    intercol_quartiles_saved = [[] for _ in range(args.total_runs)]
+    saved_preds = [[] for _ in range(args.total_runs)]
     iterations_max = 0
     for j in range(len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
@@ -690,9 +690,9 @@ def main():
 
             final_comb_trained_col_cs_std[t].append(torch.mean(col_std_ave).item())
             final_comb_trained_cs_std[t].append(torch.mean(std_ave).item())
-            final_ind_trained_col_cs_diffs[t].append([round(1 - ((val.item()* 100)/99), 4) for val in batch_cum_trained_col_cs])
+            final_ind_trained_col_cs_diffs[t].append([round(1 - ((val.item()* 10)/9), 4) for val in batch_cum_trained_col_cs])
             final_ind_trained_cs_col_stds[t].append([round(val.item(), 4) for val in col_std_ave])
-            final_ind_trained_cs_diffs[t].append([round(1 - ((val.item() * 100)/99), 4) for val in batch_cum_trained_cs])
+            final_ind_trained_cs_diffs[t].append([round(1 - ((val.item() * 10)/9), 4) for val in batch_cum_trained_cs])
             final_ind_trained_cs_diffs_std[t].append([round(val.item(), 4) for val in std_ave])
 
             final_ind_interrow_diffs[t].append([round(1 - ((val.item()* 100)/99), 4) for val in batch_cum_trained_interrow_cs])
@@ -808,14 +808,10 @@ def main():
                       \n  cumulative column-wise CS diff: \t {final_comb_trained_cols_cs_diffs[t][i]} \
                        \n \n cumulative column-wise CS Std:\t {final_comb_trained_col_cs_std[t][i]} \n \n \
                         Mispredictions: \n{mispredictions} \n \n \
-                           Batches Quartile Measures: Row-Wise: [min, 20, 40, 60, 80, max, average]: \n {row_quartiles_saved[t][i]} \
-                             Batches Quartile Measures: Column-Wise: [min, 20, 40, 60, 80, max, average]: \n {col_quartiles_saved[t][i]} \n \n \n \n \n \
                                 Interrow Cs diffs: \n {final_ind_interrow_diffs[t][i]} \t \t \n \
                                 InterRow Stds: \n {final_ind_interrow_std[t][i]} \t \t \n \
                                   InterCol Cs diffs: \n {final_ind_intercol_diffs[t][i]} \n \n  \
                                   InterCol Stds: \n {final_ind_intercol_std[t][i]} \t \t \n \n \
-                                     InterRow Cs Quartiles: Row-Wise: [min, 20, 40, 60, 80, max, average]: \n {interrow_quartiles_saved[t][i]} \
-                                        InterCol Cs Quartiles: Column-Wise: [min, 20, 40, 60, 80, max, average]: \n {intercol_quartiles_saved[t][i]} \
                                            InterRow Average CS: \n {final_interrow_diffs[t][i]} \n \n \
                                               InterCol Average CS: \n {final_intercol_diffs[t][i]}")
             f.write(f"\n Iterations max: {iterations_max}\n\n")
