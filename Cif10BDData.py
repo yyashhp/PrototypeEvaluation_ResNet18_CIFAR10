@@ -479,8 +479,8 @@ def main():
             proto = par_image_tensors[t].clone()
             boundary_images = torch.load(f"{saved_boundaries_path}/Cifar10ImagesBatch_{t}_0720_14_45_35.pt")
             boundary_latents = torch.load(f"{saved_boundaries_path}/Cifar10LatentsBatch_{t}_0720_14_45_35.pt")
-            print(f"Sizes of boundary images loaded: {boundary_images.shape}")
-            print(f"Sizes of boundary latent loaded: {boundary_latents.shape}")
+            print(f"Sizes of boundary images loaded: {len(boundary_images)}")
+            print(f"Sizes of boundary latent loaded: {len(boundary_latents)}")
             set+=1
             cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
             cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
