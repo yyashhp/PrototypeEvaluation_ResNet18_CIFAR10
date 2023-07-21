@@ -684,8 +684,8 @@ def main():
                 print(f"Size of colstack: {len(intercol_shortlist)}")
                 intercol_std_list.append(torch.stack(intercol_shortlist, dim=0))
             intercol_std_ave = torch.std(torch.stack(intercol_std_list, dim=0), dim=0)
-            intercol_std_ave = torch.mean(intercol_std_ave, dim=0)
-       #     print(f"intercol_std_ave shape: {intercol_std_ave.shape}")
+        #    intercol_std_ave = torch.mean(intercol_std_ave, dim=0)
+            print(f"intercol_std_ave shape: {intercol_std_ave.shape}")
         #    cos_mean_ave = torch.mean(torch.stack(col_std_list, dim=0), dim=0)
 
        #     print(f"Length of intercol_std_array {len(intercol_std_ave)}")
@@ -803,7 +803,7 @@ def main():
         #         \t \t cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
         #          Mispredictions: {mispredictions}")
         for i in range(len(data_schedule)):
-            for t in range(1):
+            for t in range(args.total_runs):
                 f.write(f" Data Split: {data_schedule[i]} \n  \
                     Batch {t} \n \
                     \n \n cumulative row-wise CS diff: \t {final_comb_trained_cs_diffs[t][i]} \n  \
@@ -843,8 +843,8 @@ def main():
 
     overall_row_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cs_diffs).clone(), dim=0)
     overall_col_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cols_cs_diffs).clone(), dim=0)
-    overall_row_cs_diffs = torch.mean(torch.Tensor(final_interrow_diffs).clone(), dim=0)
-    overall_col_cs_diffs = torch.mean(torch.Tensor(final_intercol_diffs).clone(), dim=0)
+    overall_interrow_cs_diffs = torch.mean(torch.Tensor(final_interrow_diffs).clone(), dim=0)
+    overall_intercol_cs_diffs = torch.mean(torch.Tensor(final_intercol_diffs).clone(), dim=0)
     overall_row_cs_stds = torch.mean(torch.Tensor(final_comb_trained_cs_std).clone(), dim=0)
     overall_col_cs_stds = torch.mean(torch.Tensor(final_comb_trained_col_cs_std).clone(), dim=0)
 
@@ -852,8 +852,8 @@ def main():
     plt.plot(data_schedule, overall_row_cs_diffs.tolist(), label="row-wise cs diff")
     plt.plot(data_schedule, overall_col_cs_stds.tolist(), label="column-wise std")
     plt.plot(data_schedule, overall_row_cs_stds.tolist(), label="row-wise std")
-    plt.plot(data_schedule, final_interrow_diffs[t], label="inter-row-wise diff")
-    plt.plot(data_schedule, final_intercol_diffs[t], label="inter-col-wise diff")
+    plt.plot(data_schedule, overall_interrow_cs_diffs.tolist(), label="inter-row-wise diff")
+    plt.plot(data_schedule, overall_intercol_cs_diffs.tolist(), label="inter-col-wise diff")
     plt.legend()
     plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Overall_Cif10_OVERALL.png")
     plt.show()
