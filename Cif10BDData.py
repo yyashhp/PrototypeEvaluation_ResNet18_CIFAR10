@@ -642,10 +642,11 @@ def main():
                     #if deep[0].item() < 1e-8 and deep[1].item()< 1e-8 and torch.max(deep)[0].item() < 1e-8:
                     #    continue
                     for val in range(len(deep)):
-                        print(f"Length of the deep: {len(deep)}")
                         if deep[val]>=1e-4:
                             interrow_shortlist.append(1-deep[val])
+                print(f"Size of colstack: {len(interrow_shortlist)}")
                 inter_std_list.append(torch.stack(interrow_shortlist, dim=0))
+
                 print(f"Size of rowstack: {torch.stack(interrow_shortlist, dim=0).size}")
             print(f'Lsize of the interrow_std_list: {torch.stack(inter_std_list, dim=0).shape}')
             interrow_std_ave = torch.std(torch.stack(inter_std_list, dim=0), dim=1)
@@ -680,10 +681,10 @@ def main():
                             intercol_shortlist.append(1-deep[val])
                         else:
                             intercol_shortlist.append(torch.mean(deep))
-                print(f"Size of colstack: {torch.stack(intercol_shortlist, dim=0).size}")
+                print(f"Size of colstack: {len(intercol_shortlist)}")
                 intercol_std_list.append(torch.stack(intercol_shortlist, dim=0))
             intercol_std_ave = torch.std(torch.stack(intercol_std_list, dim=0), dim=0)
-          #  intercol_std_ave = torch.mean(intercol_std_ave, dim=0)
+            intercol_std_ave = torch.mean(intercol_std_ave, dim=0)
        #     print(f"intercol_std_ave shape: {intercol_std_ave.shape}")
         #    cos_mean_ave = torch.mean(torch.stack(col_std_list, dim=0), dim=0)
 
