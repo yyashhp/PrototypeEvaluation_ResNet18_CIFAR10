@@ -479,8 +479,8 @@ def main():
             proto = par_image_tensors[t].clone()
             boundary_images = torch.load(f"{saved_boundaries_path}/Cifar10ImagesBatch_{t}_0720_14_45_35.pt")
             boundary_latents = torch.load(f"{saved_boundaries_path}/Cifar10LatentsBatch_{t}_0720_14_45_35.pt")
-            print(f"Sizes of boundary images loaded: {len(boundary_images)}")
-            print(f"Sizes of boundary latent loaded: {len(boundary_latents)}")
+            print(f"Sizes of boundary images loaded: {len(boundary_images[0])}")
+            print(f"Sizes of boundary latent loaded: {len(boundary_latents[0])}")
             set+=1
             cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
             cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
@@ -615,8 +615,8 @@ def main():
             batch_cum_trained_intercol_cs_std, batch_cum_trained_intercol_cs = torch.std_mean(intercol_values.clone(), dim=2)
 
             print(f"Size of first means: {batch_cum_trained_intercol_cs.shape} \t {batch_cum_trained_interrow_cs.shape}")
-         #   batch_cum_trained_interrow_cs = torch.mean(batch_cum_trained_interrow_cs, dim=1)
-         #   batch_cum_trained_intercol_cs = torch.mean(batch_cum_trained_intercol_cs, dim=0)
+            batch_cum_trained_interrow_cs = torch.mean(batch_cum_trained_interrow_cs, dim=1)
+            batch_cum_trained_intercol_cs = torch.mean(batch_cum_trained_intercol_cs, dim=0)
 
 
             cum_trained_cs_avg = 1 - torch.mean(batch_cum_trained_cs)
