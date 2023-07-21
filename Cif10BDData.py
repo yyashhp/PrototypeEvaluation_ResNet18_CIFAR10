@@ -646,7 +646,7 @@ def main():
                         if deep[val]>=1e-4:
                             interrow_shortlist.append(1-deep[val])
                 inter_std_list.append(torch.stack(interrow_shortlist, dim=0))
-                print(f"Size of colstack: {torch.stack(intercol_shortlist, dim=0).size}")
+                print(f"Size of rowstack: {torch.stack(interrow_shortlist, dim=0).size}")
             print(f'Lsize of the interrow_std_list: {torch.stack(inter_std_list, dim=0).shape}')
             interrow_std_ave = torch.std(torch.stack(inter_std_list, dim=0), dim=1)
        #     interrow_std_ave = torch.mean(interrow_std_ave, dim=1)
