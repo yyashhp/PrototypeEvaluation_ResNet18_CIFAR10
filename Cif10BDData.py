@@ -850,17 +850,38 @@ def main():
     overall_interrow_cs_stds = torch.mean(torch.Tensor(final_interrow_std).clone(), dim=0)
     overall_intercol_cs_stds = torch.mean(torch.Tensor(final_intercol_std).clone(), dim=0)
 
-    plt.plot(data_schedule, overall_col_cs_diffs.tolist(), label="column-wise cs diff")
-    plt.plot(data_schedule, overall_row_cs_diffs.tolist(), label="row-wise cs diff")
-    plt.plot(data_schedule, overall_col_cs_stds.tolist(), label="column-wise std")
-    plt.plot(data_schedule, overall_row_cs_stds.tolist(), label="row-wise std")
-    plt.plot(data_schedule, overall_interrow_cs_diffs.tolist(), label="inter-row-wise diff")
-    plt.plot(data_schedule, overall_intercol_cs_diffs.tolist(), label="inter-col-wise diff")
-    plt.plot(data_schedule, overall_interrow_cs_stds.tolist(), label="inter-row-wise std")
-    plt.plot(data_schedule, overall_intercol_cs_stds.tolist(), label="inter-col-wise std")
+    plt.plot(data_schedule, overall_col_cs_diffs.tolist(), label="Origin-wise Inter-Class Dissimilarity")
+    plt.plot(data_schedule, overall_row_cs_diffs.tolist(), label="Origin-wise Intra-Class Dissimilarity")
+    plt.plot(data_schedule, overall_interrow_cs_diffs.tolist(), label="Pair-wise Intra-Class Dissimilarity")
+    plt.plot(data_schedule, overall_intercol_cs_diffs.tolist(), label="Pair-wise Inter-Class Dissimilarity")
     plt.legend()
-    plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Overall_Cif10_OVERALL.png")
+    plt.title('Cifar10 Inter-Class and Intra-Class Boundary Dissimilarity (Pair-wise vs Origin-wise) Average')
+    plt.xlabel('Percentage of Data the Model was Trained on')
+    plt.ylabel('Dissimilarity (1 - Cosine Similarity)')
+    plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Overall_Cif10Vals.png")
     plt.show()
+    plt.figure().clear()
+    plt.close()
+    plt.cla()
+    plt.clf()
+
+    plt.plot(data_schedule, overall_col_cs_stds.tolist(), label="Origin-wise Inter-Class STD")
+    plt.plot(data_schedule, overall_row_cs_stds.tolist(), label="Origin-wise Intra-Class STD")
+    plt.plot(data_schedule, overall_interrow_cs_stds.tolist(), label="Pair-wise Intra-Class STD")
+    plt.plot(data_schedule, overall_intercol_cs_stds.tolist(), label="Pair-wise Intra-Class STD")
+    plt.legend()
+    plt.title('Cifar10 Inter-Class and Intra-Class Boundary Dissimilarity (Pair-wise vs Origin-wise) STD')
+    plt.xlabel('Percentage of Data the Model was Trained on')
+    plt.ylabel('STD of Dissimilarity')
+    plt.savefig(
+        f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Overall_Cif10STDs.png")
+    plt.show()
+    plt.figure().clear()
+    plt.close()
+    plt.cla()
+    plt.clf()
+
+
 
 
 if __name__ == '__main__':
