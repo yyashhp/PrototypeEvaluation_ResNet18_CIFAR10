@@ -507,7 +507,7 @@ def main():
                                 intercol_values[i][k][b] = 0
                             else:
                                 interrow_values[i][k][b] = cos_sim(protos_latent[i].clone(), boundary_latents[j][k][b].clone())
-                                interrow_values[i][k][b] = cos_sim(protos_latent[i].clone(), boundary_latents[j][i][b].clone())
+                                intercol_values[i][k][b] = cos_sim(protos_latent[i].clone(), boundary_latents[j][b][k].clone())
                    #     trained_boundaries.append((torch.zeros([3, 32, 32], device=device)))
                    #     latents_boundaries.append(torch.zeros(512, device=device))
                     elif i!=k:
@@ -570,7 +570,7 @@ def main():
                                 interrow_values[i][k][b] = cos_sim(boundary_latent, protos_latent[i].clone())
                             else:
                                 interrow_values[i][k][b] = cos_sim(boundary_latent, boundary_latents[j][i][b].clone())
-                                intercol_values[i][k][b] = cos_sim(boundary_latent, boundary_latents[j][k][b].clone())
+                                intercol_values[i][k][b] = cos_sim(boundary_latent, boundary_latents[j][b][k].clone())
                         with open('{}/Batch0InterValsCalc_{}.txt'.format(model_dir, date_time),'a') as f:
                                 f.write(
                                     f"Going from {k} to {i}, batch {t} \n\n")
@@ -782,7 +782,7 @@ def main():
     #     torch.save(stacked_sets_trained_boundaries[j],
     #                f"{saved_boundaries_path}/Final_{data_schedule[j]}_Boundaries_TrainedIms_{date_time}.pt")
 
-    with open('{}/Iterative_CIFAR100_Data_Collect_{}.txt'.format(model_dir, date_time), 'a') as f:
+    with open('{}/Iterative_Data_Collect_{}.txt'.format(model_dir, date_time), 'a') as f:
         #for i in range(6, len(data_schedule)):
         # f.write(f"\n Split: {data_schedule[i]} \t Alphas: {final_comb_alphas_avg[i]}  \t cumulative alpha: {final_comb_cum_alphas_avg[i]} \t CS_Line_Diffs:\
             #  {[val.item() for val in final_ind_cs_diffs[i]]} \

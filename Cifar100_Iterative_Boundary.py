@@ -159,24 +159,24 @@ def main():
     final_comb_boundaries_avg = []
     final_comb_alphas_avg = []
     final_comb_cum_alphas_avg = []
-    final_comb_trained_cs_diffs = [[] for _ in range(1)]
-    final_ind_trained_cs_diffs = [[] for _ in range(1)]
+    final_comb_trained_cs_diffs = [[] for _ in range(args.total_runs)]
+    final_ind_trained_cs_diffs = [[] for _ in range(args.total_runs)]
     final_comb_trained_l2_diffs = []
     final_ind_trained_l2_diffs = []
-    final_ind_trained_cs_diffs_std = [[] for _ in range(1)]
-    final_comb_trained_cols_cs_diffs = [[] for _ in range(1)]
-    final_comb_trained_cs_std = [[] for _ in range(1)]
-    final_comb_trained_col_cs_std = [[] for _ in range(1)]
-    final_ind_trained_col_cs_diffs = [[] for _ in range(1)]
-    final_ind_trained_cs_col_stds = [[] for _ in range(1)]
-    final_ind_interrow_diffs  = [[] for _ in range(1)]
-    final_ind_intercol_diffs= [[] for _ in range(1)]
-    final_ind_interrow_std= [[] for _ in range(1)]
-    final_ind_intercol_std= [[] for _ in range(1)]
-    final_interrow_diffs = [[] for _ in range(1)]
-    final_intercol_diffs = [[] for _ in range(1)]
-    final_interrow_std = [[] for _ in range(1)]
-    final_intercol_std = [[] for _ in range(1)]
+    final_ind_trained_cs_diffs_std = [[] for _ in range(args.total_runs)]
+    final_comb_trained_cols_cs_diffs = [[] for _ in range(args.total_runs)]
+    final_comb_trained_cs_std = [[] for _ in range(args.total_runs)]
+    final_comb_trained_col_cs_std = [[] for _ in range(args.total_runs)]
+    final_ind_trained_col_cs_diffs = [[] for _ in range(args.total_runs)]
+    final_ind_trained_cs_col_stds = [[] for _ in range(args.total_runs)]
+    final_ind_interrow_diffs  = [[] for _ in range(args.total_runs)]
+    final_ind_intercol_diffs= [[] for _ in range(args.total_runs)]
+    final_ind_interrow_std= [[] for _ in range(args.total_runs)]
+    final_ind_intercol_std= [[] for _ in range(args.total_runs)]
+    final_interrow_diffs = [[] for _ in range(args.total_runs)]
+    final_intercol_diffs = [[] for _ in range(args.total_runs)]
+    final_interrow_std = [[] for _ in range(args.total_runs)]
+    final_intercol_std = [[] for _ in range(args.total_runs)]
 
     batch_diff_std = []
     batch_diff_col_std = []
@@ -188,12 +188,11 @@ def main():
 
     stacked_trained_l2 = []
     stacked_sets_trained_boundaries = []
-    iterations_matrix = [[] for _ in range(1)]
-    col_quartiles_saved = [[] for _ in range(1)]
-    row_quartiles_saved = [[] for _ in range(1)]
-    interrow_quartiles_saved = [[] for _ in range(1)]
-    intercol_quartiles_saved = [[] for _ in range(1)]
-    saved_preds = [[] for _ in range(1)]
+    col_quartiles_saved = [[] for _ in range(args.total_runs)]
+    row_quartiles_saved = [[] for _ in range(args.total_runs)]
+    interrow_quartiles_saved = [[] for _ in range(args.total_runs)]
+    intercol_quartiles_saved = [[] for _ in range(args.total_runs)]
+    saved_preds = [[] for _ in range(args.total_runs)]
     iterations_max = 0
     for j in range(len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
@@ -210,10 +209,10 @@ def main():
         row_quartiles = torch.zeros(nclass, 7, dtype = torch.float)
         intercol_quartiles = torch.zeros(nclass, 7, dtype=torch.float)
         interrow_quartiles = torch.zeros(nclass, 7, dtype=torch.float)
-        boundary_images = torch.load(f"{saved_boundaries_path}/{data_schedule[j]}_Boundary_Images")
-        boundary_latents = torch.load(f"{saved_boundaries_path}/{data_schedule[j]}_Boundary_Latent")
-        print(f"Sizes of boundary images loaded: {boundary_images.shape}")
-        print(f"Sizes of boundary latent loaded: {boundary_latents.shape}")
+      #  boundary_images = torch.load(f"{saved_boundaries_path}/{data_schedule[j]}_Boundary_Images")
+      #  boundary_latents = torch.load(f"{saved_boundaries_path}/{data_schedule[j]}_Boundary_Latent")
+      ##  print(f"Sizes of boundary images loaded: {boundary_images.shape}")
+      #  print(f"Sizes of boundary latent loaded: {boundary_latents.shape}")
 
 
     #
@@ -475,8 +474,12 @@ def main():
       #  for proto in par_image_tensors:
 
 
-        for t in range(1):
+        for t in range(1, args.total_runs):
             proto = par_image_tensors[t].clone()
+            boundary_images = torch.load(f"{saved_boundaries_path}/Cifar100_Batch{t}_Boundaries_TrainedIms")
+            boundary_latents = torch.load(f"{saved_boundaries_path}/Cifar100_Batch{t}_Boundaries_Latents")
+            print(f"Sizes of boundary images loaded: {len(boundary_images[0])}")
+            print(f"Sizes of boundary latent loaded: {len(boundary_latents[0])}")
             set+=1
             cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
             cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
@@ -484,9 +487,9 @@ def main():
             intercol_values = torch.zeros([nclass, nclass, nclass], dtype=torch.float)
             preds_matrix = torch.zeros(nclass, nclass, dtype=torch.float)
             proto_clone = proto.clone()
-            set_trained_boundaries = []
-            batch_l2_trained_diff = []
-            set_latent_boundaries = []
+        #    set_trained_boundaries = []
+        #    batch_l2_trained_diff = []
+        #    set_latent_boundaries = []
             with torch.no_grad():
                 normed_protos = transformDict['norm'](proto_clone.clone())
                 protos_latent, protos_logits = model(normed_protos)
@@ -503,7 +506,7 @@ def main():
                                 intercol_values[i][k][b] = 0
                             else:
                                 interrow_values[i][k][b] = cos_sim(protos_latent[i].clone(), boundary_latents[k][b].clone())
-                                interrow_values[i][k][b] = cos_sim(protos_latent[i].clone(), boundary_latents[i][b].clone())
+                                intercol_values[i][k][b] = cos_sim(protos_latent[i].clone(), boundary_latents[b][k].clone())
                    #     trained_boundaries.append((torch.zeros([3, 32, 32], device=device)))
                    #     latents_boundaries.append(torch.zeros(512, device=device))
                     elif i!=k:
@@ -566,7 +569,7 @@ def main():
                                 interrow_values[i][k][b] = cos_sim(boundary_latent, protos_latent[i].clone())
                             else:
                                 interrow_values[i][k][b] = cos_sim(boundary_latent, boundary_latents[i][b].clone())
-                                intercol_values[i][k][b] = cos_sim(boundary_latent, boundary_latents[k][b].clone())
+                                intercol_values[i][k][b] = cos_sim(boundary_latent, boundary_latents[b][k].clone())
                         with open('{}/Batch0InterValsCalc_{}.txt'.format(model_dir, date_time),'a') as f:
                                 f.write(
                                     f"Going from {k} to {i}, batch {t} \n\n")
@@ -603,8 +606,8 @@ def main():
       #  batch_diff_col_std.append(batch_trained_col_std)
       #  batch_cum_trained_cs, batch_cum_trained_cs_std = torch.std_mean(batch_trained_cs, dim=0)
             batch_cum_trained_cs_std, batch_cum_trained_cs = torch.std_mean(cos_trained_latent.clone(), dim=1)
-            mask = cos_trained_latent > 0
-            col_mask = cos_trained_latent_col > 0
+     #       mask = cos_trained_latent > 0
+        #    col_mask = cos_trained_latent_col > 0
      #   batch_cum_trained_col_cs, batch_cum_trained_col_cs_std = torch.std_mean(batch_trained_col_cs, dim=1)
             batch_cum_trained_col_cs_std, batch_cum_trained_col_cs = torch.std_mean(cos_trained_latent_col.clone(),dim=0)
             batch_cum_trained_interrow_cs_std, batch_cum_trained_interrow_cs = torch.std_mean(interrow_values.clone(), dim=2)
@@ -663,7 +666,7 @@ def main():
 
             print(f"Length of col_std_array {len(col_std_ave)}")
 
-            for row in intercol_values_matrices[t].clone():
+            for row in torch.transpose(intercol_values_matrices[t].clone(), 0, 1).clone():
                 intercol_shortlist = []
                 for deep in row:
                     # if deep[0].item() < 1e-8 and deep[1].item()< 1e-8 and torch.max(deep)[0].item() < 1e-8:
@@ -723,7 +726,7 @@ def main():
                 row_quartiles[line_index][3] = 1 - sorted_line[59]
                 row_quartiles[line_index][4] = 1 - sorted_line[79]
                 row_quartiles[line_index][5] = 1 - sorted_line[99]
-                row_quartiles[line_index][6] = 1 - torch.mean(sorted_line)
+                row_quartiles[line_index][6] = 1 - (torch.mean([sorted_line]) * 100/99)
                 line_index+=1
             row_quartiles_saved[t].append(row_quartiles.clone())
 
@@ -738,7 +741,7 @@ def main():
                 col_quartiles[line_index][3] = 1 - sorted_line[59]
                 col_quartiles[line_index][4] = 1 - sorted_line[79]
                 col_quartiles[line_index][5] = 1 - sorted_line[99]
-                col_quartiles[line_index][6] = 1 - torch.mean(sorted_line)
+                col_quartiles[line_index][6] = 1 - (torch.mean([sorted_line]) * 100/99)
                 line_index+=1
             col_quartiles_saved[t].append(col_quartiles.clone())
             line_index = 0
@@ -752,7 +755,7 @@ def main():
                 interrow_quartiles[line_index][3] = 1 - sorted_line[5999]
                 interrow_quartiles[line_index][4] = 1 - sorted_line[7999]
                 interrow_quartiles[line_index][5] = 1 - sorted_line[9898]
-                interrow_quartiles[line_index][6] = torch.mean([1-val for val in sorted_line])
+                interrow_quartiles[line_index][6] = 1 - (torch.mean([sorted_line]) * 100/99)
                 line_index += 1
             interrow_quartiles_saved[t].append(interrow_quartiles.clone())
             line_index = 0
@@ -766,7 +769,7 @@ def main():
                 intercol_quartiles[line_index][3] = 1 - sorted_line[5999]
                 intercol_quartiles[line_index][4] = 1 - sorted_line[7999]
                 intercol_quartiles[line_index][5] = 1 - sorted_line[9898]
-                intercol_quartiles[line_index][6] = torch.mean([1-val for val in sorted_line])
+                intercol_quartiles[line_index][6] = 1 - (torch.mean([sorted_line]) * 100/99)
                 line_index += 1
             intercol_quartiles_saved[t].append(intercol_quartiles.clone())
             line_index = 0
@@ -853,7 +856,7 @@ def main():
         #         \t \t cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
         #          Mispredictions: {mispredictions}")
         for i in range(len(data_schedule)):
-            for t in range(1):
+            for t in range(1,args.total_runs):
                 f.write(f" Data Split: {data_schedule[i]} \n  \
                     Batch {t} \n \
                     \n \n cumulative row-wise CS diff: \t {final_comb_trained_cs_diffs[t][i]} \n  \
@@ -879,7 +882,7 @@ def main():
 
 
     f.close()
-    for t in range(1):
+    for t in range(1, args.total_runs):
 
         plt.plot(data_schedule, final_comb_trained_cols_cs_diffs[t], label="column-wise cs diff")
         plt.plot(data_schedule, final_comb_trained_cs_diffs[t], label="row-wise cs diff")
@@ -895,18 +898,45 @@ def main():
         plt.cla()
         plt.clf()
 
-    # overall_row_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cs_diffs).clone(), dim=0)
-    # overall_col_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cols_cs_diffs).clone(), dim=0)
-    # overall_row_cs_stds = torch.mean(torch.Tensor(final_comb_trained_cs_std).clone(), dim=0)
-    # overall_col_cs_stds = torch.mean(torch.Tensor(final_comb_trained_col_cs_std).clone(), dim=0)
-    #
-    # plt.plot(data_schedule, overall_col_cs_diffs.tolist(), label="column-wise cs diff")
-    # plt.plot(data_schedule, overall_row_cs_diffs.tolist(), label="row-wise cs diff")
-    # plt.plot(data_schedule, overall_col_cs_stds.tolist(), label="column-wise std")
-    # plt.plot(data_schedule, overall_row_cs_stds.tolist(), label="row-wise std")
-    # plt.legend()
-    # plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_Splits4and5_OVERALL.png")
-    # plt.show()
+    overall_row_cs_diffs = (torch.mean(torch.Tensor(final_comb_trained_cs_diffs).clone(), dim=0) *(5/4))
+    overall_col_cs_diffs = (torch.mean(torch.Tensor(final_comb_trained_cols_cs_diffs).clone(), dim=0) *(5/4))
+    overall_interrow_cs_diffs = (torch.mean(torch.Tensor(final_interrow_diffs).clone(), dim=0) *(5/4))
+    overall_intercol_cs_diffs = (torch.mean(torch.Tensor(final_intercol_diffs).clone(), dim=0) *(5/4))
+    overall_row_cs_stds = (torch.mean(torch.Tensor(final_comb_trained_cs_std).clone(), dim=0) *(5/4))
+    overall_col_cs_stds = (torch.mean(torch.Tensor(final_comb_trained_col_cs_std).clone(), dim=0) *(5/4))
+    overall_interrow_cs_stds = (torch.mean(torch.Tensor(final_interrow_std).clone(), dim=0) *(5/4))
+    overall_intercol_cs_stds = (torch.mean(torch.Tensor(final_intercol_std).clone(), dim=0) *(5/4))
+
+    plt.plot(data_schedule, overall_col_cs_diffs.tolist(), label="Origin-wise Inter-Class Dissimilarity")
+    plt.plot(data_schedule, overall_row_cs_diffs.tolist(), label="Origin-wise Intra-Class Dissimilarity")
+    plt.plot(data_schedule, overall_intercol_cs_diffs.tolist(), label="Pair-wise Inter-Class Dissimilarity")
+    plt.plot(data_schedule, overall_interrow_cs_diffs.tolist(), label="Pair-wise Intra-Class Dissimilarity")
+    plt.legend()
+    plt.title('Cifar10 Inter-Class and Intra-Class Boundary Dissimilarity Average')
+    plt.xlabel('Percentage of Data the Model was Trained on')
+    plt.ylabel('Dissimilarity (1 - Cosine Similarity)')
+    plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Overall_Cif10Vals.png")
+    plt.show()
+    plt.figure().clear()
+    plt.close()
+    plt.cla()
+    plt.clf()
+
+    plt.plot(data_schedule, overall_col_cs_stds.tolist(), label="Origin-wise Inter-Class STD")
+    plt.plot(data_schedule, overall_row_cs_stds.tolist(), label="Origin-wise Intra-Class STD")
+    plt.plot(data_schedule, overall_intercol_cs_stds.tolist(), label="Pair-wise Inter-Class STD")
+    plt.plot(data_schedule, overall_interrow_cs_stds.tolist(), label="Pair-wise Intra-Class STD")
+    plt.legend()
+    plt.title('Cifar10 Inter-Class and Intra-Class Boundary Dissimilarity STD')
+    plt.xlabel('Percentage of Data the Model was Trained on')
+    plt.ylabel('STD of Dissimilarity')
+    plt.savefig(
+        f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Overall_Cif10STDs.png")
+    plt.show()
+    plt.figure().clear()
+    plt.close()
+    plt.cla()
+    plt.clf()
 
 
 if __name__ == '__main__':
