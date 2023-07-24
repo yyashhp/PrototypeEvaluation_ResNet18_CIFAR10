@@ -474,7 +474,7 @@ def main():
       #  for proto in par_image_tensors:
 
 
-        for t in range(1, args.total_runs):
+        for t in range(args.total_runs):
             proto = par_image_tensors[t].clone()
             boundary_images = torch.load(f"{saved_boundaries_path}/Cifar100_Batch{t}_{data_schedule[j]}_Boundaries_TrainedIms")
             boundary_latents = torch.load(f"{saved_boundaries_path}/Cifar100_Batch{t}_{data_schedule[j]}_Boundaries_Latents")
@@ -856,7 +856,7 @@ def main():
         #         \t \t cumulative column-wise CS Std: {final_comb_trained_col_cs_std[0]} \n \n \
         #          Mispredictions: {mispredictions}")
         for i in range(len(data_schedule)):
-            for t in range(1,args.total_runs):
+            for t in range(args.total_runs):
                 f.write(f" Data Split: {data_schedule[i]} \n  \
                     Batch {t} \n \
                     \n \n cumulative row-wise CS diff: \t {final_comb_trained_cs_diffs[t][i]} \n  \
@@ -882,7 +882,7 @@ def main():
 
 
     f.close()
-    for t in range(1, args.total_runs):
+    for t in range(args.total_runs):
 
         plt.plot(data_schedule, final_comb_trained_cols_cs_diffs[t], label="column-wise cs diff")
         plt.plot(data_schedule, final_comb_trained_cs_diffs[t], label="row-wise cs diff")
@@ -898,14 +898,14 @@ def main():
         plt.cla()
         plt.clf()
 
-    overall_row_cs_diffs = (torch.mean(torch.Tensor(final_comb_trained_cs_diffs).clone(), dim=0) *(5/4))
-    overall_col_cs_diffs = (torch.mean(torch.Tensor(final_comb_trained_cols_cs_diffs).clone(), dim=0) *(5/4))
-    overall_interrow_cs_diffs = (torch.mean(torch.Tensor(final_interrow_diffs).clone(), dim=0) *(5/4))
-    overall_intercol_cs_diffs = (torch.mean(torch.Tensor(final_intercol_diffs).clone(), dim=0) *(5/4))
-    overall_row_cs_stds = (torch.mean(torch.Tensor(final_comb_trained_cs_std).clone(), dim=0) *(5/4))
-    overall_col_cs_stds = (torch.mean(torch.Tensor(final_comb_trained_col_cs_std).clone(), dim=0) *(5/4))
-    overall_interrow_cs_stds = (torch.mean(torch.Tensor(final_interrow_std).clone(), dim=0) *(5/4))
-    overall_intercol_cs_stds = (torch.mean(torch.Tensor(final_intercol_std).clone(), dim=0) *(5/4))
+    overall_row_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cs_diffs).clone(), dim=0)
+    overall_col_cs_diffs = torch.mean(torch.Tensor(final_comb_trained_cols_cs_diffs).clone(), dim=0)
+    overall_interrow_cs_diffs = torch.mean(torch.Tensor(final_interrow_diffs).clone(), dim=0)
+    overall_intercol_cs_diffs = torch.mean(torch.Tensor(final_intercol_diffs).clone(), dim=0)
+    overall_row_cs_stds = torch.mean(torch.Tensor(final_comb_trained_cs_std).clone(), dim=0)
+    overall_col_cs_stds = torch.mean(torch.Tensor(final_comb_trained_col_cs_std).clone(), dim=0)
+    overall_interrow_cs_stds = torch.mean(torch.Tensor(final_interrow_std).clone(), dim=0)
+    overall_intercol_cs_stds = torch.mean(torch.Tensor(final_intercol_std).clone(), dim=0)
 
     plt.plot(data_schedule, overall_col_cs_diffs.tolist(), label="Origin-wise Inter-Class Dissimilarity")
     plt.plot(data_schedule, overall_row_cs_diffs.tolist(), label="Origin-wise Intra-Class Dissimilarity")
