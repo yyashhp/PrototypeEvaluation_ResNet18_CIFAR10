@@ -477,7 +477,7 @@ def main():
         for t in range(1, args.total_runs):
             proto = par_image_tensors[t].clone()
             boundary_images = torch.load(f"{saved_boundaries_path}/Cifar100_Batch{t}_{data_schedule[j]}_Boundaries_TrainedIms")
-            boundary_latents = torch.load(f"{saved_boundaries_path}/Cifar100_Batch{t}_Boundaries_Latents")
+            boundary_latents = torch.load(f"{saved_boundaries_path}/Cifar100_Batch{t}_{data_schedule[j]}_Boundaries_Latents")
             print(f"Sizes of boundary images loaded: {len(boundary_images[0])}")
             print(f"Sizes of boundary latent loaded: {len(boundary_latents[0])}")
             set+=1
