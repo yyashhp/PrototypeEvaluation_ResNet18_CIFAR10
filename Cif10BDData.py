@@ -852,10 +852,10 @@ def main():
 
     plt.plot(data_schedule, overall_col_cs_diffs.tolist(), label="Origin-wise Inter-Class Dissimilarity")
     plt.plot(data_schedule, overall_row_cs_diffs.tolist(), label="Origin-wise Intra-Class Dissimilarity")
-    plt.plot(data_schedule, overall_interrow_cs_diffs.tolist(), label="Pair-wise Intra-Class Dissimilarity")
     plt.plot(data_schedule, overall_intercol_cs_diffs.tolist(), label="Pair-wise Inter-Class Dissimilarity")
+    plt.plot(data_schedule, overall_interrow_cs_diffs.tolist(), label="Pair-wise Intra-Class Dissimilarity")
     plt.legend()
-    plt.title('Cifar10 Inter-Class and Intra-Class Boundary Dissimilarity (Pair-wise vs Origin-wise) Average')
+    plt.title('Cifar10 Inter-Class and Intra-Class Boundary Dissimilarity Average')
     plt.xlabel('Percentage of Data the Model was Trained on')
     plt.ylabel('Dissimilarity (1 - Cosine Similarity)')
     plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Overall_Cif10Vals.png")
@@ -867,10 +867,10 @@ def main():
 
     plt.plot(data_schedule, overall_col_cs_stds.tolist(), label="Origin-wise Inter-Class STD")
     plt.plot(data_schedule, overall_row_cs_stds.tolist(), label="Origin-wise Intra-Class STD")
+    plt.plot(data_schedule, overall_intercol_cs_stds.tolist(), label="Pair-wise Inter-Class STD")
     plt.plot(data_schedule, overall_interrow_cs_stds.tolist(), label="Pair-wise Intra-Class STD")
-    plt.plot(data_schedule, overall_intercol_cs_stds.tolist(), label="Pair-wise Intra-Class STD")
     plt.legend()
-    plt.title('Cifar10 Inter-Class and Intra-Class Boundary Dissimilarity (Pair-wise vs Origin-wise) STD')
+    plt.title('Cifar10 Inter-Class and Intra-Class Boundary Dissimilarity STD')
     plt.xlabel('Percentage of Data the Model was Trained on')
     plt.ylabel('STD of Dissimilarity')
     plt.savefig(
