@@ -726,7 +726,7 @@ def main():
                 row_quartiles[line_index][3] = 1 - sorted_line[59]
                 row_quartiles[line_index][4] = 1 - sorted_line[79]
                 row_quartiles[line_index][5] = 1 - sorted_line[99]
-                row_quartiles[line_index][6] = 1 - (torch.mean([sorted_line]) * 100/99)
+                row_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
                 line_index+=1
             row_quartiles_saved[t].append(row_quartiles.clone())
 
@@ -741,7 +741,7 @@ def main():
                 col_quartiles[line_index][3] = 1 - sorted_line[59]
                 col_quartiles[line_index][4] = 1 - sorted_line[79]
                 col_quartiles[line_index][5] = 1 - sorted_line[99]
-                col_quartiles[line_index][6] = 1 - (torch.mean([sorted_line]) * 100/99)
+                col_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
                 line_index+=1
             col_quartiles_saved[t].append(col_quartiles.clone())
             line_index = 0
@@ -755,7 +755,7 @@ def main():
                 interrow_quartiles[line_index][3] = 1 - sorted_line[5999]
                 interrow_quartiles[line_index][4] = 1 - sorted_line[7999]
                 interrow_quartiles[line_index][5] = 1 - sorted_line[9898]
-                interrow_quartiles[line_index][6] = 1 - (torch.mean([sorted_line]) * 100/99)
+                interrow_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
                 line_index += 1
             interrow_quartiles_saved[t].append(interrow_quartiles.clone())
             line_index = 0
@@ -769,7 +769,7 @@ def main():
                 intercol_quartiles[line_index][3] = 1 - sorted_line[5999]
                 intercol_quartiles[line_index][4] = 1 - sorted_line[7999]
                 intercol_quartiles[line_index][5] = 1 - sorted_line[9898]
-                intercol_quartiles[line_index][6] = 1 - (torch.mean([sorted_line]) * 100/99)
+                intercol_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
                 line_index += 1
             intercol_quartiles_saved[t].append(intercol_quartiles.clone())
             line_index = 0
