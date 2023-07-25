@@ -926,7 +926,7 @@ def main():
     plt.plot(data_schedule, overall_intercol_cs_stds.tolist(), label="Inter-Class STD")
     plt.plot(data_schedule, overall_interrow_cs_stds.tolist(), label="Intra-Class STD")
     plt.legend()
-    plt.title('Cifar10 Prototype STD of Latent Vector Dissimilarity')
+    plt.title('Cifar10 STD of Prototype Latent Vector Dissimilarity')
     plt.xlabel('Percentage of Data the Model was Trained on')
     plt.ylabel('STD')
     plt.savefig(
@@ -945,7 +945,7 @@ def main():
     overall_col_high_outliers = torch.mean(torch.Tensor(col_high_outliers_total).clone(), dim=0)
     overall_row_low_outliers = torch.mean(torch.Tensor(row_low_outliers_total).clone(), dim=0)
     overall_col_low_outliers = torch.mean(torch.Tensor(col_low_outliers_total).clone(), dim=0)
-    print(overall_row_low_outliers.shape())
+    print(overall_row_low_outliers.shape)
     with open('{}/outlier_data{}.txt'.format(model_dir, date_time), 'a') as f:
         for i in range(len(data_schedule)):
             f.write(f"Data Split : {data_schedule[i]} \t Row Mean: {overall_interrow_cs_diffs[i]} \t Row_Std: {overall_interrow_cs_stds[i]} \

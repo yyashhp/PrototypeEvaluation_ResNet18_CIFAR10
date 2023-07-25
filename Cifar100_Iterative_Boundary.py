@@ -724,8 +724,8 @@ def main():
             # final_ind_trained_cs_diffs_std[t].append([round(val.item(), 4) for val in std_ave])
             row_std = torch.mean(interrow_std_ave).item()
             col_std = torch.mean(intercol_std_ave).item()
-            row_mean = mean([round(1 - ((val.item() * 10) / 9), 4) for val in batch_cum_trained_interrow_cs])
-            col_mean = mean([round(1 - ((val.item() * 10) / 9), 4) for val in batch_cum_trained_intercol_cs])
+            row_mean = mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_interrow_cs])
+            col_mean = mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_intercol_cs])
 
             final_ind_interrow_diffs[t].append([round(1 - ((val.item()* 100)/99), 4) for val in batch_cum_trained_interrow_cs])
             final_ind_intercol_diffs[t].append([round(1 - ((val.item()* 100)/99), 4) for val in batch_cum_trained_intercol_cs])
@@ -736,16 +736,13 @@ def main():
             final_interrow_std[t].append(torch.mean(interrow_std_ave).item())
             final_intercol_std[t].append(torch.mean(intercol_std_ave).item())
 
-
-
-
             for row in interrow_values_matrices[t].clone():
                 for deep in row:
                     for val in range(len(deep)):
-                        if deep[val]>=1e-6:
-                            if (deep[val].item()-row_mean)/row_std >= 3:
+                        if deep[val] >= 1e-6:
+                            if ((1 - deep[val].item()) - row_mean) / row_std >= 3:
                                 row_high_outliers += 1
-                            if (deep[val].item()-row_mean)/row_std <= -3:
+                            if ((1 - deep[val].item()) - row_mean) / row_std <= -3:
                                 row_low_outliers += 1
             print(f'Lsize of the row high and low outlier list: {row_high_outliers} \t {row_low_outliers}')
             row_high_outliers_total[t].append(row_high_outliers)
@@ -754,17 +751,13 @@ def main():
             for row in torch.transpose(intercol_values_matrices[t].clone(), 0, 1).clone():
                 for deep in row:
                     for val in range(len(deep)):
-                        if deep[val]>= 1e-6:
-                            if (deep[val].item()-col_mean)/row_std >= 3:
+                        if deep[val] >= 1e-6:
+                            if ((1 - deep[val].item()) - col_mean) / row_std >= 3:
                                 col_high_outliers += 1
-                            if (deep[val].item()-col_mean)/row_std <= -3:
+                            if ((1 - deep[val].item()) - col_mean) / row_std <= -3:
                                 col_low_outliers += 1
-
-            print(f'Lsize of the col high and low outlier list: {col_high_outliers} \t {col_low_outliers}')
-
             col_high_outliers_total[t].append(col_high_outliers)
             col_low_outliers_total[t].append(col_low_outliers)
-
 
 
         # batch_trained_l2 = torch.mean(torch.stack(stacked_trained_l2, dim=0), dim=0)
@@ -772,10 +765,10 @@ def main():
         # final_comb_trained_l2_diffs.append(torch.mean(batch_cum_trained_l2))
         # final_ind_trained_l2_diffs.append(batch_cum_trained_l2)
 
-            final_comb_trained_cs_diffs[t].append(
-            mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_cs]))
-            final_comb_trained_cols_cs_diffs[t].append(
-            mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_col_cs]))
+          #  final_comb_trained_cs_diffs[t].append(
+        #    mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_cs]))
+        #    final_comb_trained_cols_cs_diffs[t].append(
+        #    mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_col_cs]))
         #    iterations_matrix[t].append(iterations_needed)
 
             line_index = 0
@@ -990,7 +983,7 @@ def main():
     plt.plot(data_schedule, overall_intercol_cs_diffs.tolist(), label="Inter-Class Dissimilarity")
     plt.plot(data_schedule, overall_interrow_cs_diffs.tolist(), label="Intra-Class Dissimilarity")
     plt.legend()
-    plt.title('Cifar10 Inter-Class and Intra-Class Prototype Latent Vector Dissimilarity')
+    plt.title('Cifar100 Inter-Class and Intra-Class Prototype Latent Vector Dissimilarity')
     plt.xlabel('Percentage of Data the Model was Trained on')
     plt.ylabel('Dissimilarity (1 - Cosine Similarity)')
     plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Overall_Cif10Vals.png")
@@ -1005,11 +998,11 @@ def main():
     plt.plot(data_schedule, overall_intercol_cs_stds.tolist(), label="Inter-Class STD")
     plt.plot(data_schedule, overall_interrow_cs_stds.tolist(), label="Intra-Class STD")
     plt.legend()
-    plt.title('Cifar10 Prototype STD of Latent Vector Dissimilarity')
+    plt.title('Cifar100 STD of Prototype Latent Vector Dissimilarity')
     plt.xlabel('Percentage of Data the Model was Trained on')
     plt.ylabel('STD')
     plt.savefig(
-        f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Overall_Cif10STDs.png")
+        f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Overall_Cif100STDs.png")
     plt.show()
     plt.figure().clear()
     plt.close()
