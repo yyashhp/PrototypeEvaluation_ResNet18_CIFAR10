@@ -645,9 +645,9 @@ def main():
             inter_std_list = []
             intercol_std_list = []
             row_max = 0
-            row_min = 0
+            row_min = 100
             col_max = 0
-            col_min = 0
+            col_min = 100
             row_high_outliers = 0
             row_low_outliers = 0
             col_high_outliers = 0
