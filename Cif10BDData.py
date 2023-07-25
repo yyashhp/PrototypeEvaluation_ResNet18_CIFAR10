@@ -746,9 +746,9 @@ def main():
                 for deep in row:
                     for val in range(len(deep)):
                         if deep[val]>=1e-6:
-                            if (deep[val].item()-row_mean)/row_std >= 3:
+                            if ((1 - deep[val].item())-row_mean)/row_std >= 3:
                                 row_high_outliers += 1
-                            if (deep[val].item()-row_mean)/row_std <= -3:
+                            if ((1 - deep[val].item())-row_mean)/row_std <= -3:
                                 row_low_outliers += 1
             print(f'Lsize of the row high and low outlier list: {row_high_outliers} \t {row_low_outliers}')
             row_high_outliers_total[t].append(row_high_outliers)
@@ -758,9 +758,9 @@ def main():
                 for deep in row:
                     for val in range(len(deep)):
                         if deep[val]>= 1e-6:
-                            if (deep[val].item()-col_mean)/row_std >= 3:
+                            if ((1-deep[val].item())-col_mean)/row_std >= 3:
                                 col_high_outliers += 1
-                            if (deep[val].item()-col_mean)/row_std <= -3:
+                            if ((1-deep[val].item())-col_mean)/row_std <= -3:
                                 col_low_outliers += 1
 
             print(f'Lsize of the col high and low outlier list: {col_high_outliers} \t {col_low_outliers}')
@@ -949,8 +949,8 @@ def main():
     with open('{}/outlier_data{}.txt'.format(model_dir, date_time), 'a') as f:
         for i in range(len(data_schedule)):
             f.write(f"Data Split : {data_schedule[i]} \t Row Mean: {overall_interrow_cs_diffs[i]} \t Row_Std: {overall_interrow_cs_stds[i]} \
-               Max: {overall_row_maxes[i].item()} \t Min: {overall_row_mins[i].item()} \t # of high outliers: {round(overall_row_high_outliers[i].item(),1)} \t # of low outliers: {round(overall_row_low_outliers[i].item(), 1)} \
-                  \n Col mean: {overall_intercol_cs_diffs[i]} \t Col STD: {overall_intercol_cs_stds[i]} \t Max: {overall_col_maxes[i].item()} \t Min: {overall_col_mins[i].item()} \
+               Max: {round(overall_row_maxes[i].item(), 4)} \t Min: {round(overall_row_mins[i].item(), 4)} \t # of high outliers: {round(overall_row_high_outliers[i].item(),1)} \t # of low outliers: {round(overall_row_low_outliers[i].item(), 1)} \
+                  \n Col mean: {overall_intercol_cs_diffs[i]} \t Col STD: {overall_intercol_cs_stds[i]} \t Max: {round(overall_col_maxes[i].item(), 4)} \t Min: {round(overall_col_mins[i].item(), 4)} \
                      # of high outliers: {round(overall_col_high_outliers[i].item(),1)} \t # of low outliers: {round(overall_col_low_outliers[i].item(), 1)} \n" )
     f.close()
 
