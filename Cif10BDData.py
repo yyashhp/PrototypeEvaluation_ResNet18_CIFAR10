@@ -949,9 +949,9 @@ def main():
     with open('{}/outlier_data{}.txt'.format(model_dir, date_time), 'a') as f:
         for i in range(len(data_schedule)):
             f.write(f"Data Split : {data_schedule[i]} \t Row Mean: {overall_interrow_cs_diffs[i]} \t Row_Std: {overall_interrow_cs_stds[i]} \
-               Max: {round(overall_row_maxes[i].clone().item(), 4)} \t Min: {round(overall_row_mins[i].clone().item(), 4)} \t # of high outliers: {round(overall_row_high_outliers[i].clone().item(),1)} \t # of low outliers: {round(overall_row_low_outliers[i].item(), 1)} \
-                  \n Col mean: {overall_intercol_cs_diffs[i]} \t Col STD: {overall_intercol_cs_stds[i]} \t Max: {round(overall_col_maxes[i].item(), 4)} \t Min: {round(overall_col_mins[i].clone().item(), 4)} \
-                     # of high outliers: {round(overall_col_high_outliers[i].item(),1)} \t # of low outliers: {round(overall_col_low_outliers[i].item(), 1)} \n" )
+               Max: {round(overall_row_maxes[i].clone().item(), 4)} \t Min: {round(overall_row_mins[i].clone().item(), 4)} \t # of high outliers: {(overall_row_high_outliers[i])} \t # of low outliers: {overall_row_low_outliers[i]} \
+                  \n Col mean: {overall_intercol_cs_diffs[i]} \t Col STD: {overall_intercol_cs_stds[i]} \t Max: {overall_col_maxes[i]} \t Min: {(overall_col_mins[i])} \
+                     # of high outliers: {overall_col_high_outliers[i]} \t # of low outliers: {round(overall_col_low_outliers[i].item(), 1)} \n" )
     f.close()
 
 
