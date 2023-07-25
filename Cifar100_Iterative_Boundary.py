@@ -469,9 +469,9 @@ def main():
         model.multi_out = 1
      #   stacked_sets_trained_boundaries = []
     #    stacked_sets_latent_boundaries = []
-        cos_trained_latent_matrices = []
+       # cos_trained_latent_matrices = []
 
-        cos_trained_latent_col_matrices = []
+       # cos_trained_latent_col_matrices = []
         interrow_values_matrices = []
         intercol_values_matrices = []
         #stacked_trained_l2 = []d
@@ -565,8 +565,8 @@ def main():
                         start_proto_squeezed = torch.squeeze(start_proto.clone(), dim=0)
                         print(f"Boundary  shape: {start_proto_squeezed.shape}")
                         boundary_latent = boundary_latents[i][k].clone()
-                        cos_trained_latent[i][k] = cos_sim(boundary_latent, protos_latent[i].clone())
-                        cos_trained_latent_col[i][k] = cos_sim(boundary_latent, protos_latent[k].clone())
+                    #    cos_trained_latent[i][k] = cos_sim(boundary_latent, protos_latent[i].clone())
+                    #    cos_trained_latent_col[i][k] = cos_sim(boundary_latent, protos_latent[k].clone())
                         for b in range(nclass):
                             if b == k:
                                 interrow_values[i][k][b] = 0
@@ -590,8 +590,8 @@ def main():
            #     set_latent_boundaries.append(torch.stack(latents_boundaries, dim=0))
 
             #    batch_l2_trained_diff.append(torch.stack(l2_trained_diff, dim=0))
-            cos_trained_latent_matrices.append(cos_trained_latent.clone())
-            cos_trained_latent_col_matrices.append(cos_trained_latent_col.clone())
+          #  cos_trained_latent_matrices.append(cos_trained_latent.clone())
+          #  cos_trained_latent_col_matrices.append(cos_trained_latent_col.clone())
             interrow_values_matrices.append(interrow_values.clone())
             intercol_values_matrices.append(intercol_values.clone())
         #    stacked_sets_trained_boundaries.append(torch.stack(set_trained_boundaries, dim=0))
@@ -612,11 +612,11 @@ def main():
        # batch_diff_std.append(batch_trained_std)
       #  batch_diff_col_std.append(batch_trained_col_std)
       #  batch_cum_trained_cs, batch_cum_trained_cs_std = torch.std_mean(batch_trained_cs, dim=0)
-            batch_cum_trained_cs_std, batch_cum_trained_cs = torch.std_mean(cos_trained_latent.clone(), dim=1)
+          #  batch_cum_trained_cs_std, batch_cum_trained_cs = torch.std_mean(cos_trained_latent.clone(), dim=1)
      #       mask = cos_trained_latent > 0
         #    col_mask = cos_trained_latent_col > 0
      #   batch_cum_trained_col_cs, batch_cum_trained_col_cs_std = torch.std_mean(batch_trained_col_cs, dim=1)
-            batch_cum_trained_col_cs_std, batch_cum_trained_col_cs = torch.std_mean(cos_trained_latent_col.clone(),dim=0)
+          #  batch_cum_trained_col_cs_std, batch_cum_trained_col_cs = torch.std_mean(cos_trained_latent_col.clone(),dim=0)
             batch_cum_trained_interrow_cs_std, batch_cum_trained_interrow_cs = torch.std_mean(interrow_values.clone(), dim=2)
             batch_cum_trained_intercol_cs_std, batch_cum_trained_intercol_cs = torch.std_mean(intercol_values.clone(), dim=2)
 
@@ -625,23 +625,32 @@ def main():
             batch_cum_trained_intercol_cs = torch.mean(batch_cum_trained_intercol_cs, dim=0)
 
 
-            cum_trained_cs_avg = 1 - torch.mean(batch_cum_trained_cs)
-            cum_trained_col_cs = 1 - torch.mean(batch_cum_trained_col_cs)
-            std_list = []
-            col_std_list = []
-            for row in cos_trained_latent_matrices[t].clone():
-                shortlist = []
-                for val in row:
-                    if val>=1e-4:
-                        shortlist.append(1-val)
-                std_list.append(torch.stack(shortlist, dim=0))
-            print(f'Lsize of the std_list: {torch.stack(std_list, dim=0).shape}')
-            std_ave = torch.std(torch.stack(std_list, dim=0), dim=1)
-            print(f"std_ave shape: {std_ave.shape}")
-            mean_ave = torch.mean(torch.stack(std_list, dim=0), dim=1)
-            print(f"Length of std_array {len(std_ave)}")
+        #    cum_trained_cs_avg = 1 - torch.mean(batch_cum_trained_cs)
+      #      cum_trained_col_cs = 1 - torch.mean(batch_cum_trained_col_cs)
+       #     std_list = []
+       #     col_std_list = []
+       #     for row in cos_trained_latent_matrices[t].clone():
+       #         shortlist = []
+       #         for val in row:
+      #              if val>=1e-4:
+     #                   shortlist.append(1-val)
+     #           std_list.append(torch.stack(shortlist, dim=0))
+     #       print(f'Lsize of the std_list: {torch.stack(std_list, dim=0).shape}')
+     #       std_ave = torch.std(torch.stack(std_list, dim=0), dim=1)
+      #      print(f"std_ave shape: {std_ave.shape}")
+      #      mean_ave = torch.mean(torch.stack(std_list, dim=0), dim=1)
+      #      print(f"Length of std_array {len(std_ave)}")
             inter_std_list = []
             intercol_std_list = []
+            row_max = 0
+            row_min = 0
+            col_max = 0
+            col_min = 0
+            row_high_outliers = 0
+            row_low_outliers = 0
+            col_high_outliers = 0
+            col_low_outliers = 0
+
             for row in interrow_values_matrices[t].clone():
                 interrow_shortlist = []
                 for deep in row:
@@ -651,6 +660,10 @@ def main():
                         print(f"Length of the deep: {len(deep)}")
                         if deep[val]>=1e-4:
                             interrow_shortlist.append(1-deep[val])
+                            if deep[val]< row_min:
+                                row_min = deep[val]
+                            if 1 > deep[val]> row_max:
+                                row_max = deep[val]
                 inter_std_list.append(torch.stack(interrow_shortlist, dim=0))
             print(f'Lsize of the interrow_std_list: {torch.stack(inter_std_list, dim=0).shape}')
             interrow_std_ave = torch.std(torch.stack(inter_std_list, dim=0), dim=1)
