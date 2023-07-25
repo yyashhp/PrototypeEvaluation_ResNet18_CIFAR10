@@ -915,7 +915,7 @@ def main():
     plt.title('Cifar100 Inter-Class and Intra-Class Boundary Dissimilarity Average')
     plt.xlabel('Percentage of Data the Model was Trained on')
     plt.ylabel('Dissimilarity (1 - Cosine Similarity)')
-    plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Overall_Cif10Vals.png")
+    plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Overall_Cif100Vals.png")
     plt.show()
     plt.figure().clear()
     plt.close()
@@ -931,7 +931,7 @@ def main():
     plt.xlabel('Percentage of Data the Model was Trained on')
     plt.ylabel('STD of Dissimilarity')
     plt.savefig(
-        f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Overall_Cif10STDs.png")
+        f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Overall_Cif10S0TDs.png")
     plt.show()
     plt.figure().clear()
     plt.close()
