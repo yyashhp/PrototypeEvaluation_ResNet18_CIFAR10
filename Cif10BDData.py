@@ -661,7 +661,7 @@ def main():
                     for val in range(len(deep)):
                         if deep[val]>=1e-4:
                             interrow_shortlist.append(1-deep[val])
-                            if deep[val]< row_min:
+                            if 0.00001< deep[val]< row_min:
                                 row_min = deep[val]
                             if 1 > deep[val] > row_max:
                                 row_max = deep[val]
@@ -701,7 +701,7 @@ def main():
 
                         if deep[val]>=1e-4:
                             intercol_shortlist.append(1-deep[val])
-                            if deep[val]< col_min:
+                            if 0.00001< deep[val]< col_min:
                                 col_min = deep[val]
                             if 1 > deep[val]> col_max:
                                 col_max = deep[val]

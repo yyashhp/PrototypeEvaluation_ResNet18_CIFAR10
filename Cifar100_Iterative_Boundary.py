@@ -643,9 +643,9 @@ def main():
             inter_std_list = []
             intercol_std_list = []
             row_max = 0
-            row_min = 0
+            row_min = 100
             col_max = 0
-            col_min = 0
+            col_min = 100
             row_high_outliers = 0
             row_low_outliers = 0
             col_high_outliers = 0
@@ -660,7 +660,7 @@ def main():
                         print(f"Length of the deep: {len(deep)}")
                         if deep[val]>=1e-4:
                             interrow_shortlist.append(1-deep[val])
-                            if deep[val]< row_min:
+                            if 0.00001< deep[val]< row_min:
                                 row_min = deep[val]
                             if 1 > deep[val]> row_max:
                                 row_max = deep[val]
@@ -698,7 +698,7 @@ def main():
 
                         if deep[val]>=1e-4:
                             intercol_shortlist.append(1-deep[val])
-                            if deep[val]< col_min:
+                            if 0.0001< deep[val]< col_min:
                                 col_min = deep[val]
                             if 1 > deep[val]> col_max:
                                 col_max = deep[val]
