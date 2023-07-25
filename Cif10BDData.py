@@ -487,8 +487,8 @@ def main():
             proto = par_image_tensors[t].clone()
             boundary_images = torch.load(f"{saved_boundaries_path}/Cifar10ImagesBatch_{t}_0720_14_45_35.pt")
             boundary_latents = torch.load(f"{saved_boundaries_path}/Cifar10LatentsBatch_{t}_0720_14_45_35.pt")
-            print(f"Sizes of boundary images loaded: {len(boundary_images[0][0])}")
-            print(f"Sizes of boundary latent loaded: {len(boundary_latents[0][0])}")
+         #   print(f"Sizes of boundary images loaded: {len(boundary_images[0][0])}")
+         #   print(f"Sizes of boundary latent loaded: {len(boundary_latents[0][0])}")
             set+=1
        #     cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
        #     cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
@@ -546,7 +546,7 @@ def main():
                         #         break
                         # if iterations_max < iterations < 12500:
                         #     iterations_max = iterations
-                        print(f"Preds after {k} goes to {i}: {preds}\n")
+                    #    print(f"Preds after {k} goes to {i}: {preds}\n")
                         if preds != i:
                             mispredictions.append([set, k, i, preds.item()])
                         #if i == 6:
@@ -565,7 +565,7 @@ def main():
                         #     norm_trained_boundary = transformDict['norm'](start_proto.clone())
                         #     boundary_latent, boundary_logits = model(norm_trained_boundary)
                         start_proto_squeezed = torch.squeeze(start_proto.clone(), dim=0)
-                        print(f"Boundary  shape: {start_proto_squeezed.shape}")
+                     #   print(f"Boundary  shape: {start_proto_squeezed.shape}")
                         boundary_latent = boundary_latents[j][i][k].clone()
                     #    cos_trained_latent[i][k] = cos_sim(boundary_latent, protos_latent[i].clone())
                    #     cos_trained_latent_col[i][k] = cos_sim(boundary_latent, protos_latent[k].clone())
@@ -668,8 +668,8 @@ def main():
               #  print(f"Size of colstack: {len(interrow_shortlist)}")
                 inter_std_list.append(torch.stack(interrow_shortlist, dim=0))
 
-                print(f"Size of rowstack: {torch.stack(interrow_shortlist, dim=0).size}")
-            print(f'Lsize of the interrow_std_list: {torch.stack(inter_std_list, dim=0).shape}')
+           #     print(f"Size of rowstack: {torch.stack(interrow_shortlist, dim=0).size}")
+         #   print(f'Lsize of the interrow_std_list: {torch.stack(inter_std_list, dim=0).shape}')
             row_maxes[t].append(row_max)
             row_mins[t].append(row_min)
             interrow_std_ave = torch.std(torch.stack(inter_std_list, dim=0), dim=1)
@@ -730,7 +730,7 @@ def main():
             col_std = torch.mean(intercol_std_ave).item()
             row_mean = mean([round(1 - ((val.item() * 10) / 9), 4) for val in batch_cum_trained_interrow_cs])
             col_mean = mean([round(1 - ((val.item() * 10) / 9), 4) for val in batch_cum_trained_intercol_cs])
-
+            print(f"Row means and stds and col ones: {row_mean} \t {row_std} \t {col_mean} \t {col_std}")
 
             final_ind_interrow_diffs[t].append([round(1 - ((val.item()* 10)/9), 4) for val in batch_cum_trained_interrow_cs])
             final_ind_intercol_diffs[t].append([round(1 - ((val.item()* 10)/9), 4) for val in batch_cum_trained_intercol_cs])
@@ -890,7 +890,7 @@ def main():
         plt.plot(data_schedule, final_interrow_diffs[t], label="inter-row-wise diff")
         plt.plot(data_schedule, final_intercol_diffs[t], label="inter-col-wise diff")
         plt.legend()
-        plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR100_Saved_Data{t}.png")
+        plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_CIFAR10_Saved_Data{t}.png")
         plt.show()
         plt.figure().clear()
         plt.close()
