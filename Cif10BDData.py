@@ -950,7 +950,7 @@ def main():
         for i in range(len(data_schedule)):
             f.write(f"Data Split : {data_schedule[i]} \t Row Mean: {round(overall_interrow_cs_diffs[i].item(), 4)} \t Row_Std: {round(overall_interrow_cs_stds[i].item(), 4)} \
                Max: {round(overall_row_maxes[i].item(),4)} \t Min: {round(overall_row_mins[i].item(),4)} \t # of high outliers: {round(overall_row_high_outliers[i].item(), 1)} \t # of low outliers: {round(overall_row_low_outliers[i].item(), 1)} \
-                  \n Col mean: {round(overall_intercol_cs_diffs[i].item(), 4)} \t Col STD: {round(overall_intercol_cs_stds[i].item(), 4)} \t Max: {round(overall_col_maxes[i], 4)} \t Min: {round(overall_col_mins[i], 4)} \
+                  \n Col mean: {round(overall_intercol_cs_diffs[i].item(), 4)} \t Col STD: {round(overall_intercol_cs_stds[i].item(), 4)} \t Max: {round(overall_col_maxes[i].item(), 4)} \t Min: {round(overall_col_mins[i], 4)} \
                      # of high outliers: {round(overall_col_high_outliers[i].item(), 1)} \t # of low outliers: {round(overall_col_low_outliers[i].item(), 1)} \n" )
     f.close()
 
