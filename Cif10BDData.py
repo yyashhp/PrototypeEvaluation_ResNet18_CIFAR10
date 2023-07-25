@@ -937,10 +937,10 @@ def main():
     plt.cla()
     plt.clf()
 
-    overall_row_maxes = torch.max(torch.Tensor(row_maxes).clone(), dim=0)
-    overall_col_maxes = torch.max(torch.Tensor(col_maxes).clone(), dim=0)
-    overall_row_mins = torch.min(torch.Tensor(row_mins).clone(), dim=0)
-    overall_col_mins = torch.min(torch.Tensor(col_mins).clone(), dim=0)
+    overall_row_maxes = torch.max(torch.Tensor(row_maxes).clone(), dim=0)[0]
+    overall_col_maxes = torch.max(torch.Tensor(col_maxes).clone(), dim=0)[0]
+    overall_row_mins = torch.min(torch.Tensor(row_mins).clone(), dim=0)[0]
+    overall_col_mins = torch.min(torch.Tensor(col_mins).clone(), dim=0)[0]
     overall_row_high_outliers = torch.mean(torch.Tensor(row_high_outliers_total).clone(), dim=0)
     overall_col_high_outliers = torch.mean(torch.Tensor(col_high_outliers_total).clone(), dim=0)
     overall_row_low_outliers = torch.mean(torch.Tensor(row_low_outliers_total).clone(), dim=0)
