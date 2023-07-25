@@ -698,7 +698,6 @@ def main():
                     # if deep[0].item() < 1e-8 and deep[1].item()< 1e-8 and torch.max(deep)[0].item() < 1e-8:
                     #     continue
                     for val in range(len(deep)):
-                        print(f"Length of the deep: {len(deep)}")
 
                         if deep[val]>=1e-4:
                             intercol_shortlist.append(1-deep[val])
@@ -708,14 +707,12 @@ def main():
                                 col_max = deep[val]
                         else:
                             intercol_shortlist.append(torch.mean(deep))
-                print(f"Size of colstack: {len(intercol_shortlist)}")
                 intercol_std_list.append(torch.stack(intercol_shortlist, dim=0))
             intercol_std_ave = torch.std(torch.stack(intercol_std_list, dim=0), dim=1)
             col_maxes[t].append(col_max)
             col_mins[t].append(col_min)
 
         #    intercol_std_ave = torch.mean(intercol_std_ave, dim=0)
-            print(f"intercol_std_ave shape: {intercol_std_ave.shape}")
         #    cos_mean_ave = torch.mean(torch.stack(col_std_list, dim=0), dim=0)
 
        #     print(f"Length of intercol_std_array {len(intercol_std_ave)}")
@@ -753,7 +750,7 @@ def main():
                                 row_high_outliers += 1
                             if (deep[val].item()-row_mean)/row_std <= -3:
                                 row_low_outliers += 1
-            print(f'Lsize of the row high and low outlier list: {len(row_high_outliers)} \t {len(row_low_outliers)}')
+            print(f'Lsize of the row high and low outlier list: {row_high_outliers} \t {row_low_outliers}')
             row_high_outliers_total[t].append(row_high_outliers)
             row_low_outliers_total[t].append(row_low_outliers)
 
@@ -766,7 +763,7 @@ def main():
                             if (deep[val].item()-col_mean)/row_std <= -3:
                                 col_low_outliers += 1
 
-            print(f'Lsize of the col high and low outlier list: {len(col_high_outliers)} \t {len(col_low_outliers)}')
+            print(f'Lsize of the col high and low outlier list: {col_high_outliers} \t {col_low_outliers}')
 
             col_high_outliers_total[t].append(col_high_outliers)
             col_low_outliers_total[t].append(col_low_outliers)
