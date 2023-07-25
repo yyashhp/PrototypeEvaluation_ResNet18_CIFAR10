@@ -941,16 +941,16 @@ def main():
     overall_col_maxes = torch.max(torch.Tensor(col_maxes).clone(), dim=0)
     overall_row_mins = torch.min(torch.Tensor(row_mins).clone(), dim=0)
     overall_col_mins = torch.min(torch.Tensor(col_mins).clone(), dim=0)
-    overall_row_high_outliers = round(torch.mean(torch.Tensor(row_high_outliers_total).clone(), dim=0).item(), 2)
-    overall_col_high_outliers = round(torch.mean(torch.Tensor(col_high_outliers_total).clone(), dim=0).item(), 2)
-    overall_row_low_outliers = round(torch.mean(torch.Tensor(row_low_outliers_total).clone(), dim=0).item(), 2)
-    overall_col_low_outliers = round(torch.mean(torch.Tensor(col_low_outliers_total).clone(), dim=0).item(), 2)
+    overall_row_high_outliers = torch.mean(torch.Tensor(row_high_outliers_total).clone(), dim=0)
+    overall_col_high_outliers = torch.mean(torch.Tensor(col_high_outliers_total).clone(), dim=0)
+    overall_row_low_outliers = torch.mean(torch.Tensor(row_low_outliers_total).clone(), dim=0)
+    overall_col_low_outliers = torch.mean(torch.Tensor(col_low_outliers_total).clone(), dim=0)
     with open('{}/outlier_data{}.txt'.format(model_dir, date_time), 'a') as f:
         for i in range(len(data_schedule)):
             f.write(f"Data Split : {data_schedule[i]} \t Row Mean: {overall_interrow_cs_diffs[i]} \t Row_Std: {overall_interrow_cs_stds[i]} \
-               Max: {overall_row_maxes[i].item()} \t Min: {overall_row_mins[i].item()} \t # of high outliers: {overall_row_high_outliers[i]} \t # of low outliers: {overall_row_low_outliers[i]} \
+               Max: {overall_row_maxes[i].item()} \t Min: {overall_row_mins[i].item()} \t # of high outliers: {round(overall_row_high_outliers[i].item(),1)} \t # of low outliers: {round(overall_row_low_outliers[i].item(), 1)} \
                   \n Col mean: {overall_intercol_cs_diffs[i]} \t Col STD: {overall_intercol_cs_stds[i]} \t Max: {overall_col_maxes[i].item()} \t Min: {overall_col_mins[i].item()} \
-                     # of high outliers: {overall_col_high_outliers[i]} \t # of low outliers: {overall_col_low_outliers[i]} \n" )
+                     # of high outliers: {round(overall_col_high_outliers[i].item(),1)} \t # of low outliers: {round(overall_col_low_outliers[i].item(), 1)} \n" )
     f.close()
 
 
