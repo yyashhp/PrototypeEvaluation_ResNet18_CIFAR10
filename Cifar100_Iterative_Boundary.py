@@ -563,7 +563,7 @@ def main():
                         #     norm_trained_boundary = transformDict['norm'](start_proto.clone())
                         #     boundary_latent, boundary_logits = model(norm_trained_boundary)
                         start_proto_squeezed = torch.squeeze(start_proto.clone(), dim=0)
-                        print(f"Boundary  shape: {start_proto_squeezed.shape}")
+                    #    print(f"Boundary  shape: {start_proto_squeezed.shape}")
                         boundary_latent = boundary_latents[i][k].clone()
                     #    cos_trained_latent[i][k] = cos_sim(boundary_latent, protos_latent[i].clone())
                     #    cos_trained_latent_col[i][k] = cos_sim(boundary_latent, protos_latent[k].clone())
