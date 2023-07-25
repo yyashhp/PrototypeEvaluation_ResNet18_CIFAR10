@@ -705,7 +705,7 @@ def main():
                         else:
                             intercol_shortlist.append(torch.mean(deep))
                 intercol_std_list.append(torch.stack(intercol_shortlist, dim=0))
-            intercol_std_ave = torch.std(torch.stack(intercol_std_list, dim=0), dim=0)
+            intercol_std_ave = torch.std(torch.stack(intercol_std_list, dim=0), dim=1)
             col_maxes[t].append(1 - col_min)
             col_mins[t].append(1 - col_max)
 
@@ -726,15 +726,20 @@ def main():
             col_std = torch.mean(intercol_std_ave).item()
             row_mean = mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_interrow_cs])
             col_mean = mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_intercol_cs])
+            print(f"Row means and stds and col ones: {row_mean} \t {row_std} \t {col_mean} \t {col_std}")
 
-            final_ind_interrow_diffs[t].append([round(1 - ((val.item()* 100)/99), 4) for val in batch_cum_trained_interrow_cs])
-            final_ind_intercol_diffs[t].append([round(1 - ((val.item()* 100)/99), 4) for val in batch_cum_trained_intercol_cs])
+
+
+            final_ind_interrow_diffs[t].append(
+                [round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_interrow_cs])
+            final_ind_intercol_diffs[t].append(
+                [round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_intercol_cs])
             final_ind_interrow_std[t].append([round(val.item(), 4) for val in interrow_std_ave])
             final_ind_intercol_std[t].append([round(val.item(), 4) for val in intercol_std_ave])
-            final_interrow_diffs[t].append(mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_interrow_cs]))
-            final_intercol_diffs[t].append(mean([round(1 - ((val.item() * 100) / 99), 4) for val in batch_cum_trained_intercol_cs]))
-            final_interrow_std[t].append(torch.mean(interrow_std_ave).item())
-            final_intercol_std[t].append(torch.mean(intercol_std_ave).item())
+            final_interrow_diffs[t].append(row_mean)
+            final_intercol_diffs[t].append(col_mean)
+            final_interrow_std[t].append(row_std)
+            final_intercol_std[t].append(col_std)
 
             for row in interrow_values_matrices[t].clone():
                 for deep in row:
@@ -986,7 +991,7 @@ def main():
     plt.title('Cifar100 Inter-Class and Intra-Class Prototype Latent Vector Dissimilarity')
     plt.xlabel('Percentage of Data the Model was Trained on')
     plt.ylabel('Dissimilarity (1 - Cosine Similarity)')
-    plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Overall_Cif10Vals.png")
+    plt.savefig(f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Overall_Cif100Vals.png")
     plt.show()
     plt.figure().clear()
     plt.close()
@@ -1009,21 +1014,21 @@ def main():
     plt.cla()
     plt.clf()
 
-    overall_row_maxes = torch.max(torch.Tensor(row_maxes).clone(), dim=0)
-    overall_col_maxes = torch.max(torch.Tensor(col_maxes).clone(), dim=0)
-    overall_row_mins = torch.min(torch.Tensor(row_mins).clone(), dim=0)
-    overall_col_mins = torch.min(torch.Tensor(col_mins).clone(), dim=0)
+    overall_row_maxes = torch.max(torch.Tensor(row_maxes).clone(), dim=0)[0]
+    overall_col_maxes = torch.max(torch.Tensor(col_maxes).clone(), dim=0)[0]
+    overall_row_mins = torch.min(torch.Tensor(row_mins).clone(), dim=0)[0]
+    overall_col_mins = torch.min(torch.Tensor(col_mins).clone(), dim=0)[0]
     overall_row_high_outliers = torch.mean(torch.Tensor(row_high_outliers_total).clone(), dim=0)
     overall_col_high_outliers = torch.mean(torch.Tensor(col_high_outliers_total).clone(), dim=0)
     overall_row_low_outliers = torch.mean(torch.Tensor(row_low_outliers_total).clone(), dim=0)
     overall_col_low_outliers = torch.mean(torch.Tensor(col_low_outliers_total).clone(), dim=0)
-    print(overall_row_low_outliers)
+    print(overall_row_low_outliers.shape)
     with open('{}/outlier_data{}.txt'.format(model_dir, date_time), 'a') as f:
         for i in range(len(data_schedule)):
             f.write(
-                f"Data Split : {data_schedule[i]} \t Row Mean: {overall_interrow_cs_diffs[i]} \t Row_Std: {overall_interrow_cs_stds[i]} \
-                  Max: {overall_row_maxes[i].item()} \t Min: {overall_row_mins[i].item()} \t # of high outliers: {round(overall_row_high_outliers[i].item(), 1)} \t # of low outliers: {round(overall_row_low_outliers[i].item(), 1)} \
-                     \n Col mean: {overall_intercol_cs_diffs[i]} \t Col STD: {overall_intercol_cs_stds[i]} \t Max: {overall_col_maxes[i].item()} \t Min: {overall_col_mins[i].item()} \
+                f"Data Split : {data_schedule[i]} \t Row Mean: {round(overall_interrow_cs_diffs[i].item(), 4)} \t Row_Std: {round(overall_interrow_cs_stds[i].item(), 4)} \
+                  Max: {round(overall_row_maxes[i].item(), 4)} \t Min: {round(overall_row_mins[i].item(), 4)} \t # of high outliers: {round(overall_row_high_outliers[i].item(), 1)} \t # of low outliers: {round(overall_row_low_outliers[i].item(), 1)} \
+                     \n Col mean: {round(overall_intercol_cs_diffs[i].item(), 4)} \t Col STD: {round(overall_intercol_cs_stds[i].item(), 4)} \t Max: {round(overall_col_maxes[i].item(), 4)} \t Min: {round(overall_col_mins[i].item(), 4)} \
                         # of high outliers: {round(overall_col_high_outliers[i].item(), 1)} \t # of low outliers: {round(overall_col_low_outliers[i].item(), 1)} \n")
     f.close()
 
