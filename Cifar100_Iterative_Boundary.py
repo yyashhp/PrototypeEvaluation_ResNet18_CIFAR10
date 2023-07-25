@@ -666,8 +666,8 @@ def main():
                                 row_max = deep[val]
                 inter_std_list.append(torch.stack(interrow_shortlist, dim=0))
         #    print(f'Lsize of the interrow_std_list: {torch.stack(inter_std_list, dim=0).shape}')
-            row_maxes[t].append(row_max)
-            row_mins[t].append(row_min)
+            row_maxes[t].append(1 - row_min)
+            row_mins[t].append(1 - row_max)
             interrow_std_ave = torch.std(torch.stack(inter_std_list, dim=0), dim=1)
        #     interrow_std_ave = torch.mean(interrow_std_ave, dim=1)
         #    print(f"interrow_std_ave full shape: {inter_std_list.shape}")
@@ -706,8 +706,8 @@ def main():
                             intercol_shortlist.append(torch.mean(deep))
                 intercol_std_list.append(torch.stack(intercol_shortlist, dim=0))
             intercol_std_ave = torch.std(torch.stack(intercol_std_list, dim=0), dim=0)
-            col_maxes[t].append(col_max)
-            col_mins[t].append(col_min)
+            col_maxes[t].append(1 - col_min)
+            col_mins[t].append(1 - col_max)
 
           #  intercol_std_ave = torch.mean(intercol_std_ave, dim=0)
        #     print(f"intercol_std_ave shape: {intercol_std_ave.shape}")
