@@ -72,7 +72,7 @@ print ("cuda: ", use_cuda)
 
 MEAN = [0.5] * 3
 STD = [0.5] * 3
-data_schedule = [0.25, 0.4, 0.6, 0.7, 0.8, 0.9, 1.0]
+data_schedule = [1.0]
 train_transform = transforms.Compose([transforms.ToTensor(),
                                       transforms.RandomHorizontalFlip(),
                                       transforms.RandomCrop(32, padding=4)])
@@ -203,7 +203,7 @@ def main():
     iterations_max = 0
     for j in range(len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
-        model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
+        model_saved = torch.load(f"{saved_model_path}/{j+6}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
         model.load_state_dict(model_saved)
         for p in model.parameters():
             p.requires_grad = False
@@ -806,33 +806,33 @@ def main():
            #  col_quartiles_saved[t].append(col_quartiles.clone())
            #  line_index = 0
 
-            # for line in interrow_values_matrices[t].clone():
-            #     sorted_line = torch.sort(torch.flatten(line.clone().detach()), descending=True)[0]
-            #     print(f"length of line of row is {len(sorted_line)}")
-            #     interrow_quartiles[line_index][0] = 1 - sorted_line[0]
-            #     interrow_quartiles[line_index][1] = 1 - sorted_line[1999]
-            #     interrow_quartiles[line_index][2] = 1 - sorted_line[3999]
-            #     interrow_quartiles[line_index][3] = 1 - sorted_line[5999]
-            #     interrow_quartiles[line_index][4] = 1 - sorted_line[7999]
-            #     interrow_quartiles[line_index][5] = 1 - sorted_line[9898]
-            #     interrow_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
-            #     line_index += 1
-            # interrow_quartiles_saved[t].append(interrow_quartiles.clone())
-            # line_index = 0
-            #
-            # for line in intercol_values_matrices[t].clone():
-            #     sorted_line = torch.sort(torch.flatten(line.clone().detach()), descending=True)[0]
-            #     #     print(f"length of line of row is {len(sorted_line)}")
-            #     intercol_quartiles[line_index][0] = 1 - sorted_line[0]
-            #     intercol_quartiles[line_index][1] = 1 - sorted_line[1999]
-            #     intercol_quartiles[line_index][2] = 1 - sorted_line[3999]
-            #     intercol_quartiles[line_index][3] = 1 - sorted_line[5999]
-            #     intercol_quartiles[line_index][4] = 1 - sorted_line[7999]
-            #     intercol_quartiles[line_index][5] = 1 - sorted_line[9898]
-            #     intercol_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
-            #     line_index += 1
-            # intercol_quartiles_saved[t].append(intercol_quartiles.clone())
-            # line_index = 0
+            for line in interrow_values_matrices[t].clone():
+                sorted_line = torch.sort(torch.flatten(line.clone().detach()), descending=True)[0]
+                print(f"length of line of row is {len(sorted_line)}")
+                interrow_quartiles[line_index][0] = 1 - sorted_line[0]
+                interrow_quartiles[line_index][1] = 1 - sorted_line[1999]
+                interrow_quartiles[line_index][2] = 1 - sorted_line[3999]
+                interrow_quartiles[line_index][3] = 1 - sorted_line[5999]
+                interrow_quartiles[line_index][4] = 1 - sorted_line[7999]
+                interrow_quartiles[line_index][5] = 1 - sorted_line[9898]
+                interrow_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
+                line_index += 1
+            interrow_quartiles_saved[t].append(interrow_quartiles.clone())
+            line_index = 0
+
+            for line in intercol_values_matrices[t].clone():
+                sorted_line = torch.sort(torch.flatten(line.clone().detach()), descending=True)[0]
+                #     print(f"length of line of row is {len(sorted_line)}")
+                intercol_quartiles[line_index][0] = 1 - sorted_line[0]
+                intercol_quartiles[line_index][1] = 1 - sorted_line[1999]
+                intercol_quartiles[line_index][2] = 1 - sorted_line[3999]
+                intercol_quartiles[line_index][3] = 1 - sorted_line[5999]
+                intercol_quartiles[line_index][4] = 1 - sorted_line[7999]
+                intercol_quartiles[line_index][5] = 1 - sorted_line[9898]
+                intercol_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
+                line_index += 1
+            intercol_quartiles_saved[t].append(intercol_quartiles.clone())
+            line_index = 0
 
 
 
@@ -952,6 +952,7 @@ def main():
                                        Low outliers: {col_low_outliers_total[t][i]}")
                 f.write(f"\tIterations max: {iterations_max}\n")
 
+
             #torch.set_printoptions(threshold=10000)
            # print(f"Predictions matrix: {saved_preds[t][i]}\n\n", file = f)
            # torch.set_printoptions(threshold=1000)
@@ -1023,6 +1024,14 @@ def main():
     overall_row_low_outliers = torch.mean(torch.Tensor(row_low_outliers_total).clone(), dim=0)
     overall_col_low_outliers = torch.mean(torch.Tensor(col_low_outliers_total).clone(), dim=0)
     print(overall_row_low_outliers.shape)
+
+    with open('{}/quartile_data{}.txt'.format(model_dir, date_time), 'a') as f:
+        for i in range(len(data_schedule)):
+            f.write(
+               f"{interrow_quartiles_saved[0]} \n \
+                    {intercol_quartiles_saved[0]}")
+    f.close()
+
     with open('{}/outlier_data{}.txt'.format(model_dir, date_time), 'a') as f:
         for i in range(len(data_schedule)):
             f.write(
