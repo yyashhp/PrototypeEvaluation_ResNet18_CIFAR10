@@ -188,8 +188,8 @@ def main():
     batch_diff_std = []
     batch_diff_col_std = []
     mispredictions = []
-    col_sum_matrix = torch.zeros(10000, device = device)
-    row_sum_matrix = torch.zeros(10000, device = device)
+    col_sorted_matrix = []
+    row_sorted_matrix = []
     inter_row_image_diff = []
     end_logits = torch.zeros(nclass, nclass, dtype=torch.float)
     trained_boundary_sets = []
@@ -819,7 +819,7 @@ def main():
                 interrow_quartiles[line_index][5] = 1 - sorted_line[9898]
                 interrow_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
                 line_index += 1
-                row_sum_matrix = torch.add(row_sum_matrix, sorted_line)
+                row_sorted_matrix.append(sorted_line)
             interrow_quartiles_saved[t].append(interrow_quartiles.clone())
             line_index = 0
 
@@ -834,7 +834,7 @@ def main():
                 intercol_quartiles[line_index][5] = 1 - sorted_line[9898]
                 intercol_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
                 line_index += 1
-                col_sum_matrix = torch.add(col_sum_matrix, sorted_line)
+                col_sorted_matrix.append(sorted_line)
             intercol_quartiles_saved[t].append(intercol_quartiles.clone())
             line_index = 0
 
@@ -1019,11 +1019,9 @@ def main():
     plt.cla()
     plt.clf()
 
-    row_sum_numbers = row_sum_matrix.tolist()
-    col_sum_numbers = col_sum_matrix.tolist()
-    x_axis = list(range(9999))
-
-    plt.bar(x_axis, row_sum_numbers, label="Intra-Class CS Diffs Sum")
+    x_axis = list(range(10000))
+    for row_num in range(10000):
+        plt.plot(x_axis, row_sorted_matrix[row_num], label="Intra-Class CS Diffs Sum")
 
     plt.legend()
     plt.title('Sorted Sums of CS Diffs (Intra-Class)')
@@ -1037,7 +1035,8 @@ def main():
     plt.cla()
     plt.clf()
 
-    plt.bar(x_axis, col_sum_numbers, label="Inter-Class CS Diffs Sum")
+    for col_num in range(10000):
+        plt.plot(x_axis, col_sorted_matrix[col_num], label="Inter-Class CS Diffs Sum")
 
     plt.legend()
     plt.title('Sorted Sums of CS Diff (Inter-Class)')
