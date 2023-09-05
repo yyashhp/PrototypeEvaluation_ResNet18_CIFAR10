@@ -492,9 +492,9 @@ def main():
             set+=1
             cos_trained_latent = torch.zeros(nclass, nclass, dtype=torch.float)
             cos_trained_latent_col = torch.zeros(nclass, nclass, dtype=torch.float)
-            interrow_values = torch.zeros([nclass, nclass, nclass], dtype=torch.float)
-            intercol_values = torch.zeros([nclass, nclass, nclass], dtype=torch.float)
-            preds_matrix = torch.zeros(nclass, nclass, dtype=torch.float)
+            interrow_values = torch.zeros([nclass, nclass, nclass], dtype=torch.float, device=device)
+            intercol_values = torch.zeros([nclass, nclass, nclass], dtype=torch.float, device=device)
+            preds_matrix = torch.zeros(nclass, nclass, dtype=torch.float, device=device)
             proto_clone = proto.clone()
         #    set_trained_boundaries = []
         #    batch_l2_trained_diff = []
