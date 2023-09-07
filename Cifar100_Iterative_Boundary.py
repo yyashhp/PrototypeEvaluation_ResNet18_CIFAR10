@@ -1021,7 +1021,7 @@ def main():
 
     x_axis = list(range(10000))
     for row_num in range(10000):
-        plt.plot(x_axis, row_sorted_matrix[row_num], label="Intra-Class CS Diffs Sum")
+        plt.plot(x_axis, row_sorted_matrix[row_num].tolist(), label="Intra-Class CS Diffs Sum")
 
     plt.legend()
     plt.title('Sorted Sums of CS Diffs (Intra-Class)')
@@ -1036,7 +1036,7 @@ def main():
     plt.clf()
 
     for col_num in range(10000):
-        plt.plot(x_axis, col_sorted_matrix[col_num], label="Inter-Class CS Diffs Sum")
+        plt.plot(x_axis, col_sorted_matrix[col_num].tolist(), label="Inter-Class CS Diffs Sum")
 
     plt.legend()
     plt.title('Sorted Sums of CS Diff (Inter-Class)')
