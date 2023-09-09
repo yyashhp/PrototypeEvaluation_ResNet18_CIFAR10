@@ -1019,8 +1019,8 @@ def main():
     plt.cla()
     plt.clf()
 
-    x_axis = list(range(10000))
-    for row_num in range(10000):
+    x_axis = list(range(100))
+    for row_num in range(100):
         plt.plot(x_axis, row_sorted_matrix[row_num].tolist(), label="Intra-Class CS Diffs Sum")
 
     plt.legend()
@@ -1035,7 +1035,7 @@ def main():
     plt.cla()
     plt.clf()
 
-    for col_num in range(10000):
+    for col_num in range(100):
         plt.plot(x_axis, col_sorted_matrix[col_num].tolist(), label="Inter-Class CS Diffs Sum")
 
     plt.legend()
