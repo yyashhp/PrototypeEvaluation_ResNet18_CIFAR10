@@ -1019,7 +1019,7 @@ def main():
     plt.cla()
     plt.clf()
 
-    x_axis = list(range(100))
+    x_axis = list(range(10000))
     for row_num in range(100):
         plt.plot(x_axis, row_sorted_matrix[row_num].tolist(), label="Intra-Class CS Diffs Sum")
 
