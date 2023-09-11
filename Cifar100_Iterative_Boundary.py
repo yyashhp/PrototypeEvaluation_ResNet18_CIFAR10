@@ -819,7 +819,7 @@ def main():
                 interrow_quartiles[line_index][5] = 1 - sorted_line[9898]
                 interrow_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
                 line_index += 1
-                row_sorted_matrix.append(sorted_line)
+                row_sorted_matrix.append([1-val for val in sorted_line])
             interrow_quartiles_saved[t].append(interrow_quartiles.clone())
             line_index = 0
 
@@ -834,7 +834,7 @@ def main():
                 intercol_quartiles[line_index][5] = 1 - sorted_line[9898]
                 intercol_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
                 line_index += 1
-                col_sorted_matrix.append(sorted_line)
+                col_sorted_matrix.append([1-val for val in sorted_line])
             intercol_quartiles_saved[t].append(intercol_quartiles.clone())
             line_index = 0
 
@@ -1023,9 +1023,9 @@ def main():
     for row_num in range(100):
         plt.plot(x_axis, row_sorted_matrix[row_num].tolist(), label="Intra-Class CS Diffs Sum")
 
-    plt.title('Sorted Sums of CS Diffs (Intra-Class)')
+    plt.title('Sorted Intra-Class Cosine Dissimilarity')
     plt.xlabel('Sorted Index')
-    plt.ylabel('Sum of Diffs')
+    plt.ylabel('Cosine Dissimilarity')
     plt.savefig(
         f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Intra_Class_Spread.png")
     plt.show()
@@ -1037,9 +1037,9 @@ def main():
     for col_num in range(100):
         plt.plot(x_axis, col_sorted_matrix[col_num].tolist(), label="Inter-Class CS Diffs Sum")
 
-    plt.title('Sorted Sums of CS Diff (Inter-Class)')
+    plt.title('Sorted Inter-Class Cosine Dissimilarity')
     plt.xlabel('Sorted Index')
-    plt.ylabel('Sum of Diffs')
+    plt.ylabel('Cosine Dissimilarity')
     plt.savefig(
         f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Inter_Class_Spread.png")
     plt.show()
