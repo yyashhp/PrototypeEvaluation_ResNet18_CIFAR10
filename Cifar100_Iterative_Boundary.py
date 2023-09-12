@@ -838,10 +838,10 @@ def main():
             intercol_quartiles_saved[t].append(intercol_quartiles.clone())
             line_index = 0
 
-            row_median = torch.median(row_sorted_matrix, dim=0)[0]
-            col_median = torch.median(col_sorted_matrix, dim=0)[0]
-            row_sorted_mean = torch.mean(row_sorted_matrix, dim=0)
-            col_sorted_mean = torch.mean(col_sorted_matrix, dim=0)
+            row_median = torch.median(torch.tensor(row_sorted_matrix), dim=0)[0]
+            col_median = torch.median(torch.tensor(col_sorted_matrix), dim=0)[0]
+            row_sorted_mean = torch.mean(torch.tensor(row_sorted_matrix), dim=0)
+            col_sorted_mean = torch.mean(torch.tensor(col_sorted_matrix), dim=0)
 
 
 
