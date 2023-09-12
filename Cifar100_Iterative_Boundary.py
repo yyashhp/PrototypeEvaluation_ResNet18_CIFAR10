@@ -819,7 +819,7 @@ def main():
                 interrow_quartiles[line_index][5] = 1 - sorted_line[9898]
                 interrow_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
                 line_index += 1
-                row_sorted_matrix.append([1-val for val in sorted_line.tolist()])
+                row_sorted_matrix.append(sorted_line)
             interrow_quartiles_saved[t].append(interrow_quartiles.clone())
             line_index = 0
 
@@ -834,9 +834,15 @@ def main():
                 intercol_quartiles[line_index][5] = 1 - sorted_line[9898]
                 intercol_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
                 line_index += 1
-                col_sorted_matrix.append([1-val for val in sorted_line.tolist()])
+                col_sorted_matrix.append(sorted_line)
             intercol_quartiles_saved[t].append(intercol_quartiles.clone())
             line_index = 0
+
+            row_median = torch.median(row_sorted_matrix, dim=0)[0]
+            col_median = torch.median(col_sorted_matrix, dim=0)[0]
+            row_sorted_mean = torch.mean(row_sorted_matrix, dim=0)
+            col_sorted_mean = torch.mean(col_sorted_matrix, dim=0)
+
 
 
 
@@ -1020,12 +1026,13 @@ def main():
     plt.clf()
 
     x_axis = list(range(10000))
-    for row_num in range(100):
-        plt.plot(x_axis, row_sorted_matrix[row_num], label="Intra-Class CS Diffs Sum")
+    plt.plot(x_axis, row_sorted_mean.tolist(), label="Mean")
+    plt.plot(x_axis, row_median.tolist(), label="Median")
 
-    plt.title('Sorted Intra-Class Cosine Dissimilarity')
+    plt.title('Sorted Intra-Class Cosine Similarity')
     plt.xlabel('Sorted Index')
-    plt.ylabel('Cosine Dissimilarity')
+    plt.ylabel('Cosine Similarity')
+    plt.legend()
     plt.savefig(
         f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Intra_Class_Spread.png")
     plt.show()
@@ -1034,12 +1041,14 @@ def main():
     plt.cla()
     plt.clf()
 
-    for col_num in range(100):
-        plt.plot(x_axis, col_sorted_matrix[col_num], label="Inter-Class CS Diffs Sum")
+    plt.plot(x_axis, col_sorted_mean.tolist(), label="Mean")
+    plt.plot(x_axis, col_median.tolist(), label="Median")
 
-    plt.title('Sorted Inter-Class Cosine Dissimilarity')
+
+    plt.title('Sorted Inter-Class Cosine Similarity')
     plt.xlabel('Sorted Index')
-    plt.ylabel('Cosine Dissimilarity')
+    plt.ylabel('Cosine Similarity')
+    plt.legend()
     plt.savefig(
         f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Inter_Class_Spread.png")
     plt.show()
