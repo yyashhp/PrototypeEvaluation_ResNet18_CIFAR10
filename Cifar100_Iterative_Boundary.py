@@ -1,4 +1,7 @@
 from __future__ import print_function
+
+import statistics
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -838,10 +841,10 @@ def main():
             intercol_quartiles_saved[t].append(intercol_quartiles.clone())
             line_index = 0
 
-            row_median = torch.median(torch.tensor(row_sorted_matrix), dim=0)[0]
-            col_median = torch.median(torch.tensor(col_sorted_matrix), dim=0)[0]
-            row_sorted_mean = torch.mean(torch.tensor(row_sorted_matrix), dim=0)
-            col_sorted_mean = torch.mean(torch.tensor(col_sorted_matrix), dim=0)
+            row_median = statistics.median(row_sorted_matrix)
+            col_median = statistics.median(col_sorted_matrix)
+            row_sorted_mean = np.mean(np.array(row_sorted_matrix), axis=0)
+            col_sorted_mean = np.mean(np.array(col_sorted_matrix), axis=0)
 
 
 
