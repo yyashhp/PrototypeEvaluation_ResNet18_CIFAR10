@@ -1029,10 +1029,10 @@ def main():
     plt.clf()
 
     x_axis = list(range(10000))
-    plt.plot(x_axis, row_sorted_mean.tolist(), label="Mean")
-    plt.plot(x_axis, row_median.tolist(), label="Median")
+    plt.plot(x_axis, row_sorted_mean, label="Mean")
+    plt.plot(x_axis, row_median, label="Median")
 
-    plt.title('Sorted Intra-Class Cosine Similarity')
+    plt.title('Averaged Intra-Class Cosine Similarity Mean and Median')
     plt.xlabel('Sorted Index')
     plt.ylabel('Cosine Similarity')
     plt.legend()
@@ -1044,11 +1044,11 @@ def main():
     plt.cla()
     plt.clf()
 
-    plt.plot(x_axis, col_sorted_mean.tolist(), label="Mean")
-    plt.plot(x_axis, col_median.tolist(), label="Median")
+    plt.plot(x_axis, col_sorted_mean, label="Mean")
+    plt.plot(x_axis, col_median, label="Median")
 
 
-    plt.title('Sorted Inter-Class Cosine Similarity')
+    plt.title('Averaged Inter-Class Cosine Similarity Mean and Median')
     plt.xlabel('Sorted Index')
     plt.ylabel('Cosine Similarity')
     plt.legend()
