@@ -20,6 +20,7 @@ from foolbox.attacks import L2DeepFoolAttack
 from statistics import mean
 import matplotlib
 import matplotlib.pyplot as plt
+import csv
 
 parser = argparse.ArgumentParser(description="CIFAR100 Training")
 parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed(default: 1')
@@ -841,8 +842,17 @@ def main():
                 col_sorted_matrix.append(sorted_line.tolist())
             intercol_quartiles_saved[t].append(intercol_quartiles.clone())
             line_index = 0
-            row_sorted_matrix.to_file("row.txt")
-            col_sorted_matrix.to_file("col.text")
+            with open('rowMat', 'w') as f:
+
+                # using csv.writer method from CSV package
+                write = csv.writer(f)
+                write.writerows(row_sorted_matrix)
+            with open('colMat', 'w') as f:
+                write = csv.writer(f)
+                write.writerows(col_sorted_matrix)
+
+                # using csv.writer method from CSV package
+
             row_median = [row[4999] for row in row_sorted_matrix]
             col_median = [col[4999] for col in col_sorted_matrix]
             row_sorted_mean = np.mean(row_sorted_matrix, axis=0)
