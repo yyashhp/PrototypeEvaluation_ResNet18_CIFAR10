@@ -822,7 +822,8 @@ def main():
                 interrow_quartiles[line_index][5] = 1 - sorted_line[9898]
                 interrow_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
                 line_index += 1
-                row_sorted_matrix.append(sorted_line.cpu())
+
+                row_sorted_matrix.append(sorted_line.tolist())
             interrow_quartiles_saved[t].append(interrow_quartiles.clone())
             line_index = 0
 
@@ -837,14 +838,15 @@ def main():
                 intercol_quartiles[line_index][5] = 1 - sorted_line[9898]
                 intercol_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
                 line_index += 1
-                col_sorted_matrix.append(sorted_line.cpu())
+                col_sorted_matrix.append(sorted_line.tolist())
             intercol_quartiles_saved[t].append(intercol_quartiles.clone())
             line_index = 0
-
+            row_sorted_matrix.to_file("row.txt")
+            col_sorted_matrix.to_file("col.text")
             row_median = [row[4999] for row in row_sorted_matrix]
             col_median = [col[4999] for col in col_sorted_matrix]
-            row_sorted_mean = np.mean(np.array(row_sorted_matrix), axis=0)
-            col_sorted_mean = np.mean(np.array(col_sorted_matrix), axis=0)
+            row_sorted_mean = np.mean(row_sorted_matrix, axis=0)
+            col_sorted_mean = np.mean(col_sorted_matrix, axis=0)
 
 
 
