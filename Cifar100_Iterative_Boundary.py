@@ -841,8 +841,8 @@ def main():
             intercol_quartiles_saved[t].append(intercol_quartiles.clone())
             line_index = 0
 
-            row_median = statistics.median(row_sorted_matrix)
-            col_median = statistics.median(col_sorted_matrix)
+            row_median = [row[4999] for row in row_sorted_matrix]
+            col_median = [col[4999] for col in col_sorted_matrix]
             row_sorted_mean = np.mean(np.array(row_sorted_matrix), axis=0)
             col_sorted_mean = np.mean(np.array(col_sorted_matrix), axis=0)
 
