@@ -822,7 +822,7 @@ def main():
                 interrow_quartiles[line_index][5] = 1 - sorted_line[9898]
                 interrow_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
                 line_index += 1
-                row_sorted_matrix.append(sorted_line)
+                row_sorted_matrix.append(sorted_line.cpu())
             interrow_quartiles_saved[t].append(interrow_quartiles.clone())
             line_index = 0
 
@@ -837,7 +837,7 @@ def main():
                 intercol_quartiles[line_index][5] = 1 - sorted_line[9898]
                 intercol_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
                 line_index += 1
-                col_sorted_matrix.append(sorted_line)
+                col_sorted_matrix.append(sorted_line.cpu())
             intercol_quartiles_saved[t].append(intercol_quartiles.clone())
             line_index = 0
 
