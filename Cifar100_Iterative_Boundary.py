@@ -869,7 +869,7 @@ def main():
             row_sorted_means.append(np.mean(row_sorted_matrix[t], axis=0))
             col_sorted_means.append(np.mean(col_sorted_matrix[t], axis=0))
         row_median = np.mean(row_medians, axis=0)
-        col_median = np.mean(col_median, axis=0)
+        col_median = np.mean(col_medians, axis=0)
         row_sorted_mean = np.mean(row_sorted_means, axis=0)
         col_sorted_mean = np.mean(col_sorted_means, axis=0)
         x_axis = list(range(10000))
