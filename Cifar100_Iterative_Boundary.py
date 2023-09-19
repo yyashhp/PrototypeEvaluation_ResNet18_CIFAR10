@@ -76,7 +76,7 @@ print ("cuda: ", use_cuda)
 
 MEAN = [0.5] * 3
 STD = [0.5] * 3
-data_schedule = [1.0]
+data_schedule = [0.25,0.4,0.6,0.7,0.8,0.9,1.0]
 train_transform = transforms.Compose([transforms.ToTensor(),
                                       transforms.RandomHorizontalFlip(),
                                       transforms.RandomCrop(32, padding=4)])
@@ -192,8 +192,8 @@ def main():
     batch_diff_std = []
     batch_diff_col_std = []
     mispredictions = []
-    col_sorted_matrix = []
-    row_sorted_matrix = []
+    col_sorted_matrix = [[] for _ in range(args.total_runs)]
+    row_sorted_matrix = [[] for _ in range(args.total_runs)]
     inter_row_image_diff = []
     end_logits = torch.zeros(nclass, nclass, dtype=torch.float)
     trained_boundary_sets = []
@@ -209,7 +209,7 @@ def main():
     iterations_max = 0
     for j in range(len(data_schedule)):
         model = ResNet18(nclass=nclass, scale=args.model_scale, channels=nchannels, **kwargsUser).to(device)
-        model_saved = torch.load(f"{saved_model_path}/{j+6}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
+        model_saved = torch.load(f"{saved_model_path}/{j}_Saved_Model_with_{data_schedule[j]}_CIFAR100_Data_0621_13_24_49", map_location=device)
         model.load_state_dict(model_saved)
         for p in model.parameters():
             p.requires_grad = False
@@ -824,7 +824,7 @@ def main():
                 interrow_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
                 line_index += 1
 
-                row_sorted_matrix.append(sorted_line.tolist())
+                row_sorted_matrix[t].append(sorted_line.tolist())
             interrow_quartiles_saved[t].append(interrow_quartiles.clone())
             line_index = 0
 
@@ -839,30 +839,69 @@ def main():
                 intercol_quartiles[line_index][5] = 1 - sorted_line[9898]
                 intercol_quartiles[line_index][6] = 1 - (torch.mean(sorted_line) * 100/99)
                 line_index += 1
-                col_sorted_matrix.append(sorted_line.tolist())
+                col_sorted_matrix[t].append(sorted_line.tolist())
             intercol_quartiles_saved[t].append(intercol_quartiles.clone())
             line_index = 0
-            with open('rowMat', 'w') as f:
+            with open('{}/Iterative_CIFAR100_Row_Mat.txt'.format(model_dir), 'a') as f:
 
                 # using csv.writer method from CSV package
                 write = csv.writer(f)
                 write.writerows(row_sorted_matrix)
-            with open('colMat', 'w') as f:
+            with open('{}/Iterative_CIFAR100_Col_Mat.txt'.format(model_dir), 'a') as f:
                 write = csv.writer(f)
                 write.writerows(col_sorted_matrix)
 
                 # using csv.writer method from CSV package
 
-            row_median = [row[4999] for row in row_sorted_matrix]
-            col_median = [col[4999] for col in col_sorted_matrix]
-            row_sorted_mean = np.mean(row_sorted_matrix, axis=0)
-            col_sorted_mean = np.mean(col_sorted_matrix, axis=0)
 
 
 
 
         #class_diffs = []
         #diffs_check = []
+        row_medians = []
+        col_medians = []
+        row_sorted_means = []
+        col_sorted_means = []
+        for t in range (args.total_runs):
+            row_medians.append([row[49] for row in np.array(row_sorted_matrix[t]).T.tolist()])
+            col_medians.append([col[49] for col in np.array(col_sorted_matrix[t]).T.tolist()])
+            row_sorted_means.append(np.mean(row_sorted_matrix[t], axis=0))
+            col_sorted_means.append(np.mean(col_sorted_matrix[t], axis=0))
+        row_median = np.mean(row_medians, axis=0)
+        col_median = np.mean(col_median, axis=0)
+        row_sorted_mean = np.mean(row_sorted_means, axis=0)
+        col_sorted_mean = np.mean(col_sorted_means, axis=0)
+        x_axis = list(range(10000))
+        plt.plot(x_axis, row_sorted_mean, label="Mean")
+        plt.plot(x_axis, row_median, label="Median")
+
+        plt.title(f'Averaged Intra-Class Cosine Similarity Mean and Median, with {data_schedule[j]} Data')
+        plt.xlabel('Sorted Index')
+        plt.ylabel('Cosine Similarity')
+        plt.legend()
+        plt.savefig(
+            f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Intra_Class_{data_schedule[j]} Spread.png")
+        plt.show()
+        plt.figure().clear()
+        plt.close()
+        plt.cla()
+        plt.clf()
+
+        plt.plot(x_axis, col_sorted_mean, label="Mean")
+        plt.plot(x_axis, col_median, label="Median")
+
+        plt.title(f'Averaged Inter-Class Cosine Similarity Mean and Median, with {data_schedule[j]} Data')
+        plt.xlabel('Sorted Index')
+        plt.ylabel('Cosine Similarity')
+        plt.legend()
+        plt.savefig(
+            f"{model_dir}/../PrototypeEvaluation_ResNet18_CIFAR10/metric_plots/{date_time}_Inter_Class_{data_schedule[j]} Spread.png")
+        plt.show()
+        plt.figure().clear()
+        plt.close()
+        plt.cla()
+        plt.clf()
 
 
 
