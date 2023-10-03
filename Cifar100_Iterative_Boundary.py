@@ -872,6 +872,8 @@ def main():
         col_median = np.mean(col_medians, axis=0)
         row_sorted_mean = np.mean(row_sorted_means, axis=0)
         col_sorted_mean = np.mean(col_sorted_means, axis=0)
+        print(len(row_sorted_mean))
+        print("LENGTH OF ROW SORTED MEAN")
         x_axis = list(range(10000))
         plt.plot(x_axis, row_sorted_mean, label="Mean")
         plt.plot(x_axis, row_median, label="Median")
@@ -1079,9 +1081,9 @@ def main():
     plt.cla()
     plt.clf()
 
-    x_axis = list(range(9399))
-    plt.plot(x_axis, row_sorted_mean, label="Mean")
-    plt.plot(x_axis, row_median, label="Median")
+    new_x_axis = list(range(9400))
+    plt.plot(new_x_axis, row_sorted_mean, label="Mean")
+    plt.plot(new_x_axis, row_median, label="Median")
 
     plt.title('Averaged Intra-Class Cosine Similarity Mean and Median')
     plt.xlabel('Sorted Index')
@@ -1095,8 +1097,8 @@ def main():
     plt.cla()
     plt.clf()
 
-    plt.plot(x_axis, col_sorted_mean, label="Mean")
-    plt.plot(x_axis, col_median, label="Median")
+    plt.plot(new_x_axis, col_sorted_mean, label="Mean")
+    plt.plot(new_x_axis, col_median, label="Median")
 
 
     plt.title('Averaged Inter-Class Cosine Similarity Mean and Median')
